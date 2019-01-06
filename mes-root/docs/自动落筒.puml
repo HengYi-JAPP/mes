@@ -1,0 +1,18 @@
+@startuml
+autonumber
+hide footbox
+title 人工落筒
+
+actor Client
+participant "Api" as api
+participant "EventSourceService" as ES
+participant "AuthService" as auth
+
+Client -> api: 提交信息
+
+api --> ad: 获取验证标签
+api --> auth: Ad中不存在，则本地密码验证
+api --> auth: 验证成功，生成token
+
+Client <- api: 返回token
+@enduml

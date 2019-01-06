@@ -1,0 +1,3317 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: DEV
+    url: https://localhost:9998
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/hengyi/mes-auto/1.0.0
+info:
+  description: auto api
+  version: "1.0.0"
+  title: Mes Auto
+  contact:
+    email: ixtf1984@gmail.com
+tags:
+  - name: auth
+    description: 登录和权限
+  - name: api
+  - name: config
+    description: 配置
+  - name: admin
+    description: 管理员
+  - name: if
+    description: 接口
+paths:
+  /token:
+    post:
+      tags:
+        - auth
+      summary: 获取令牌
+      description: |
+        普通api，web:80，pda:9998，open:9999的区别是：验证方式和端口不同
+
+        pda，open接口需要此调用获取令牌，web直接单点登入
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: JWT
+                example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJ1aWQiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJpc3MiOiJqYXBwLW1lcy1hdXRvIn0.h-CPVnDFw0YyCfm7MIAgXIqTlecAhT5VQe43i5aIUeE
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/auth:
+    get:
+      tags:
+        - auth
+      summary: 获取身份和权限
+      externalDocs:
+        description: 权限设计参考
+        url: https://shiro.apache.org/permissions.html
+      responses:
+        '200':
+          description: 身份和权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthInfo'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /apkInfo:
+    get:
+      tags:
+        - api
+      summary: apk 版本信息
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApkInfo'
+        '400':
+          $ref: '#/components/responses/JException'
+  /apk/{version}:
+    get:
+      tags:
+        - api
+      summary: 版本下载
+      parameters:
+        - in: path
+          name: version
+          required: true
+          description: 版本号
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/silkBarcodes:
+    post:
+      tags:
+        - api
+      summary: 丝锭条码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SilkBarcodeGenerateCommand'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - api
+      summary: 丝锭条码查询
+      parameters:
+        - in: query
+          name: first
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+        - in: query
+          name: codeDate
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: lineMachineId
+          schema:
+            type: string
+            description: 机台
+        - in: query
+          name: doffingNum
+          schema:
+            type: string
+            description: 落次
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  silkBarcodes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SilkBarcode'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/dyeingPrepares:
+    get:
+      tags:
+        - api
+      summary: 待染判查询
+      parameters:
+        - in: query
+          name: first
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+        - in: query
+          name: codeDate
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: hrIdQ
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  dyeingPrepares:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DyeingPrepare'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/dyeingPrepares/{id}:
+    post:
+      tags:
+        - api
+      summary: 染判结果提交
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DyeingPrepareResultSubmitCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  dyeingPrepares:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DyeingPrepare'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/dyeingPrepareResults:
+    get:
+      tags:
+        - api
+      summary: 染判结果查询
+      parameters:
+        - in: query
+          name: first
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+        - in: query
+          name: codeDate
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  dyeingPrepares:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DyeingPrepare'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/batchSilkBarcodes:
+    post:
+      tags:
+        - api
+      summary: 批量丝锭条码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/SilkBarcodeGenerateCommand'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/AutoDoffingAdaptCheckSilks:
+    post:
+      tags:
+        - api
+      summary: 自动落筒-验证标签
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCar
+                - workshop
+              properties:
+                silkCar:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                workshop:
+                  $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckSilk'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/AutoDoffingAdaptEvents:
+    post:
+      tags:
+        - api
+      summary: 自动落筒
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoDoffingAdaptEvent'
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-JAPP-MES-IF-SIGN:
+              schema:
+                type: string
+                format: JWT
+              description: 接口调用日志，出错核对，请保存
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventHandleResultDTO'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/ManualDoffingCheckSilks:
+    post:
+      tags:
+        - api
+      summary: 手动落筒-标签验证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCar
+                - lineMachineCount
+              properties:
+                silkCar:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                lineMachineCount:
+                  type: number
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckSilk'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/ManualDoffingEvents:
+    post:
+      tags:
+        - api
+      summary: 手动落筒
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualDoffingEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingSampleDoffingCheckSilks:
+    post:
+      tags:
+        - api
+      summary: 标样丝落筒-标签验证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCar
+                - workshop
+              properties:
+                silkCar:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                workshop:
+                  $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckSilk'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingSampleDoffingEvents:
+    post:
+      tags:
+        - api
+      summary: 标样丝落筒
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoDoffingAdaptEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/PhysicalInfoDoffingCheckSilks:
+    post:
+      tags:
+        - api
+      summary: 取样丝落筒-标签验证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCar
+                - workshop
+              properties:
+                silkCar:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                workshop:
+                  $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckSilk'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/PhysicalInfoDoffingEvents:
+    post:
+      tags:
+        - api
+      summary: 取样丝落筒
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoDoffingAdaptEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/SilkCarRuntimeDeleteEvents:
+    post:
+      tags:
+        - api
+      summary: 删除落筒
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCarRecord
+              properties:
+                silkCarRecord:
+                  $ref: '#/components/schemas/SilkCarRecordDTO'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/AppendDoffingCheckSilks:
+    post:
+      tags:
+        - api
+      summary: 生产班拼车-位与车-标签验证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCarRecord
+                - lineMachineCount
+              properties:
+                silkCarRecord:
+                  $ref: '#/components/schemas/SilkCarRecordDTO'
+                lineMachineCount:
+                  type: number
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/AppendDoffingEvents:
+    post:
+      tags:
+        - api
+      summary: 生产班拼车-位与车
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppendDoffingEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/SilkCarRuntimeFlipEvents:
+    post:
+      tags:
+        - api
+      summary: AB面翻转
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCarRecord
+              properties:
+                silkCarRecord:
+                  $ref: '#/components/schemas/SilkCarRecordDTO'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/SilkNoteFeedbackEvents:
+    post:
+      tags:
+        - api
+      summary: 备注处理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCarRecord
+                - silkNote
+              properties:
+                silkCarRecord:
+                  $ref: '#/components/schemas/SilkCarRecordDTO'
+                silkNote:
+                  $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/CarpoolEvents:
+    post:
+      tags:
+        - api
+      summary: 拼车
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/SilkCarRuntimeGradeEvents:
+    post:
+      tags:
+        - api
+      summary: 丝车等级
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SilkCarRuntimeGradeEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/silkCarRuntimes/{code}:
+    get:
+      tags:
+        - api
+      summary: 获取丝车信息
+      parameters:
+        - in: path
+          name: code
+          required: true
+          description: 丝车编号
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SilkCarRuntime'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/silkCarRuntimes/{code}/physicalInfo:
+    get:
+      tags:
+        - api
+      summary: 丝车送物检查信息
+      parameters:
+        - in: path
+          name: code
+          required: true
+          description: 丝车编号
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SilkCarRuntimePhysicalInfoDTO'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingSampleSubmitEvents:
+    post:
+      tags:
+        - api
+      summary: 标样丝提交
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DyeingSampleSubmitEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/SilkRuntimeDetachEvents:
+    post:
+      tags:
+        - api
+      summary: 丝锭解码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SilkRuntimeDetachEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingPrepareFirstSubmitEvents:
+    post:
+      tags:
+        - api
+      summary: 一次织袜，正常抽样
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DyeingPrepareFirstSubmitEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingPrepareCrossSpindleSubmitEvents:
+    post:
+      tags:
+        - api
+      summary: 一次织袜，位与锭交织
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DyeingPrepareFirstSubmitEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingPrepareCrossLineMachineSubmitEvents:
+    post:
+      tags:
+        - api
+      summary: 一次织袜，位与位交织
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DyeingPrepareCrossLineMachineSubmitEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/DyeingPrepareMultiSubmitEvents:
+    post:
+      tags:
+        - api
+      summary: 多次织袜
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DyeingPrepareMultiSubmitEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/SilkCarRuntimeGradeSubmitEvents:
+    post:
+      tags:
+        - api
+      summary: 等级提交
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SilkCarRuntimeGradeSubmitEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/packageBoxBarcodes:
+    post:
+      tags:
+        - api
+      summary: 唛头条码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageBoxBarcodeGenerateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/ManualPackageBoxEventsSimple:
+    post:
+      tags:
+        - api
+      summary: 人工打包
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualPackageBoxEventsSimple'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/ManualPackageBoxEvents:
+    post:
+      tags:
+        - api
+      summary: 人工打包--@Deprecated
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualPackageBoxEvent'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/TemporaryBoxIncrementEvents:
+    post:
+      tags:
+        - api
+      summary: 增加暂存箱
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemporaryBoxIncrementEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/TemporaryBoxDecrementEvents:
+    post:
+      tags:
+        - api
+      summary: 暂存箱打包
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemporaryBoxDecrementEvent'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/packageBoxs/batchPackageType:
+    post:
+      tags:
+        - api
+      summary: 更新包装类型
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageTypeBatchCommand'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/packageBoxs/barcodes/{code}:
+    get:
+      tags:
+        - api
+      summary: 唛头信息
+      parameters:
+        - in: path
+          name: code
+          required: true
+          description: 唛头编号
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/corporations:
+    get:
+      tags:
+        - config
+      summary: 公司列表
+      description: 系统上线前会在数据库建一个公司，后续操作关联在这公司
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Corporation'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/workshops:
+    post:
+      tags:
+        - config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkshopUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshop'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      summary: 车间列表
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workshop'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/workshops/{id}:
+    put:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: workshop id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkshopUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshop'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: workshop id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshop'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/lines:
+    post:
+      tags:
+        - config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      responses:
+        '200':
+          description: 线别列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Line'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/lines/{id}:
+    put:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: line id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: line id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/lineMachines:
+    post:
+      tags:
+        - config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineMachineUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineMachine'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/lineMachines/{id}:
+    put:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: line id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineMachineUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineMachine'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: line id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineMachine'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/operators:
+    post:
+      tags:
+        - admin
+      summary: 用户导入
+      requestBody:
+        required: true
+        description: hrId 和 oaId 可以都输入，也可以只输入一项，但不能都为空
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperatorImportCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: query
+          name: first
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  operators:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Operator'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/operators/{id}:
+    put:
+      tags:
+        - admin
+      summary: 更新用户
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperatorPermissionUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/operators/{id}/auth:
+    get:
+      tags:
+        - config
+      summary: 用户权限数据
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/operators/{id}/password:
+    put:
+      tags:
+        - api
+      summary: 用户修改密码
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - oldPassword
+                - newPassword
+                - newPasswordAgain
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+                newPasswordAgain:
+                  type: string
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/operatorGroups:
+    post:
+      tags:
+        - admin
+      summary: 新建用户组
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperatorGroupUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorGroup'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OperatorGroup'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/operatorGroups/{id}:
+    put:
+      tags:
+        - admin
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperatorGroupUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorGroup'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorGroup'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/grades:
+    post:
+      tags:
+        - admin
+      summary: 新建等级
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GradeUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grade'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      summary: 等级列表
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Grade'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/grades/{id}:
+    put:
+      tags:
+        - admin
+      summary: 更新等级
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GradeUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grade'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grade'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/batches:
+    post:
+      tags:
+        - admin
+      summary: 新建批号
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      summary: 批号列表
+      parameters:
+        - in: query
+          name: first
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  batches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Batch'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/batches/{id}:
+    put:
+      tags:
+        - admin
+      summary: 更新批号
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/products:
+    post:
+      tags:
+        - admin
+      summary: 新建产品
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      summary: 产品列表
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/products/{id}:
+    put:
+      tags:
+        - admin
+      summary: 更新产品
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/products/{id}/dyeingInfo:
+    put:
+      tags:
+        - admin
+      summary: 更新产品
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDyeingInfoUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/sapT001ls:
+    get:
+      tags:
+        - config
+      summary: Sap库存地列表
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SapT001l'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/packageClasses:
+    post:
+      tags:
+        - admin
+      summary: 新建打包班次
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageClassUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageClass'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      summary: 打包班次列表
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PackageClass'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/packageClasses/{id}:
+    put:
+      tags:
+        - admin
+      summary: 更新打包班次
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageClassUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageClass'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageClass'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/temporaryBoxs:
+    post:
+      tags:
+        - admin
+      summary: 新建暂存箱
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemporaryBoxUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryBox'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      summary: 暂存箱列表
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemporaryBox'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/currentSelPackageBoxes:
+    get:
+      tags:
+        - api
+      summary: 打包工，当天，打包列表
+      parameters:
+        - in: query
+          name: first
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 100
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  measureResult:
+                    type: object
+                    description: 未入库
+                    properties:
+                      first:
+                        type: integer
+                      pageSize:
+                        type: integer
+                      count:
+                        type: integer
+                      packageBoxes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PackageBox'
+                  warehouseResult:
+                    type: object
+                    description: 已入库
+                    properties:
+                      first:
+                        type: integer
+                      pageSize:
+                        type: integer
+                      count:
+                        type: integer
+                      packageBoxes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/temporaryBoxs/{id}:
+    put:
+      tags:
+        - admin
+      summary: 更新暂存箱
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemporaryBoxUpdateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryBox'
+        '400':
+          $ref: '#/components/responses/JException'
+    get:
+      tags:
+        - config
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryBox'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /facevisa/autoVisualInspection/silkCodes/{code}:
+    get:
+      tags:
+        - if
+      summary: 自动外观检，获取丝锭信息
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoVisualInspectionSilkInfoDTO'
+        '400':
+          $ref: '#/components/responses/JException'
+  /warehouse/PackageBoxFetchEvent:
+    post:
+      tags:
+        - if
+      summary: 仓储系统-入库接口
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+  /warehouse/PackageBoxFlipEvent:
+    post:
+      tags:
+        - if
+      summary: 仓储系统-翻包接口
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - packageBox
+                - inSilks
+                - items
+              properties:
+                packageBox:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                inSilks:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/EntityByCodeDTO'
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - silkCarRecord
+                      - silks
+                    properties:
+                      silkCarRecord:
+                        $ref: '#/components/schemas/SilkCarRecordDTO'
+                      silks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/reports/monthPackageBoxReport:
+    get:
+      tags:
+        - api
+      summary: 月打包
+      parameters:
+        - in: path
+          name: workshopId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: year
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: month
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageBoxReport'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/reports/dailyPackageBoxReport:
+    get:
+      tags:
+        - api
+      summary: 日打包
+      parameters:
+        - in: path
+          name: workshopId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  packageBoxes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/reports/dailyDoffingReport:
+    get:
+      tags:
+        - api
+      summary: 日下机
+      parameters:
+        - in: path
+          name: workshopId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoffingReport'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/reports/dailySilkExceptionReport:
+    get:
+      tags:
+        - api
+      summary: 日异常
+      parameters:
+        - in: path
+          name: workshopId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SilkExceptionReport'
+        '400':
+          $ref: '#/components/responses/JException'
+
+  /api/reports/monthSilkExceptionReport:
+    get:
+      tags:
+        - api
+      summary: 月异常
+      parameters:
+        - in: path
+          name: workshopId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: year
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: month
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  packageBoxes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Silk'
+        '400':
+          $ref: '#/components/responses/JException'
+components:
+  securitySchemes:
+    # arbitrary name for the security scheme
+    bearerAuth:
+      type: http
+      scheme: bearer
+      # optional, arbitrary value for documentation purposes
+      bearerFormat: JWT
+  responses:
+    #    Unauthorized:
+    #      description: Unauthorized
+    #      content:
+    #        application/json:
+    #          schema:
+    #            $ref: '#/components/schemas/JException'
+    JException:
+      description: |
+        非200的异常一般都会处理过，没处理的都是http status默认
+
+        如：401没认证，403没权限，404找不到，等等
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JException'
+  schemas:
+    JException:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: E00000
+        errorMessage:
+          type: string
+    TokenCommand:
+      type: object
+      required:
+        - loginId
+        - loginPassword
+      properties:
+        loginId:
+          type: string
+        loginPassword:
+          type: string
+    BasicSilkPosition:
+      type: object
+      required:
+        - sideType
+        - row
+        - col
+      properties:
+        sideType:
+          type: string
+          enum: [A, B]
+          description: A,B面
+        row:
+          type: integer
+          example: 1
+          description: 第几行，从1开始
+        col:
+          type: integer
+          example: 1
+          description: 第几列，从1开始
+    BasicPermission:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    AuthInfo:
+      allOf:
+        - $ref: '#/components/schemas/BasicPermission'
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        hrId:
+          type: string
+        oaId:
+          type: string
+        admin:
+          type: boolean
+    ApkInfo:
+      type: object
+      properties:
+        version:
+          type: string
+    EntityDTO:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    EntityByCodeDTO:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+    CheckSilk:
+      allOf:
+        - $ref: '#/components/schemas/BasicSilkPosition'
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+    EventHandleResultDTO:
+      type: object
+      description: 事件源，可当接口日志
+      properties:
+        silkCarRecordId:
+          type: string
+          description: 丝车车次ID
+        eventId:
+          type: string
+          description: 事件源ID
+    SilkCarRecordDTO:
+      allOf:
+        - $ref: '#/components/schemas/EntityDTO'
+        - type: object
+          required:
+            - silkCar
+          properties:
+            silkCar:
+              $ref: '#/components/schemas/EntityDTO'
+    SilkRuntimeDTO:
+      allOf:
+        - $ref: '#/components/schemas/BasicSilkPosition'
+        - type: object
+          required:
+            - silk
+          properties:
+            silk:
+              $ref: '#/components/schemas/EntityDTO'
+    SilkCarRuntimePhysicalInfoDTO:
+      type: object
+      properties:
+        barCode:
+          type: string
+          description: 丝车条码
+        batchNumber:
+          type: string
+          description: 批号
+        spec:
+          type: string
+          description: 规格
+        sampler:
+          type: string
+          description: 取样人
+        product:
+          type: string
+          description: 产品
+        silks:
+          type: array
+          items:
+            type: object
+            properties:
+              productLine:
+                type: string
+                description: 产线
+              item:
+                type: string
+                description: 位号
+              fallTime:
+                type: string
+                description: 落次
+              spindleNumber:
+                type: string
+                description: 丝锭条码
+              abnormalCauses:
+                type: string
+                description: 丝锭异常信息
+    SilkBarcodeGenerateCommand:
+      type: object
+      required:
+        - lineMachine
+        - codeDate
+        - doffingNum
+      properties:
+        lineMachine:
+          $ref: '#/components/schemas/EntityDTO'
+        codeDate:
+          type: string
+          format: date
+        doffingNum:
+          type: string
+          description: 落次
+    SilkBarcode:
+      type: object
+      properties:
+        batch:
+          $ref: '#/components/schemas/Batch'
+        lineMachine:
+          $ref: '#/components/schemas/LineMachine'
+        codeDate:
+          type: string
+          format: date
+        doffingNum:
+          type: string
+          description: 落次
+        silks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Silk'
+    PackageBoxBarcodeGenerateCommand:
+      type: object
+      required:
+        - batch
+        - line
+        - packageClass
+        - date
+        - count
+      properties:
+        batch:
+          $ref: '#/components/schemas/EntityDTO'
+        line:
+          $ref: '#/components/schemas/EntityDTO'
+        packageClass:
+          $ref: '#/components/schemas/EntityDTO'
+        date:
+          type: string
+          format: date
+          description: 生产日期
+        count:
+          type: number
+          description: 唛头数量
+    SilkCarRuntime:
+      type: object
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecord'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntime'
+
+    AppendDoffingEvent:
+      type: object
+      required:
+        - silkCar
+        - lineMachineCount
+        - checkSilks
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        lineMachineCount:
+          type: number
+        checkSilks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckSilk'
+    AutoDoffingAdaptEvent:
+      type: object
+      required:
+        - silkCar
+        - workshop
+        - grade
+        - checkSilks
+      properties:
+        silkCar:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+        workshop:
+          $ref: '#/components/schemas/EntityDTO'
+        grade:
+          $ref: '#/components/schemas/EntityDTO'
+        checkSilks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckSilk'
+    AutoDoffingEvent:
+      type: object
+      required:
+        - silkCar
+        - silks
+      properties:
+        silkCar:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+        silks:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/BasicSilkPosition'
+              - type: object
+                required:
+                  - lineMachine
+                  - spindle
+                properties:
+                  lineMachine:
+                    type: object
+                    properties:
+                      lineId:
+                        type: string
+                        description: 确定线别后，会提供一个固定的线别ID
+                      item:
+                        type: integer
+                        description: 位号
+                  spindle:
+                    type: integer
+                    description: 锭位
+    CarpoolEvent:
+      type: object
+      required:
+        - silkCar
+        - silks
+      properties:
+        silkCar:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+        silks:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityByCodeDTO'
+    ManualDoffingEvent:
+      type: object
+      required:
+        - silkCar
+        - lineMachineCount
+        - grade
+      properties:
+        silkCar:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+        lineMachineCount:
+          type: number
+        grade:
+          $ref: '#/components/schemas/EntityDTO'
+        checkSilks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckSilk'
+    SilkRuntimeTagCheckEvent.Silk:
+      allOf:
+        - $ref: '#/components/schemas/BasicSilkPosition'
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              description: 丝锭条码
+    SilkCarRuntimeGradeEvent:
+      type: object
+      required:
+        - silkCarRecord
+        - grade
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        grade:
+          $ref: '#/components/schemas/EntityDTO'
+    SapT001l:
+      type: object
+      required:
+        - lgort
+      properties:
+        lgort:
+          type: string
+        lgobe:
+          type: string
+    PackageTypeBatchCommand:
+      type: object
+      required:
+        - palletType
+        - packageType
+        - foamType
+        - foamNum
+        - SapT001l
+        - packageBoxs
+      properties:
+        palletType:
+          type: string
+          description: 托盘类型名称
+        palletCode:
+          type: string
+          description: 九鼎托盘rfid，当托盘类型为九鼎时必输
+        packageType:
+          type: string
+          description: 包装类型名称
+        foamType:
+          type: string
+          description: 泡沫类型名称
+        foamNum:
+          type: integer
+          description: 泡沫数量
+        sapT001l:
+          $ref: '#/components/schemas/SapT001l'
+        packageBoxs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityByCodeDTO'
+    SilkRuntimeTagCheckEvent:
+      type: object
+      required:
+        - silkCarRecord
+        - silkRuntimes
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeTagCheckEvent.Silk'
+    DyeingSampleSubmitEvent:
+      type: object
+      required:
+        - silkCarRecord
+        - silkRuntimes
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+    SilkRuntimeDetachEvent:
+      type: object
+      required:
+        - silkCarRecord
+        - silkRuntimes
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+    DyeingPrepareFirstSubmitEvent:
+      type: object
+      required:
+        - silkCarRecord
+        - silkRuntimes
+        - dyeingSample
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+        dyeingSample:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+    DyeingPrepareCrossLineMachineSubmitEvent:
+      type: object
+      required:
+        - silkCarRecord1
+        - silkRuntimes1
+        - silkCarRecord2
+        - silkRuntimes2
+      properties:
+        silkCarRecord1:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes1:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+        silkCarRecord2:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes2:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+    DyeingPrepareMultiSubmitEvent:
+      type: object
+      required:
+        - dyeingType
+        - silkCarRecord
+        - silkRuntimes
+        - dyeingSample
+      properties:
+        dyeingType:
+          type: string
+          enum: [SECOND, THIRD]
+          description: 区分二次织袜或三次织袜
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+        dyeingSample:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+    SilkCarRuntimeGradeSubmitEvent.Silk:
+      allOf:
+        - $ref: '#/components/schemas/SilkRuntimeDTO'
+        - type: object
+          required:
+            - grade
+          properties:
+            grade:
+              $ref: '#/components/schemas/EntityDTO'
+    SilkCarRuntimeGradeSubmitEvent:
+      type: object
+      required:
+        - silkCarRecord
+        - silkRuntimes
+      properties:
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkCarRuntimeGradeSubmitEvent.Silk'
+    ManualPackageBoxEventsSimple:
+      type: object
+      required:
+        - silkCount
+        - silkCarRecords
+      properties:
+        silkCount:
+          type: integer
+        silkCarRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkCarRecordDTO'
+    ManualPackageBoxEvent:
+      type: object
+      required:
+        - packageBoxType
+        - items
+      properties:
+        packageBoxType:
+          type: string
+          enum: [AUTO, MANUAL]
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - silkCarRecord
+              - count
+            properties:
+              count:
+                type: number
+              silkCarRecord:
+                $ref: '#/components/schemas/SilkCarRecordDTO'
+    TemporaryBoxIncrementEvent:
+      type: object
+      required:
+        - temporaryBox
+        - silkCarRecord
+        - silkRuntimes
+      properties:
+        temporaryBox:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkRuntimeDTO'
+    TemporaryBoxDecrementEvent:
+      type: object
+      required:
+        - temporaryBox
+        - count
+      properties:
+        temporaryBox:
+          $ref: '#/components/schemas/EntityByCodeDTO'
+        count:
+          type: integer
+    OperatorImportCommand:
+      type: object
+      properties:
+        hrId:
+          type: string
+          example: 12000077
+        oaId:
+          type: string
+          example: jzb
+    OperatorPermissionUpdateCommand:
+      allOf:
+        - $ref: '#/components/schemas/BasicPermission'
+        - type: object
+          properties:
+            admin:
+              type: boolean
+            groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityDTO'
+    Operator:
+      allOf:
+        - $ref: '#/components/schemas/BasicPermission'
+        - type: object
+          properties:
+            id:
+              type: string
+              readOnly: true
+            hrId:
+              type: string
+              readOnly: true
+            oaId:
+              type: string
+              readOnly: true
+            name:
+              type: string
+              readOnly: true
+            admin:
+              type: boolean
+            groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/OperatorGroup'
+    OperatorGroupUpdateCommand:
+      allOf:
+        - $ref: '#/components/schemas/BasicPermission'
+        - type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+    OperatorGroup:
+      allOf:
+        - $ref: '#/components/schemas/BasicPermission'
+        - type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+    Corporation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    WorkshopUpdateCommand:
+      type: object
+      required:
+        - corporation
+        - code
+        - name
+      properties:
+        corporation:
+          $ref: '#/components/schemas/EntityDTO'
+        code:
+          type: string
+          minLength: 1
+          maxLength: 1
+          description: 丝锭条码打印的编码，一位
+        name:
+          type: string
+        note:
+          type: string
+    Workshop:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        note:
+          type: string
+        corporation:
+          $ref: '#/components/schemas/Corporation'
+    LineUpdateCommand:
+      type: object
+      required:
+        - workshop
+        - name
+      properties:
+        workshop:
+          $ref: '#/components/schemas/EntityDTO'
+        name:
+          type: string
+        note:
+          type: string
+    Line:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        autoDoffing:
+          type: boolean
+        workshop:
+          $ref: '#/components/schemas/Workshop'
+    LineMachineUpdateCommand:
+      type: object
+      required:
+        - line
+        - item
+      properties:
+        line:
+          $ref: '#/components/schemas/EntityDTO'
+        item:
+          type: integer
+        spindleNum:
+          type: integer
+        spindleSeq:
+          type: array
+          items:
+            type: integer
+    LineMachine:
+      type: object
+      properties:
+        id:
+          type: string
+        line:
+          $ref: '#/components/schemas/Line'
+        item:
+          type: integer
+        spindleNum:
+          type: integer
+          description: 锭数
+        spindleSeq:
+          description: 落筒的锭位顺序
+          type: array
+          items:
+            type: integer
+    SilkCar:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+    SilkCarRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 车次ID
+        silkCar:
+          $ref: '#/components/schemas/SilkCar'
+        batch:
+          $ref: '#/components/schemas/Batch'
+        grade:
+          description: 预设等级
+          $ref: '#/components/schemas/Grade'
+        doffingType:
+          type: string
+          enum: [AUTO,MANUAL]
+        doffingOperator:
+          $ref: '#/components/schemas/Operator'
+        doffingDateTime:
+          type: number
+          format: date-time
+        carpoolOperator:
+          $ref: '#/components/schemas/Operator'
+        carpoolDateTime:
+          type: number
+          format: date-time
+        initSilks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Silk'
+        startDateTime:
+          type: number
+          format: date-time
+        endDateTime:
+          type: number
+          format: date-time
+    Silk:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        doffingNum:
+          type: string
+          description: 落次
+        doffingOperator:
+          $ref: '#/components/schemas/Operator'
+    SilkException:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    SilkNote:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    SilkRuntime:
+      description: 正在丝车上的丝锭
+      allOf:
+        - $ref: '#/components/schemas/BasicSilkPosition'
+        - type: object
+          required:
+            - silk
+          properties:
+            silk:
+              $ref: '#/components/schemas/Silk'
+            exceptions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SilkException'
+            dyeingResultSubmitted:
+              type: boolean
+              description: 染判结果是否已经提交
+            hasDyeingException:
+              type: boolean
+              description: 染判结果是有异常
+            notes:
+              type: array
+              items:
+                $ref: '#/components/schemas/SilkNote'
+    ProductUpdateCommand:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+          minLength: 2
+          maxLength: 2
+    ProductDyeingInfoUpdateCommand:
+      type: object
+      properties:
+        dyeingFormConfig:
+          $ref: '#/components/schemas/EntityDTO'
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+    BatchUpdateCommand:
+      type: object
+      required:
+        - name
+        - sortBy
+      properties:
+        name:
+          type: string
+        sortBy:
+          type: string
+    Batch:
+      type: object
+      description: 批号
+      properties:
+        id:
+          type: string
+        batchNo:
+          type: string
+        silkWeight:
+          type: number
+        centralValue:
+          type: number
+        holeNum:
+          type: number
+        spec:
+          type: string
+          description: 规格
+        tubeColor:
+          type: string
+          description: 规格
+        note:
+          type: string
+        workshop:
+          $ref: '#/components/schemas/Workshop'
+        product:
+          $ref: '#/components/schemas/Product'
+    GradeUpdateCommand:
+      type: object
+      required:
+        - name
+        - sortBy
+      properties:
+        name:
+          type: string
+        sortBy:
+          type: string
+    Grade:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sortBy:
+          type: string
+          description: 分数，丝锭的等级需要100分，才能推入自动包装线
+    PackageClassUpdateCommand:
+      type: object
+      required:
+        - name
+        - packageCode
+      properties:
+        name:
+          type: string
+        packageCode:
+          type: string
+          minLength: 1
+        sortBy:
+          type: string
+    PackageClass:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        packageCode:
+          type: string
+        sortBy:
+          type: string
+    TemporaryBoxUpdateCommand:
+      type: object
+      required:
+        - code
+        - batch
+        - grade
+      properties:
+        code:
+          type: string
+        batch:
+          $ref: '#/components/schemas/EntityDTO'
+        grade:
+          $ref: '#/components/schemas/EntityDTO'
+    TemporaryBox:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        batch:
+          $ref: '#/components/schemas/Batch'
+        grade:
+          $ref: '#/components/schemas/Grade'
+        silkCount:
+          type: integer
+          description: 暂存数量
+    PackageBox:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          description: 唛头条码
+        palletCode:
+          type: string
+          description: 久鼎塑托
+        type:
+          type: string
+          enum: [AUTO, MANUAL,FOREIGN]
+          description: 打包类型，自动打包，人工打包，外贸打包
+        grossWeight:
+          type: number
+          description: 毛重
+        netWeight:
+          type: number
+          description: 净重
+        batch:
+          $ref: '#/components/schemas/Batch'
+        printClass:
+          description: 打印班次
+          $ref: '#/components/schemas/PackageClass'
+        printDate:
+          type: number
+          description: 打印日期
+        budatClass:
+          description: 入库班次
+          $ref: '#/components/schemas/PackageClass'
+        budat:
+          type: number
+          description: 入库日期
+        silkCount:
+          type: integer
+          description: 丝锭颗数
+        silks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Silk'
+        createDateTime:
+          type: number
+          description: 打包时间
+    DyeingSample:
+      type: object
+      properties:
+        id:
+          type: string
+        silk:
+          $ref: '#/components/schemas/Silk'
+    DyeingPrepareResultSubmitCommand:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              silk:
+                $ref: '#/components/schemas/EntityDTO'
+              hasException:
+                type: boolean
+              formConfig:
+                type: object
+              formConfigValueData:
+                type: object
+    DyeingPrepare:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [FIRST, CROSS_LINEMACHINE_SPINDLE,CROSS_LINEMACHINE_LINEMACHINE,SECOND,THIRD]
+        silkCarRecord:
+          $ref: '#/components/schemas/SilkCarRecord'
+        silks:
+          $ref: '#/components/schemas/Silk'
+        dyeingSample:
+          $ref: '#/components/schemas/DyeingSample'
+        silkCarRecord1:
+          $ref: '#/components/schemas/SilkCarRecord'
+        silks1:
+          $ref: '#/components/schemas/Silk'
+        silkCarRecord2:
+          $ref: '#/components/schemas/SilkCarRecord'
+        silks2:
+          type: array
+          items:
+            $ref: '#/components/schemas/Silk'
+        creator:
+          $ref: '#/components/schemas/Operator'
+        cdt:
+          type: string
+          format: date
+        dyeingResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/DyeingResult'
+    DyeingResult:
+      type: object
+      properties:
+        id:
+          type: string
+        dyeingPrepare:
+          $ref: '#/components/schemas/DyeingPrepare'
+        silk:
+          $ref: '#/components/schemas/Silk'
+        lineMachine:
+          $ref: '#/components/schemas/LineMachine'
+        spindle:
+          type: integer
+        hasException:
+          type: boolean
+        dyeingDateTime:
+          type: string
+          format: date
+    PackageBoxReport:
+      type: object
+      properties:
+        packageBoxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackageBox'
+    SilkExceptionReport:
+      type: object
+      properties:
+        packageBoxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Silk'
+    DoffingReport:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              batch:
+                $ref: '#/components/schemas/Batch'
+              silks:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Silk'
+    AutoVisualInspectionSilkInfoDTO:
+      type: object
+      properties:
+        silk_code:
+          type: string
+        workshop_id:
+          type: string
+        workshop_name:
+          type: string
+        line_id:
+          type: string
+        line_name:
+          type: string
+        item:
+          type: integer
+        spindle_no:
+          type: integer
+        fall_no:
+          type: string
+        batch_no:
+          type: string
+        spec:
+          type: string
+        product_date_time:
+          type: number
+          format: date
+          description: 落丝时间，时间戳
+        is_exception:
+          type: boolean
+        exceptionInfos:
+          type: array
+          description: 异常列表
+          items:
+            type: object
+            properties:
+              exception_id:
+                type: string
+              exception_name:
+                type: string
+              operator_id:
+                type: string
+                description: 操作人ID
+              operator_display_name:
+                type: string
+                description: 操作人显示：人名[员工号]
+
+security:
+  - bearerAuth: []

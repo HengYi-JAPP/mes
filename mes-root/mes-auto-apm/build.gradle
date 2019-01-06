@@ -1,0 +1,13 @@
+dependencies {
+    compile project(':mes-auto-core'),
+            "org.apache.lucene:lucene-analyzers-smartcn:${luceneVersion}",
+            "org.apache.lucene:lucene-expressions:${luceneVersion}",
+            "org.apache.lucene:lucene-facet:${luceneVersion}",
+            "org.apache.lucene:lucene-queries:${luceneVersion}",
+            "org.apache.lucene:lucene-queryparser:${luceneVersion}"
+}
+
+apply plugin: 'com.palantir.docker'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'application'
+mainClassName = "com.hengyi.japp.mes.auto.apm.Apm"

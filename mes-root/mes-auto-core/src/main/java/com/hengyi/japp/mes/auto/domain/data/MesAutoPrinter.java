@@ -1,0 +1,14 @@
+package com.hengyi.japp.mes.auto.domain.data;
+
+import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * @author jzb 2018-11-22
+ */
+@Data
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+public class MesAutoPrinter extends EntityDTO {
+    private String name;
+}

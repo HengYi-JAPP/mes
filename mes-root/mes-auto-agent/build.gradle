@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':mes-auto-core')
+}
+
+mainClassName = "com.hengyi.japp.mes.auto.agent.Agent"

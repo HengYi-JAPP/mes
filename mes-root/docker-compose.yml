@@ -1,0 +1,71 @@
+version: "3.2"
+
+services:
+  #  mes-auto-rabbit:
+  #    image: rabbitmq:3-management
+  #    restart: always
+  #    environment:
+  #    - RABBITMQ_HIPE_COMPILE=1
+  #    - RABBITMQ_DEFAULT_USER=mes-auto
+  #    - RABBITMQ_DEFAULT_PASS=mes-auto-rabbitmq@com.hengyi.japp
+  #    expose:
+  #    - "5672"
+  #    - "15672"
+  #    - "4369"
+  #    - "5671"
+  #    ports:
+  #    - "5672:5672"
+  #    - "15672:15672"
+  #
+  #  mes-auto-redis:
+  #    image: redis:5
+  #    restart: always
+  #    volumes:
+  #    - /home/mes/auto/db/redis/data:/data
+  #    expose:
+  #    - "6379"
+  #    ports:
+  #    - "6379:6379"
+  #
+  #  mes-auto-mongo:
+  #    image: mongo:4
+  #    restart: always
+  #    volumes:
+  #    - /home/mes/auto/db/mongo/data/db:/data/db
+  #    expose:
+  #    - "27017"
+  #    ports:
+  #    - "27017:27017"
+  #    environment:
+  #    - MONGO_INITDB_ROOT_USERNAME=mes-auto
+  #    - MONGO_INITDB_ROOT_PASSWORD=mes-auto-mongo@com.hengyi.japp
+  ##    command: mongod --smallfiles --logpath=/dev/null # --quiet
+
+  mes-auto-worker:
+    image: hengyi/mes-auto-worker
+    restart: always
+    volumes:
+      - type: bind
+        source: /home/mes
+        target: /home/mes
+
+#  mes-auto-agent:
+#    image: hengyi/mes-auto-agent
+#    restart: always
+#    volumes:
+#    - type: bind
+#      source: /home/mes
+#      target: /home/mes
+#    expose:
+#    - "9999"
+#    - "9998"
+#    - "8080"
+#    ports:
+#    - "9999:9999"
+#    - "9998:9998"
+#    - "8080:8080"
+#    depends_on:
+#    - mes-auto-worker
+
+#volumes:
+#data:

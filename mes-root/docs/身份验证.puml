@@ -1,0 +1,20 @@
+@startuml
+autonumber
+hide footbox
+title 身份验证
+
+actor Client
+participant "Api" as api
+participant "AdService" as ad
+participant "AuthService" as auth
+
+Client -> api: 获取token
+activate api
+
+api --> ad: 用户名密码验证
+api --> auth: Ad中不存在，则本地密码验证
+api --> auth: 验证成功，生成token
+
+Client <- api: 返回token
+deactivate api
+@enduml

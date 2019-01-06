@@ -1,0 +1,11 @@
+dependencies {
+    compile project(':mes-auto-core'),
+            "io.vertx:vertx-hazelcast:${vertxVersion}",
+            "org.apache.lucene:lucene-analyzers-smartcn:${luceneVersion}",
+            "org.apache.lucene:lucene-expressions:${luceneVersion}",
+            "org.apache.lucene:lucene-facet:${luceneVersion}",
+            "org.apache.lucene:lucene-queries:${luceneVersion}",
+            "org.apache.lucene:lucene-queryparser:${luceneVersion}"
+}
+
+mainClassName = "com.hengyi.japp.mes.auto.search.Search"

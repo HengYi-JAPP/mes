@@ -1,0 +1,8 @@
+dependencies {
+    compile "com.github.ixtf.japp:zxing:${jappVersion}",
+            "com.github.ixtf.japp:print:${jappVersion}",
+            "commons-daemon:commons-daemon:1.1.0"
+}
+
+apply plugin: 'application'
+mainClassName = "com.hengyi.japp.mes.auto.print.Print"

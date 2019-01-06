@@ -1,0 +1,86 @@
+@startuml
+start
+
+partition 生成丝车 {
+  fork
+    :人工落筒;
+    note right
+      丝锭摆放顺序：
+        A面 -> B面
+        下  -> 上
+        最下一行，左  -> 右
+        间隔一行，右  -> 左
+    end note
+    :扫丝车，扫机台;
+    :贴标签，验证标签;
+
+  fork again
+    :自动落筒;
+    :扫丝车，扫机台;
+    :贴标签，验证标签;
+    note right
+      参考原自动落筒机器人顺序
+    end note
+
+  fork again
+    :拼车;
+    :扫丝车，扫丝锭;
+    note right
+     扫丝锭顺序：
+       A面 -> B面
+       左  -> 右
+       上  -> 下
+    end note
+
+  endfork
+}
+
+partition 落丝工 {
+  :预设等级;
+  :填写异常，或备注;
+}
+
+partition 其他工种…… {
+  :填写异常，或备注;
+}
+
+partition 织袜、染判 {
+  :提交织袜信息;
+  note right
+    参考原自动落筒机器人顺序
+  end note
+}
+
+partition 打包 {
+  fork
+    :自动打包;
+    :推入自动线，获取丝车信息（每锭丝）;
+    repeat
+      :获取丝锭信息;
+        if (丝锭染判结果？) then (未出)
+          :大屏显示无法推入自动线原因;
+          stop
+        else
+          if (丝锭是否异常？) then (有)
+            :前道降等，标示自动线剔除该丝锭;
+          endif
+        endif
+    :生成丝锭信息;
+    repeat while (还有更多丝锭?)
+	:自动线解绑接口;
+	:自动线打包接口;
+	:接收唛头信息接口;
+
+  fork again
+    :人工打包;
+    :扫丝车，输入打包颗数;
+    :生成唛头;
+
+  endfork
+}
+
+:更新唛头，如：入库日期、班次等;
+:保存唛头信息;
+
+stop
+@enduml
