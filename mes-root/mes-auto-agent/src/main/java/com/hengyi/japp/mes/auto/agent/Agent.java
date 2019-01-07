@@ -28,20 +28,18 @@ public class Agent {
     public static Injector INJECTOR;
 
     public static void main(String[] args) {
-        Vertx.rxClusteredVertx(vertxOptions())
-                .flatMapCompletable(vertx -> {
-                    INJECTOR = Guice.createInjector(new AgentModule(vertx));
+        Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
+            INJECTOR = Guice.createInjector(new AgentModule(vertx));
 
-                    RxJavaPlugins.setComputationSchedulerHandler(s -> RxHelper.scheduler(vertx));
-                    RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
-                    RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
+            RxJavaPlugins.setComputationSchedulerHandler(s -> RxHelper.scheduler(vertx));
+            RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
+            RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
 
-                    final Completable web$ = deployWeb(vertx).ignoreElement();
-                    final Completable pda$ = deployPda(vertx).ignoreElement();
-                    final Completable open$ = deployOpen(vertx).ignoreElement();
-                    return Completable.mergeArray(web$, pda$, open$);
-                })
-                .subscribe();
+            final Completable web$ = deployWeb(vertx).ignoreElement();
+            final Completable pda$ = deployPda(vertx).ignoreElement();
+            final Completable open$ = deployOpen(vertx).ignoreElement();
+            return Completable.mergeArray(web$, pda$, open$);
+        }).subscribe();
     }
 
     private static Single<String> deployWeb(Vertx vertx) {
