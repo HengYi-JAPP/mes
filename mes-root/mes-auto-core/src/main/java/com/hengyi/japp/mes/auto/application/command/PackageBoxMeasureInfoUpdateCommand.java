@@ -18,9 +18,11 @@ import java.util.Date;
 public class PackageBoxMeasureInfoUpdateCommand implements Serializable {
     @NotNull
     private SaleType saleType;
-    @Min(0)
+    @Min(1)
+    private int silkCount;
+    @Min(1)
     private double grossWeight;
-    @Min(0)
+    @Min(1)
     private double netWeight;
     @NotNull
     private Date budat;

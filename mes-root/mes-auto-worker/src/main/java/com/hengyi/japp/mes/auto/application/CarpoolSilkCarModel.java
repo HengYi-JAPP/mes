@@ -43,6 +43,7 @@ public class CarpoolSilkCarModel extends AbstractSilkCarModel {
             final Single<SilkRuntime> silkRuntime$ = silkRepository.findByCode(checkSilk.getCode()).toSingle().map(silk -> {
                 if (!silk.isDetached()) {
                     final String msg = "checkSilk[" + checkSilk.getCode() + "]，非解绑丝锭拼车";
+                    log.error(msg);
                     //todo 解绑逻辑更新
 //                    throw new RuntimeException(msg);
                 }
