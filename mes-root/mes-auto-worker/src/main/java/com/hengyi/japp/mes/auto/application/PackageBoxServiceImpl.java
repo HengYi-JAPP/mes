@@ -202,9 +202,12 @@ public class PackageBoxServiceImpl implements PackageBoxService {
     @Override
     public Single<PackageBox> update(Principal principal, String id, PackageBoxMeasureInfoUpdateCommand command) {
         return packageBoxRepository.find(id).flatMap(packageBox -> {
+            if (PackageBoxType.AUTO != packageBox.getType()) {
+                packageBox.setSilkCount(command.getSilkCount());
+                packageBox.setNetWeight(command.getNetWeight());
+                packageBox.setGrossWeight(command.getGrossWeight());
+            }
             packageBox.setBudat(command.getBudat());
-            packageBox.setGrossWeight(command.getGrossWeight());
-            packageBox.setNetWeight(command.getNetWeight());
             packageBox.setPalletType(command.getPalletType());
             packageBox.setPackageType(command.getPackageType());
             packageBox.setSaleType(command.getSaleType());
