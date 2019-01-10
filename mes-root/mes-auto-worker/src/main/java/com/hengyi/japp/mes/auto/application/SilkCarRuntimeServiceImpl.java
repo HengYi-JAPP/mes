@@ -234,7 +234,8 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         });
     }
 
-    private Single<SilkCarRuntime> doffing(SilkCarRuntimeInitEvent event, DoffingType doffingType) {
+    @Override
+    public Single<SilkCarRuntime> doffing(SilkCarRuntimeInitEvent event, DoffingType doffingType) {
         final SilkCar silkCar = event.getSilkCar();
         final Collection<SilkRuntime> silkRuntimes = event.getSilkRuntimes();
         final Grade grade = event.getGrade();

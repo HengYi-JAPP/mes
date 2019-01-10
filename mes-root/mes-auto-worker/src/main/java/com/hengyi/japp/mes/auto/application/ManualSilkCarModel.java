@@ -90,7 +90,8 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
                     silk.setDoffingNum(silkBarcode.getDoffingNum());
                     silk.setSpindle(spindle);
                     silk.setLineMachine(lineMachine);
-                    silk.setBatch(lineMachine.getProductPlan().getBatch());
+//                    silk.setBatch(lineMachine.getProductPlan().getBatch());
+                    silk.setBatch(silkBarcode.getBatch());
                     return silkRuntime;
                 });
                 builder.add(silkRuntime$);
@@ -155,6 +156,5 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         }
         throw new RuntimeException();
     }
-
 
 }

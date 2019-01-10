@@ -34,6 +34,12 @@ public class Worker {
             RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
             RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
 
+//            final AuthService authService = Jvertx.getProxy(AuthService.class);
+//            final TokenCommand tokenCommand = new TokenCommand();
+//            tokenCommand.setLoginId("12000077");
+//            tokenCommand.setLoginPassword("123456");
+//            authService.token(tokenCommand).subscribe(System.out::println);
+
             final Completable agent$ = deployAgentWorker(vertx).ignoreElement();
             final Completable backend$ = deployBackendWorker(vertx).ignoreElement();
             return Completable.mergeArray(agent$, backend$);

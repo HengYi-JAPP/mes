@@ -6,6 +6,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.bridge.BridgeEventType;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
@@ -14,7 +15,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.handler.StaticHandler;
+import io.vertx.reactivex.ext.web.handler.*;
 import io.vertx.reactivex.ext.web.handler.sockjs.SockJSHandler;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,9 +29,25 @@ public class WebVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         final Router router = Router.router(vertx);
-        Jvertx.enableCommon(router);
+        router.route().handler(CorsHandler.create("^http(s)?://(10\\.2\\.0\\.215|localhost|127\\.0\\.0\\.1)(:[1-9]\\d+)?")
+                .allowCredentials(false)
+                .allowedHeader("x-requested-with")
+                .allowedHeader("access-control-allow-origin")
+                .allowedHeader("access-control-allow-credentials")
+                .allowedHeader("origin")
+                .allowedHeader("content-type")
+                .allowedHeader("accept")
+                .allowedHeader("authorization")
+                .allowedMethod(HttpMethod.GET)
+                .allowedMethod(HttpMethod.PUT)
+                .allowedMethod(HttpMethod.OPTIONS)
+                .allowedMethod(HttpMethod.POST)
+                .allowedMethod(HttpMethod.DELETE)
+                .allowedMethod(HttpMethod.PATCH));
+        router.route().handler(BodyHandler.create());
+        router.route().handler(ResponseContentTypeHandler.create());
+        router.route().handler(CookieHandler.create());
 
-        router.get().path("/angular/*").handler(StaticHandler.create());
         router.route("/*").handler(StaticHandler.create());
         router.route("/eventbus/*").handler(eventBusHandler());
         router.route().failureHandler(Jvertx::failureHandler);

@@ -54,6 +54,7 @@ public class WorkerModule extends GuiceModule {
     protected void configure() {
         bind(ApplicationEvents.class).to(ApplicationEventsRabbit.class);
         bind(AuthService.class).to(AuthServiceImpl.class);
+        bind(AdminService.class).to(AdminServiceImpl.class);
 
         bind(CorporationService.class).to(CorporationServiceImpl.class);
         bind(WorkshopService.class).to(WorkshopServiceImpl.class);
