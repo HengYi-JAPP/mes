@@ -1,0 +1,22 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput formControlName="name" required [placeholder]="'silkException'|translate">
+    <mat-error *ngIf="form.get('name').hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

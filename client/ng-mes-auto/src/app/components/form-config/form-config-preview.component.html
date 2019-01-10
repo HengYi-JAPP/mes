@@ -1,0 +1,43 @@
+<ng-container *ngFor="let fieldConfig of formConfig.formFieldConfigs">
+  <div>
+
+    <ng-container *ngIf="fieldConfig.isInputString">
+      <mat-form-field>
+        <input [placeholder]="fieldConfig.name" matInput type="text">
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isInputNumber">
+      <mat-form-field>
+        <input [placeholder]="fieldConfig.name" matInput type="number">
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isInputBoolean">
+      <mat-form-field>
+        <input [placeholder]="fieldConfig.name" matInput type="number">
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isSelectNumber">
+      <mat-form-field>
+        <mat-select [multiple]="fieldConfig.multi" [placeholder]="fieldConfig.name">
+          <mat-option *ngFor="let it of fieldConfig.selectOptions" [value]="it">
+            {{it}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isSelectString">
+      <mat-form-field>
+        <mat-select [multiple]="fieldConfig.multi" [placeholder]="fieldConfig.name">
+          <mat-option *ngFor="let it of fieldConfig.selectOptions" [value]="it">
+            {{it}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+  </div>
+</ng-container>

@@ -1,0 +1,11 @@
+<mat-toolbar class="h40">
+  <h4 class="truncate" fxFlex style="font-size: 16px;">
+    {{formConfig?.name || ('FormConfig.template'|translate)}}
+  </h4>
+  <button (click)="pick()" mat-icon-button type="button">
+    <mat-icon>edit</mat-icon>
+  </button>
+</mat-toolbar>
+<ng-container *ngIf="formConfig$|async">
+  <app-form-config-preview [formConfig]="formConfig$|async"></app-form-config-preview>
+</ng-container>

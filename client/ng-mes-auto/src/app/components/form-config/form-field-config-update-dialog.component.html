@@ -1,0 +1,44 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput formControlName="name" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="form.get('name').hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-checkbox formControlName="required">{{'FormConfig.FieldConfig.required'|translate}}</mat-checkbox>
+
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="valueTypeCtrl" required [placeholder]="'FormConfig.FieldConfig.valueType'|translate">
+      <mat-option *ngFor="let it of ALL_VALUE_TYPE" [value]="it">
+        {{('FormConfig.FieldConfig.ValueType.' + it)|translate}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="inputTypeCtrl" required [placeholder]="'FormConfig.FieldConfig.inputType'|translate">
+      <mat-option *ngFor="let it of ALLL_INPUT_TYPE" [value]="it">
+        {{('FormConfig.FieldConfig.InputType.' + it)|translate}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <ng-container *ngIf="selectOptionsCtrl.enabled">
+    <app-selection-value-input [formControl]="selectOptionsCtrl" required minlength="1"></app-selection-value-input>
+  </ng-container>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

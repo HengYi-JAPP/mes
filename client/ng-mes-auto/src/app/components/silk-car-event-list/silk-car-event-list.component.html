@@ -1,0 +1,12 @@
+<ng-container *ngFor="let event of eventSources$|async" [ngSwitch]="event.type">
+
+  <app-product-process-submit-event-info *ngSwitchCase="'ProductProcessSubmitEvent'"
+                                         [event]="event"></app-product-process-submit-event-info>
+
+  <app-dyeing-sample-silk-submit-event-info *ngSwitchCase="'DyeingSampleSilkSubmitEvent'"
+                                            [event]="event"></app-dyeing-sample-silk-submit-event-info>
+
+  <app-silk-runtime-detach-event-info *ngSwitchCase="'DyeingSampleSilkSubmitEvent'"
+                                      [event]="event"></app-silk-runtime-detach-event-info>
+
+</ng-container>

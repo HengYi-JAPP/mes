@@ -1,0 +1,73 @@
+<mat-progress-bar *ngIf="coreLoading$|async" color="accent" mode="indeterminate" style="height: 4px"></mat-progress-bar>
+<mat-toolbar class="title">
+  <div fxFlex class="dialog-title truncate">
+    {{dialogTitle|translate}}
+  </div>
+  <button type="button" mat-icon-button matDialogClose color="accent" tabindex="-1">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput [formControl]="name" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="name.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <div fxLayout style="flex-shrink: 0;margin-bottom: 16px">
+    <mat-button-toggle-group [formControl]="type" required>
+      <mat-button-toggle [value]="'CHANGE_BATCH'">{{'ProductPlanType.CHANGE_BATCH'|translate}}</mat-button-toggle>
+      <mat-button-toggle [value]="'SAMPLE'">{{'ProductPlanType.SAMPLE'|translate}}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <mat-form-field floatLabel="always">
+    <input type="text" matInput [formControl]="batch" [matAutocomplete]="autoBatch" required
+           [placeholder]="'batchNo'|translate">
+    <mat-autocomplete #autoBatch="matAutocomplete" [displayWith]="displayWithBatch" autoActiveFirstOption>
+      <mat-option *ngFor="let it of batches$|async" [value]="it">
+        <div fxLayout fxLayoutGap="16px">
+          <span>{{it.batchNo}}</span>
+          <span>{{it.product.name}}</span>
+          <span>{{it.spec}}</span>
+        </div>
+      </mat-option>
+    </mat-autocomplete>
+    <mat-hint align="end">
+      <span>{{batch.value?.product?.name}}</span>
+      <span>{{batch.value?.spec}}</span>
+    </mat-hint>
+    <mat-error *ngIf="batch.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="batch.hasError('requiredPickEntity')">
+      <span translate>Validator.requiredPickEntity</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <input matInput [formControl]="startDate" [matDatepicker]="startDatePicker" required
+           [placeholder]="'Common.startDate'|translate">
+    <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #startDatePicker></mat-datepicker>
+    <mat-error *ngIf="startDate.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <app-line-machine-input [formControl]="lineMachines" required>
+    <mat-error *ngIf="lineMachines.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="lineMachines.hasError('minLength')">
+      <span translate [translateParams]="lineMachines.getError('minLength')">Validator.minLength</span>
+    </mat-error>
+  </app-line-machine-input>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

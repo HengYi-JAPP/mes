@@ -1,0 +1,24 @@
+<mat-toolbar class="title">
+  <h4 class="dialog-title truncate" fxFlex style="font-size: 16px;">
+    {{dialogTitle|translate}}
+  </h4>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput formControlName="name" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="form.get('name').hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <app-form-field-config-input formControlName="formFieldConfigs" required min></app-form-field-config-input>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

@@ -1,0 +1,61 @@
+<div fxLayout fxLayoutAlign="start center" fxLayoutGap="16px" style="padding-right: 16px;flex-shrink: 0;">
+  <form fxFlex fxLayout>
+    <mat-form-field floatLabel="never" fxFlexOffset="2px">
+      <mat-select (selectionChange)="lineChange($event)" [placeholder]="'line'|translate" [value]="(line$|async)?.id">
+        <mat-option *ngFor="let it of lines$|async" [value]="it.id">
+          {{it.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+
+  <button (click)="create()" [matTooltip]="'Tooltip.singleCreateLineMachine'|translate" mat-mini-fab tabindex="-1"
+          type="button">
+    <mat-icon>add</mat-icon>
+  </button>
+  <button (click)="createBatch()" [matTooltip]="'Tooltip.batchCreateLineMachine'|translate" mat-mini-fab tabindex="-1"
+          type="button">
+    <mat-icon>playlist_add</mat-icon>
+  </button>
+</div>
+
+<mat-table [dataSource]="lineMachines$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="line">
+    <mat-header-cell *matHeaderCellDef>{{'line'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.line.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="item">
+    <mat-header-cell *matHeaderCellDef>{{'LineMachine.item'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.item}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="partNum">
+    <mat-header-cell *matHeaderCellDef>{{'LineMachine.partNum'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.partNum}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="spindleNum">
+    <mat-header-cell *matHeaderCellDef>{{'LineMachine.spindleNum'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.spindleNum}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button (click)="update(row)" mat-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+      <!--<button (click)="delete(row)" mat-button color="warn">-->
+      <!--{{'Common.delete'|translate}}-->
+      <!--</button>-->
+    </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

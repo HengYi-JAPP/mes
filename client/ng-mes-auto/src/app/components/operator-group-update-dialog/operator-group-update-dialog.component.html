@@ -1,0 +1,38 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex style="overflow-y: auto;">
+  <mat-form-field floatLabel="always">
+    <input matInput [formControl]="nameCtrl" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="nameCtrl.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="rolesCtrl" multiple [placeholder]="'role'|translate">
+      <mat-option *ngFor="let it of ROLES" [value]="it">
+        {{('RoleType.' + it)|translate}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <app-permission-input [formControl]="permissionsCtrl"></app-permission-input>
+  <mat-error *ngIf="permissionsCtrl.hasError('required')">
+    <span translate>Validator.required</span>
+  </mat-error>
+  <mat-error *ngIf="permissionsCtrl.hasError('minLength')">
+    <span translate>Validator.minLength</span>
+  </mat-error>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

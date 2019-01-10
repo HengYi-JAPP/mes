@@ -1,0 +1,82 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="line" [placeholder]="'line'|translate" required [compareWith]="compareWithId">
+      <mat-option *ngFor="let it of lines$|async" [value]="it">
+        {{it.name}}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="line.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <ng-container *ngIf="!batchModel">
+    <mat-form-field floatLabel="always">
+      <input type="number" step="1" min="1" matInput [formControl]="item" required
+             [placeholder]="'LineMachine.item'|translate">
+      <mat-error *ngIf="item.hasError('required')">
+        <span translate>Validator.required</span>
+      </mat-error>
+      <mat-error *ngIf="item.hasError('min')">
+        <span translate [translateParams]="item.getError('min')">Validator.min</span>
+      </mat-error>
+    </mat-form-field>
+  </ng-container>
+
+  <mat-form-field floatLabel="always">
+    <input type="number" step="1" min="1" matInput [formControl]="spindleNumCtrl" required
+           [placeholder]="'LineMachine.spindleNum'|translate">
+    <mat-error *ngIf="spindleNumCtrl.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="spindleNumCtrl.hasError('min')">
+      <span translate [translateParams]="spindleNumCtrl.getError('min')">Validator.min</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-toolbar class="h40">
+    <h4 style="font-size: 16px;" class="truncate" fxFlex>
+      {{'LineMachine.spindleSeq'|translate}}
+    </h4>
+    <button type="button" (click)="sortSpindleSeq()" mat-icon-button [matTooltip]="'Common.sortBy'|translate">
+      <mat-icon>format_list_numbered</mat-icon>
+    </button>
+  </mat-toolbar>
+  <mat-list dense style="padding-top: 0;">
+    <mat-list-item *ngFor="let it of spindleSeqCtrl.value">
+      {{it}}
+      <mat-divider></mat-divider>
+    </mat-list-item>
+  </mat-list>
+
+  <mat-form-field floatLabel="always" *ngIf="batchModel">
+    <app-batch-range-input [formControl]="batchRange" required [placeholder]="'Common.batch'|translate"
+                           #abri></app-batch-range-input>
+    <mat-icon matSuffix (click)="abri.showBatchRangeValues()" *ngIf="!batchRange.disabled">visibility</mat-icon>
+    <mat-error *ngIf="batchRange.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="batchRange.hasError('batchRangeError')">
+      <span [translate]="batchRange.getError('batchRangeError')?.translate"
+            [translateParams]="batchRange.getError('batchRangeError')?.translateParams"></span>
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none" *ngIf="!batchModel">
+  {{'Common.finish'|translate}}
+</button>
+<button type="button" (click)="batchSubmit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none" *ngIf="batchModel">
+  {{'Common.finish'|translate}}
+</button>
