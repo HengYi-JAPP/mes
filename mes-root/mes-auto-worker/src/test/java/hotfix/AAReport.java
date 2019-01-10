@@ -41,8 +41,8 @@ public class AAReport {
 
     @SneakyThrows
     public static void main(String[] args) {
-        final LocalDate startLd = LocalDate.of(2019, 1, 6);
-        final LocalDate endLd = LocalDate.of(2019, 1, 7);
+        final LocalDate startLd = LocalDate.of(2019, 1, 8);
+        final LocalDate endLd = LocalDate.of(2019, 1, 9);
         final List<AAReportExcel> excelList = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1)
                 .flatMap(ld -> packageClasses.stream().map(packageClass -> new AAReportExcel(ld, packageClass)))
