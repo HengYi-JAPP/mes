@@ -1,121 +1,158 @@
 package hotfix;
 
-import com.google.common.collect.Maps;
-import com.hengyi.japp.mes.auto.domain.Batch;
-import com.hengyi.japp.mes.auto.domain.Line;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
-import com.hengyi.japp.mes.auto.domain.PackageClass;
-import com.hengyi.japp.mes.auto.domain.data.SaleType;
+import com.github.ixtf.japp.core.J;
+import com.google.common.collect.ComparisonChain;
+import com.hengyi.japp.mes.auto.domain.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.RecursiveAction;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static hotfix.AAReport.gradeAA;
 
 /**
  * @author jzb 2019-01-08
  */
 @Data
-public class AAReportExcel {
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+public class AAReportExcel extends RecursiveAction {
     private final LocalDate ld;
-    private final PackageClass packageClass;
+    private Collection<PackageClassTask> tasks;
 
-    private List<PackageBox> packageBoxes;
-    private AAReportPackageBoxesData data;
-
-    public void toExcel() {
-        packageBoxes = AAReport.packageBoxes(ld, packageClass)
+    @Override
+    protected void compute() {
+        tasks = AAReport.packageClasses
                 .parallelStream()
-                .filter(it -> gradeAA.equals(it.getGrade()))
+                .map(PackageClassTask::new)
                 .collect(Collectors.toList());
-        data = new AAReportPackageBoxesData(packageBoxes);
+        invokeAll(tasks);
+    }
 
-        final Collection<AutoPackageBoxesData.Item> autoData = data.getAutoPackageBoxesData().data();
-        final Collection<AutoPackageBoxesData.Item> autoDataAA = autoData.parallelStream()
-                .filter(it -> gradeAA.equals(it.getGrade()))
-                .collect(Collectors.toList());
-        final Collection<ManualPackageBoxesData.Item> manualData = data.getManualPackageBoxesData().data();
-        final Collection<ManualPackageBoxesData.Item> manualDataAA = manualData.parallelStream()
-                .filter(it -> gradeAA.equals(it.getGrade()))
-                .collect(Collectors.toList());
-        final Collection<ManualAppendPackageBoxesData.Item> appendData = data.getManualAppendPackageBoxesData().data();
-        final Collection<ManualAppendPackageBoxesData.Item> appendDataAA = appendData.parallelStream()
-                .filter(it -> gradeAA.equals(it.getGrade()))
-                .collect(Collectors.toList());
+    public void printDetail() {
+        tasks.stream().filter(it -> J.nonEmpty(it.packageBoxes)).forEach(task -> {
+            System.out.println("=====" + ld + "[" + task.packageClass.getName() + "]=====");
 
-        final Map<Triple<Batch, Line, SaleType>, Integer> tripleMap = Maps.newConcurrentMap();
-        Stream.concat(
-                autoDataAA.parallelStream().map(it -> it.toData()),
-                manualDataAA.parallelStream().map(it -> it.toData())
-        ).flatMap(it -> it.entrySet().parallelStream()).forEach(entry -> {
-            final Triple<Batch, Line, SaleType> key = entry.getKey();
-            final Integer count = entry.getValue();
-            tripleMap.compute(key, (k, v) -> {
-                if (v == null) {
-                    return count;
-                }
-                return count + v;
+            task.diffCalcus.stream().sorted().forEach(diffCalcu -> {
+                J.emptyIfNull(diffCalcu.items()).stream().forEach(item -> {
+                    final Line line = item.getLine();
+                    final String join = String.join("\t", item.getBatch().getBatchNo(), line.getName(),
+                            "" + item.getSilkCount(), "" + item.getNetWeight());
+                    System.out.println(join);
+                });
+
+                final String join = String.join("\t", diffCalcu.batch.getBatchNo(), diffCalcu.grade.getName(),
+                        "" + diffCalcu.getSilkCount(), "" + diffCalcu.getNetWeight());
+                System.out.println(join);
+                System.out.println("-------------------------------");
             });
         });
+    }
 
-        final Map<Pair<Batch, Line>, AAReportItem> resultMap = Maps.newConcurrentMap();
-        tripleMap.entrySet().parallelStream().forEach(entry -> {
-            final Triple<Batch, Line, SaleType> triple = entry.getKey();
-            final Batch batch = triple.getLeft();
-            final Line line = triple.getMiddle();
-            final Pair<Batch, Line> key = Pair.of(batch, line);
-            final Integer count = entry.getValue();
-            switch (triple.getRight()) {
-                case DOMESTIC: {
-                    resultMap.compute(key, (k, v) -> {
-                        if (v == null) {
-                            v = new AAReportItem();
-                            v.setLine(line);
-                            v.setBatch(batch);
-                        }
-                        v.setAutoSilkCount1(count);
-                        return v;
-                    });
-                    return;
-                }
-                case FOREIGN: {
-                    resultMap.compute(key, (k, v) -> {
-                        if (v == null) {
-                            v = new AAReportItem();
-                            v.setLine(line);
-                            v.setBatch(batch);
-                        }
-                        v.setAutoSilkCount2(count);
-                        return v;
-                    });
-                    return;
-                }
-            }
-        });
+    public void printByDay() {
+        System.out.println("=====" + ld + "=====");
+        tasks.stream()
+                .flatMap(it -> {
+                    final List<DiffCalcu> diffCalcus = it.getDiffCalcus();
+                    return diffCalcus.stream();
+                })
+                .collect(Collectors.groupingBy(it -> Pair.of(it.batch, it.grade)))
+                .entrySet()
+                .stream()
+                .sorted((o1, o2) -> {
+                    final Pair<Batch, Grade> key1 = o1.getKey();
+                    final Batch batch1 = key1.getKey();
+                    final Grade grade1 = key1.getRight();
+                    final Pair<Batch, Grade> key2 = o2.getKey();
+                    final Batch batch2 = key2.getKey();
+                    final Grade grade2 = key2.getRight();
+                    return ComparisonChain.start()
+                            .compare(batch1.getBatchNo(), batch2.getBatchNo())
+                            .compare(grade1.getSortBy(), grade2.getSortBy())
+                            .result();
+                })
+                .forEach(entry -> {
+                    final Pair<Batch, Grade> key = entry.getKey();
+                    final List<DiffCalcu> diffCalcus = entry.getValue();
+                    final int silkCount = diffCalcus.parallelStream().mapToInt(DiffCalcu::getSilkCount).sum();
+                    final double netWeight = diffCalcus.parallelStream().mapToDouble(DiffCalcu::getNetWeight).sum();
 
-        if (resultMap.isEmpty()) {
-            return;
+                    final String join = String.join("\t", key.getLeft().getBatchNo(), key.getRight().getName(),
+                            "" + silkCount, "" + netWeight);
+                    System.out.println(join);
+                    System.out.println("-------------------------------");
+                });
+    }
+
+    public void toExcel() {
+        System.out.println("=====" + ld + "=====");
+        tasks.stream().filter(it -> J.nonEmpty(it.packageBoxes))
+                .flatMap(task -> task.diffCalcus.stream()
+                        .flatMap(diffCalcu -> J.emptyIfNull(diffCalcu.items()).stream())
+                )
+                .collect(Collectors.groupingBy(it -> {
+                    final Batch batch = it.getBatch();
+                    final Line line = it.getLine();
+                    final Grade grade = it.getGrade();
+                    return Triple.of(line, batch, grade);
+                }))
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    final AAReportItem item = new AAReportItem();
+                    final Triple<Line, Batch, Grade> triple = entry.getKey();
+                    final List<AAReportItem> value = entry.getValue();
+                    item.setLine(triple.getLeft());
+                    item.setBatch(triple.getMiddle());
+                    item.setGrade(triple.getRight());
+                    final int silkCount = value.parallelStream().mapToInt(AAReportItem::getSilkCount).sum();
+                    item.setSilkCount(silkCount);
+                    final double netWeight = value.parallelStream()
+                            .mapToDouble(AAReportItem::getNetWeight)
+                            .sum();
+                    item.setNetWeight(netWeight);
+                    return item;
+                })
+                .sorted()
+                .forEach(item -> {
+                    final Line line = item.getLine();
+                    final String join = String.join("\t", line.getName(), item.getBatch().getBatchNo(), item.getGrade().getName(),
+                            "" + item.getSilkCount(), "" + item.getNetWeight());
+                    System.out.println(join);
+                });
+        ;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+    private class PackageClassTask extends RecursiveAction {
+        private final PackageClass packageClass;
+        private List<PackageBox> packageBoxes;
+        private List<DiffCalcu> diffCalcus;
+
+        @Override
+        protected void compute() {
+            packageBoxes = AAReport.packageBoxes(ld, packageClass);
+            diffCalcus = packageBoxes.parallelStream()
+                    .collect(Collectors.groupingBy(it -> Pair.of(it.getBatch(), it.getGrade())))
+                    .entrySet()
+                    .parallelStream()
+                    .map(entry -> {
+                        final Pair<Batch, Grade> key = entry.getKey();
+                        final Batch batch = key.getLeft();
+                        final Grade grade = key.getRight();
+                        if (grade.getSortBy() >= 100) {
+                            return new AADiffCalcu(batch, grade, entry.getValue());
+                        } else {
+                            return new ABCDiffCalcu(batch, grade, entry.getValue());
+                        }
+                    })
+                    .collect(Collectors.toList());
+            invokeAll(diffCalcus);
         }
-
-        System.out.println("=====" + ld + "[" + packageClass.getName() + "]=====");
-
-        final AAReportDiffCalcu diffCalcu = new AAReportDiffCalcu(packageBoxes);
-        diffCalcu.exe(resultMap.values());
-        resultMap.values().stream().sorted(Comparator.comparing(it -> {
-            final Line line = it.getLine();
-            final Batch batch = it.getBatch();
-            return batch.getBatchNo() + line.getName();
-        })).forEach(System.out::println);
-
-//        System.out.println("===============================");
     }
 
 }
