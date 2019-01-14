@@ -1,4 +1,4 @@
-FROM java:8-jre-alpine
+FROM openjdk:11-jre-slim
 
 ENV TZ Asia/Shanghai
 ENV VERTICLE_HOME /usr/verticles

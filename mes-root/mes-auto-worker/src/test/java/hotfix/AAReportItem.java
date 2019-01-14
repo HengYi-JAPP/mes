@@ -1,6 +1,8 @@
 package hotfix;
 
+import com.google.common.collect.ComparisonChain;
 import com.hengyi.japp.mes.auto.domain.Batch;
+import com.hengyi.japp.mes.auto.domain.Grade;
 import com.hengyi.japp.mes.auto.domain.Line;
 import lombok.Data;
 
@@ -8,18 +10,33 @@ import lombok.Data;
  * @author jzb 2019-01-09
  */
 @Data
-public class AAReportItem {
+public class AAReportItem implements Comparable<AAReportItem> {
     private Line line;
     private Batch batch;
+    private Grade grade;
+
     private int packageBoxCount;
     private int silkCount;
-    private int netWeight;
+    private double netWeight;
 
-    private int autoSilkCount1;
-    private int autoSilkCount2;
+    public double getNetWeight() {
+        if (grade.getSortBy() >= 100) {
+            return silkCount * batch.getSilkWeight();
+        }
+        return netWeight;
+    }
 
     @Override
     public String toString() {
-        return line.getName() + "\t" + batch.getBatchNo() + "\t" + packageBoxCount + "\t" + silkCount + "\t" + (silkCount * 8);
+        return String.join("\t", "" + line.getName(), "" + batch.getBatchNo(), "" + grade.getName(),
+                "" + packageBoxCount, "" + silkCount, "" + netWeight);
+    }
+
+    @Override
+    public int compareTo(AAReportItem o) {
+        return ComparisonChain.start()
+                .compare(batch.getBatchNo(), o.batch.getBatchNo())
+                .compare(line.getName(), o.line.getName())
+                .result();
     }
 }

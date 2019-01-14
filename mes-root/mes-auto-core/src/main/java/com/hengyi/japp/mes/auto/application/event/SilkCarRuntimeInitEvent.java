@@ -6,6 +6,7 @@ import com.hengyi.japp.mes.auto.domain.Grade;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.domain.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
@@ -20,10 +21,12 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -94,6 +97,29 @@ public class SilkCarRuntimeInitEvent extends EventSource {
                 event.setSilkRuntimes(silkRuntimes);
                 return super.toEvent(event);
             });
+        }
+    }
+
+    @Data
+    public static class AutoDoffingCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        @Size(min = 1)
+        private List<AutoDoffingCommandSilk> silks;
+
+        @Data
+        @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+        public static class AutoDoffingCommandSilk extends SilkCarPosition implements Serializable {
+            @NotBlank
+            private EntityDTO line;
+            @Min(1)
+            private int lineMachineItem;
+            @Min(1)
+            private int spindle;
+            @NotNull
+            private EntityDTO grade;
+            private Date doffingDateTime;
         }
     }
 

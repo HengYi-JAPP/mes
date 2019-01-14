@@ -364,16 +364,10 @@ paths:
       responses:
         '200':
           description: ok
-          headers:
-            X-JAPP-MES-IF-SIGN:
-              schema:
-                type: string
-                format: JWT
-              description: 接口调用日志，出错核对，请保存
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventHandleResultDTO'
+                $ref: '#/components/schemas/SilkCarRuntime'
         '400':
           $ref: '#/components/responses/JException'
   /api/ManualDoffingCheckSilks:
@@ -1932,6 +1926,79 @@ paths:
         '400':
           $ref: '#/components/responses/JException'
 
+  /api/AutoDoffingEvents:
+    post:
+      tags:
+        - if
+      summary: 自动落筒
+      description: 加密返回json的string，需要非对称加密，需要放入head头（X-JAPP-MES-AUTO-IF-SIGN），芮冠需要保存ifTransId，和返回的签名，用于后续核对日志。可以给永久token，但token里面必须包含落筒机信息字段
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ifTransId
+                - silkCar
+                - silks
+              properties:
+                ifTransId:
+                  type: string
+                  format: uuid
+                  description: 接口调用唯一流水号，成功后必须原样返回
+                silkCar:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                silks:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - line
+                      - lineMachineItem
+                      - spindle
+                      - doffingDateTime
+                    properties:
+                      line:
+                        $ref: '#/components/schemas/EntityDTO'
+                      lineMachineItem:
+                        type: integer
+                        description: 机台
+                      spindle:
+                        type: integer
+                        description: 锭号
+                      sideType:
+                        type: string
+                        enum: [A, B]
+                        description: A,B面
+                      row:
+                        type: integer
+                        example: 1
+                        description: 第几行，从1开始
+                      col:
+                        type: integer
+                        example: 1
+                        description: 第几列，从1开始
+                      doffingDateTime:
+                        type: number
+                        description: 落筒时间
+                      grade:
+                        $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-JAPP-MES-AUTO-IF-SIGN:
+              schema:
+                type: string
+                format: JWT
+              description: 接口调用日志，出错核对，请保存
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventHandleResultDTO'
+        '400':
+          $ref: '#/components/responses/JException'
   /facevisa/autoVisualInspection/silkCodes/{code}:
     get:
       tags:
@@ -2290,7 +2357,15 @@ components:
     EventHandleResultDTO:
       type: object
       description: 事件源，可当接口日志
+      required:
+        - ifTransId
+        - silkCarRecordId
+        - eventId
       properties:
+        ifTransId:
+          type: string
+          format: uuid
+          description: 接口调用流水，原样返回
         silkCarRecordId:
           type: string
           description: 丝车车次ID

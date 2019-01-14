@@ -123,12 +123,13 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
         Optional.ofNullable(packageBoxQuery.getCreatorId())
                 .filter(J::nonBlank)
                 .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("creator", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getBudatRange())
-                .ifPresent(it -> {
-                    final long startL = J.date(it.getStartLd()).getTime();
-                    final long endL = J.date(it.getEndLd()).getTime();
-                    bqBuilder.add(LongPoint.newRangeQuery("budat", startL, endL), BooleanClause.Occur.MUST);
-                });
+        Optional.ofNullable(packageBoxQuery.getBudatRange()).ifPresent(it -> {
+            final long startL = J.date(it.getStartLd()).getTime();
+//            final long endL = J.date(it.getEndLd()).getTime();
+            // 解决查询日期刚好前后日期时间相等
+            final long endL = J.date(it.getEndLd()).getTime() - 1;
+            bqBuilder.add(LongPoint.newRangeQuery("budat", startL, endL), BooleanClause.Occur.MUST);
+        });
 
         return bqBuilder.build();
     }

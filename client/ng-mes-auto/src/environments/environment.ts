@@ -21,11 +21,10 @@ export function logger(reducer: ActionReducer<any>): ActionReducer<any> {
 
 export const metaReducers: MetaReducer<any>[] = [logger];
 
-// export const baseApiUrl =  '192.168.1.45:8080/webApi';
-// export const baseApiUrl = location.host + '/webApi';
-export const baseApiUrl = 'http://localhost:9998/api';
-// export const baseApiUrl = 'http://192.168.1.108:9999/api';
-export const baseEventbusUrl = 'http://localhost:8080/eventbus';
+// const baseUrl = 'http://localhost';
+const baseUrl = 'http://10.2.0.215';
+export const baseApiUrl = baseUrl + ':9998/api';
+export const baseEventbusUrl = baseUrl + ':8080/eventbus';
 
 export const SEARCH_DEBOUNCE_TIME = 500;
 

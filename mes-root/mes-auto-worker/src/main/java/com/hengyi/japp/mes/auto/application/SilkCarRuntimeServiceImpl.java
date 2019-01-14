@@ -148,11 +148,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                                 if (silk.getDoffingDateTime() == null) {
                                     silk.setDoffingDateTime(event.getFireDateTime());
                                     silk.setDoffingOperator(event.getOperator());
+                                    silk.setGrade(silkCarRecord.getGrade());
                                 }
                             });
                             event.setSilkRuntimes(silkRuntimes);
                             final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes);
-//                            return silkCarRuntime$;
                             return checkSilkDuplicate(silkRuntimes).andThen(silkCarRuntime$);
                         });
                 final Completable checkRole$ = authService.checkRole(event.getOperator(), RoleType.DOFFING);

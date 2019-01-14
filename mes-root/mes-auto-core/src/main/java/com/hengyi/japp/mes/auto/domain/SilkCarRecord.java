@@ -55,10 +55,6 @@ public class SilkCarRecord extends MongoEntity {
 
     private Date endDateTime;
 
-
-//    @Transient
-//    private SilkCarRuntimeInitEvent initEvent;
-
     public Date getStartDateTime() {
         return Optional.ofNullable(getDoffingDateTime()).orElse(getCarpoolDateTime());
     }
