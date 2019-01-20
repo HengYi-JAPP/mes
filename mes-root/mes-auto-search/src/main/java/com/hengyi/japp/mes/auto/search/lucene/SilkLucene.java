@@ -1,6 +1,5 @@
 package com.hengyi.japp.mes.auto.search.lucene;
 
-import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -14,11 +13,8 @@ import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -111,13 +107,9 @@ public class SilkLucene extends BaseLucene<Silk> {
 
     public Query build(SilkQuery silkQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(booleanQuery("dyeingSample", silkQuery.isDyeingSample()), Occur.MUST);
-        if (J.nonBlank(silkQuery.getWorkshopId())) {
-            bqBuilder.add(new TermQuery(new Term("workshop", silkQuery.getWorkshopId())), Occur.MUST);
-        }
-        if (J.nonBlank(silkQuery.getBatchId())) {
-            bqBuilder.add(new TermQuery(new Term("batch", silkQuery.getBatchId())), Occur.MUST);
-        }
+        addQuery(bqBuilder, "dyeingSample", silkQuery.isDyeingSample());
+        addQuery(bqBuilder, "workshop", silkQuery.getWorkshopId());
+        addQuery(bqBuilder, "batch", silkQuery.getBatchId());
         return bqBuilder.build();
     }
 }

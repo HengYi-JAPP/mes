@@ -109,7 +109,7 @@ public class AAReport {
     }
 
     @SneakyThrows
-    private static Collection<PackageClass> packageClasses() {
+    public static Collection<PackageClass> packageClasses() {
         final HttpRequest request = HttpRequest.newBuilder()
                 .header("Authorization", "Bearer " + token)
                 .uri(URI.create(baseUrl + "/api/packageClasses"))

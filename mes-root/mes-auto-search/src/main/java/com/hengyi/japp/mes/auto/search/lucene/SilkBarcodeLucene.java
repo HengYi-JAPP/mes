@@ -87,21 +87,22 @@ public class SilkBarcodeLucene extends BaseLucene<SilkBarcode> {
         if (startL > 0 && endL > 0) {
             bqBuilder.add(LongPoint.newRangeQuery("codeDate", startL, endL), BooleanClause.Occur.MUST);
         }
-//        startL
-//                .ifPresent(it -> bqBuilder.add(LongPoint.newExactQuery("codeDate", it), BooleanClause.Occur.MUST));
         if (silkBarcodeQuery.getCodeDoffingNum() > 0) {
             bqBuilder.add(LongPoint.newExactQuery("codeDoffingNum", silkBarcodeQuery.getCodeDoffingNum()), BooleanClause.Occur.MUST);
         }
-        if (J.nonBlank(silkBarcodeQuery.getLineMachineId())) {
-            bqBuilder.add(new TermQuery(new Term("lineMachine", silkBarcodeQuery.getLineMachineId())), BooleanClause.Occur.MUST);
-        } else if (J.nonBlank(silkBarcodeQuery.getLineId())) {
-            bqBuilder.add(new TermQuery(new Term("line", silkBarcodeQuery.getLineId())), BooleanClause.Occur.MUST);
-        } else if (J.nonBlank(silkBarcodeQuery.getWorkshopId())) {
-            bqBuilder.add(new TermQuery(new Term("workshop", silkBarcodeQuery.getWorkshopId())), BooleanClause.Occur.MUST);
+
+        final Optional<TermQuery> lineMachineQuery = Optional.ofNullable(silkBarcodeQuery.getLineMachineId()).filter(J::nonBlank).map(it -> new TermQuery(new Term("lineMachine", it)));
+        final Optional<TermQuery> lineQuery = Optional.ofNullable(silkBarcodeQuery.getLineId()).filter(J::nonBlank).map(it -> new TermQuery(new Term("line", it)));
+        final Optional<TermQuery> workshopQuery = Optional.ofNullable(silkBarcodeQuery.getWorkshopId()).filter(J::nonBlank).map(it -> new TermQuery(new Term("workshop", it)));
+        if (lineMachineQuery.isPresent()) {
+            bqBuilder.add(lineMachineQuery.get(), BooleanClause.Occur.MUST);
+        } else if (lineQuery.isPresent()) {
+            bqBuilder.add(lineQuery.get(), BooleanClause.Occur.MUST);
+        } else if (workshopQuery.isPresent()) {
+            bqBuilder.add(workshopQuery.get(), BooleanClause.Occur.MUST);
         }
-        Optional.ofNullable(silkBarcodeQuery.getBatchId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("batch", it)), BooleanClause.Occur.MUST));
+
+        addQuery(bqBuilder, "batch", silkBarcodeQuery.getBatchId());
         Optional.ofNullable(silkBarcodeQuery.getDoffingNum())
                 .filter(J::nonBlank)
                 .ifPresent(it -> {

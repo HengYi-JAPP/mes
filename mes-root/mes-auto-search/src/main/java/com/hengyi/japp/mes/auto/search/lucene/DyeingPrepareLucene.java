@@ -8,11 +8,17 @@ import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.document.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.WildcardQuery;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -83,58 +89,39 @@ public class DyeingPrepareLucene extends BaseLucene<DyeingPrepare> {
         return doc;
     }
 
-    public Query build(DyeingPrepareQuery dyeingPrepareQuery) {
+    public Query build(DyeingPrepareQuery dyeingQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(IntPoint.newExactQuery("submitted", 0), BooleanClause.Occur.MUST);
+        addQuery(bqBuilder, "submitted", false);
 
-        Optional.ofNullable(dyeingPrepareQuery.getWorkshopId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("workshop", it)), BooleanClause.Occur.MUST));
+        addQuery(bqBuilder, "workshop", dyeingQuery.getWorkshopId());
+        addQuery(bqBuilder, "silkCars", dyeingQuery.getSilkCarId());
+        addQuery(bqBuilder, "doffingNums", dyeingQuery.getDoffingNum());
+        addQuery(bqBuilder, "lineMachines", dyeingQuery.getLineMachineId());
 
-        long startL = dyeingPrepareQuery.getStartDateTimestamp();
-        long endL = dyeingPrepareQuery.getEndDateTimestamp();
+        long startL = dyeingQuery.getStartDateTimestamp();
+        long endL = dyeingQuery.getEndDateTimestamp();
         bqBuilder.add(LongPoint.newRangeQuery("createDateTime", startL, endL), BooleanClause.Occur.MUST);
 
-        Optional.ofNullable(dyeingPrepareQuery.getSilkCarId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("silkCars", it)), BooleanClause.Occur.MUST));
-
-        Optional.ofNullable(dyeingPrepareQuery.getDoffingNum())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("doffingNums", it)), BooleanClause.Occur.MUST));
-
-        Optional.ofNullable(dyeingPrepareQuery.getLineMachineId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("lineMachines", it)), BooleanClause.Occur.MUST));
-
-        Optional.ofNullable(dyeingPrepareQuery.getHrIdQ())
+        Optional.ofNullable(dyeingQuery.getHrIdQ())
                 .filter(J::nonBlank)
                 .map(it -> "*" + it)
                 .ifPresent(it -> bqBuilder.add(new WildcardQuery(new Term("creator.hrId", it)), BooleanClause.Occur.MUST));
         return bqBuilder.build();
     }
 
-    public Query build(DyeingPrepareResultQuery dyeingPrepareResultQuery) {
+    public Query build(DyeingPrepareResultQuery dyeingQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(IntPoint.newExactQuery("submitted", 1), BooleanClause.Occur.MUST);
+        addQuery(bqBuilder, "submitted", true);
 
-        Optional.ofNullable(dyeingPrepareResultQuery.getWorkshopId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("workshop", it)), BooleanClause.Occur.MUST));
+        addQuery(bqBuilder, "workshop", dyeingQuery.getWorkshopId());
+        addQuery(bqBuilder, "lineMachines", dyeingQuery.getLineMachineId());
+        addQuery(bqBuilder, "silkCars", dyeingQuery.getSilkCarId());
 
-        Optional.ofNullable(dyeingPrepareResultQuery.getLineMachineId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("lineMachines", it)), BooleanClause.Occur.MUST));
-
-        long startL = dyeingPrepareResultQuery.getStartDateTimestamp();
-        long endL = dyeingPrepareResultQuery.getEndDateTimestamp();
+        long startL = dyeingQuery.getStartDateTimestamp();
+        long endL = dyeingQuery.getEndDateTimestamp();
         bqBuilder.add(LongPoint.newRangeQuery("submitDateTime", startL, endL), BooleanClause.Occur.MUST);
 
-        Optional.ofNullable(dyeingPrepareResultQuery.getSilkCarId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("silkCars", it)), BooleanClause.Occur.MUST));
-
-        Optional.ofNullable(dyeingPrepareResultQuery.getHrIdQ())
+        Optional.ofNullable(dyeingQuery.getHrIdQ())
                 .filter(J::nonBlank)
                 .map(it -> "*" + it)
                 .ifPresent(it -> bqBuilder.add(new WildcardQuery(new Term("creator.hrId", it)), BooleanClause.Occur.MUST));

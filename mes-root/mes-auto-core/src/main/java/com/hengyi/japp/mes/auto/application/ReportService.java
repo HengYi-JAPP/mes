@@ -31,4 +31,8 @@ public interface ReportService {
     }
 
     Single<MeasurePackageBoxReport> measurePackageBoxReport(LocalDate ld, String budatClassId);
+
+    Single<MeasureReport> measureReport(MeasureReport.Command command);
+
+    Single<StatisticsReport> statisticsReport(StatisticsReport.Command command);
 }

@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
@@ -9,6 +10,7 @@ import com.hengyi.japp.mes.auto.application.report.*;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.Workshop;
+import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -17,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author jzb 2018-08-08
@@ -39,6 +43,40 @@ public class ReportServiceImpl implements ReportService {
         this.packageBoxRepository = packageBoxRepository;
         this.silkRepository = silkRepository;
         this.packageClassRepository = packageClassRepository;
+    }
+
+    @Override
+    public Single<MeasureReport> measureReport(MeasureReport.Command command) {
+        final Set<String> budatClassIds = command.getBudatClasses().stream()
+                .map(EntityDTO::getId)
+                .collect(Collectors.toSet());
+        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .workshopId(command.getWorkshop().getId())
+                .budatClassIds(budatClassIds)
+                .budatRange(new LocalDateRange(command.getStartLd(), command.getEndLd()))
+                .build();
+        return packageBoxRepository.query(packageBoxQuery).map(it -> {
+            final Collection<PackageBox> packageBoxes = it.getPackageBoxes();
+            return new MeasureReport(packageBoxes);
+        });
+    }
+
+    @Override
+    public Single<StatisticsReport> statisticsReport(StatisticsReport.Command command) {
+        final Set<String> budatClassIds = command.getBudatClasses().stream()
+                .map(EntityDTO::getId)
+                .collect(Collectors.toSet());
+        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .workshopId(command.getWorkshop().getId())
+                .budatClassIds(budatClassIds)
+                .budatRange(new LocalDateRange(command.getStartLd(), command.getEndLd()))
+                .build();
+        return packageBoxRepository.query(packageBoxQuery).map(it -> {
+            final Collection<PackageBox> packageBoxes = it.getPackageBoxes();
+            return new StatisticsReport(packageBoxes);
+        });
     }
 
     @Override
@@ -94,7 +132,7 @@ public class ReportServiceImpl implements ReportService {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
                 .budatRange(new LocalDateRange(ld, ld.plusDays(1)))
-                .budatClassId(budatClassId)
+                .budatClassIds(Sets.newHashSet(budatClassId))
                 .build();
         return packageBoxRepository.query(packageBoxQuery).flatMap(it -> {
             final Collection<PackageBox> packageBoxes = it.getPackageBoxes();

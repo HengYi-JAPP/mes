@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxFlipQuery;
 import com.hengyi.japp.mes.auto.domain.*;
-import com.hengyi.japp.mes.auto.domain.data.PackageBoxFlipType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -14,11 +13,9 @@ import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -86,21 +83,12 @@ public class PackageBoxFlipLucene extends BaseLucene<PackageBoxFlip> {
 
     public Query build(PackageBoxFlipQuery packageBoxFlipQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Optional.ofNullable(packageBoxFlipQuery.getPackageBoxId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("packageBox", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxFlipQuery.getBatchId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("batch", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxFlipQuery.getWorkshopId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("workshop", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxFlipQuery.getGradeId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("grade", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxFlipQuery.getPackageBoxFlipType())
-                .map(PackageBoxFlipType::name)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("type", it)), BooleanClause.Occur.MUST));
+
+        addQuery(bqBuilder, "packageBox", packageBoxFlipQuery.getPackageBoxId());
+        addQuery(bqBuilder, "workshop", packageBoxFlipQuery.getWorkshopId());
+        addQuery(bqBuilder, "batch", packageBoxFlipQuery.getBatchId());
+        addQuery(bqBuilder, "grade", packageBoxFlipQuery.getGradeId());
+        addQuery(bqBuilder, "type", packageBoxFlipQuery.getPackageBoxFlipType());
 
         final long startL = J.date(packageBoxFlipQuery.getStartLd()).getTime();
         final long endL = J.date(packageBoxFlipQuery.getEndLd()).getTime();

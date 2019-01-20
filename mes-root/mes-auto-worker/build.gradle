@@ -1,5 +1,6 @@
 dependencies {
-    compile project(':mes-auto-core'),
+    compile "com.github.ixtf.japp:poi:${jappVersion}",
+            project(':mes-auto-core'),
             project(':mes-auto-search'),
             "cglib:cglib:3.2.10",
             // vertx 用了3.6

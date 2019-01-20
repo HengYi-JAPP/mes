@@ -56,6 +56,7 @@ subprojects {
         files "build/libs/${project.name}-fat.jar"
     }
     shadowJar {
+//        baseName "${project.name}-fat.jar"
         archiveName "${project.name}-fat.jar"
     }
     jar.manifest {

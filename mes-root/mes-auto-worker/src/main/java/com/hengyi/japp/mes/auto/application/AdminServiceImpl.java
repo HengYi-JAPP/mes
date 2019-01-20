@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
+import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
@@ -13,6 +14,7 @@ import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.GradeRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
+import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
 import com.hengyi.japp.mes.auto.repository.SilkCarRepository;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -32,13 +34,15 @@ public class AdminServiceImpl implements AdminService {
     private final SilkCarRuntimeService silkCarRuntimeService;
     private final SilkCarRepository silkCarRepository;
     private final GradeRepository gradeRepository;
+    private final PackageBoxRepository packageBoxRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private AdminServiceImpl(SilkCarRuntimeService silkCarRuntimeService, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, OperatorRepository operatorRepository) {
+    private AdminServiceImpl(SilkCarRuntimeService silkCarRuntimeService, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository) {
         this.silkCarRuntimeService = silkCarRuntimeService;
         this.silkCarRepository = silkCarRepository;
         this.gradeRepository = gradeRepository;
+        this.packageBoxRepository = packageBoxRepository;
         this.operatorRepository = operatorRepository;
     }
 
@@ -83,5 +87,11 @@ public class AdminServiceImpl implements AdminService {
                     .flatMap(it -> generateSilkRuntimesBySilkBarcodes(ImmutableList.builder(), it))
                     .map(it -> checkPosition(it, checkSilks));
         }
+    }
+
+    @Override
+    public Single<PackageBox> lucencePackageBox(Principal principal, String id) {
+        final Single<PackageBox> result$ = packageBoxRepository.find(id).flatMap(packageBoxRepository::save);
+        return rxCheckAdmin(principal).andThen(result$);
     }
 }

@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.PackageBoxService;
@@ -101,12 +102,12 @@ public class PackageBoxResource {
     @GET
     public Single<PackageBoxQuery.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
                                                 @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
+                                                @QueryParam("workshopId") @NotBlank String workshopId,
                                                 @QueryParam("startDate") @NotBlank String startDate,
                                                 @QueryParam("endDate") @NotBlank String endDate,
                                                 @QueryParam("packageBoxType") String typeString,
                                                 @QueryParam("packageBoxCode") String packageBoxCode,
                                                 @QueryParam("budatClassId") String budatClassId,
-                                                @QueryParam("workshopId") String workshopId,
                                                 @QueryParam("gradeId") String gradeId,
                                                 @QueryParam("batchId") String batchId,
                                                 @QueryParam("productId") String productId) {
@@ -132,7 +133,7 @@ public class PackageBoxResource {
                 .gradeId(gradeId)
                 .batchId(batchId)
                 .productId(productId)
-                .budatClassId(budatClassId)
+                .budatClassIds(Sets.newHashSet(budatClassId))
                 .build();
         return packageBoxRepository.query(packageBoxQuery);
     }
@@ -144,12 +145,12 @@ public class PackageBoxResource {
     @GET
     public Single<PackageBoxQueryForMeasure.Result> queryPrepare(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
                                                                  @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
+                                                                 @QueryParam("workshopId") @NotBlank String workshopId,
                                                                  @QueryParam("startDate") @NotBlank String startDate,
                                                                  @QueryParam("endDate") @NotBlank String endDate,
                                                                  @QueryParam("packageBoxType") String typeString,
                                                                  @QueryParam("packageBoxCode") String packageBoxCode,
                                                                  @QueryParam("netWeight") double netWeight,
-                                                                 @QueryParam("workshopId") String workshopId,
                                                                  @QueryParam("gradeId") String gradeId,
                                                                  @QueryParam("batchId") String batchId,
                                                                  @QueryParam("productId") String productId,

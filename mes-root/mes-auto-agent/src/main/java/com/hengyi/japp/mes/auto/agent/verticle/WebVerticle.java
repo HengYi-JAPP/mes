@@ -1,21 +1,23 @@
 package com.hengyi.japp.mes.auto.agent.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
+import com.google.common.collect.Sets;
 import com.google.inject.Key;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.bridge.BridgeEventType;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.handler.*;
+import io.vertx.reactivex.ext.web.handler.JWTAuthHandler;
+import io.vertx.reactivex.ext.web.handler.StaticHandler;
 import io.vertx.reactivex.ext.web.handler.sockjs.SockJSHandler;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,24 +31,11 @@ public class WebVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         final Router router = Router.router(vertx);
-        router.route().handler(CorsHandler.create("^http(s)?://(10\\.2\\.0\\.215|localhost|127\\.0\\.0\\.1)(:[1-9]\\d+)?")
-                .allowCredentials(false)
-                .allowedHeader("x-requested-with")
-                .allowedHeader("access-control-allow-origin")
-                .allowedHeader("access-control-allow-credentials")
-                .allowedHeader("origin")
-                .allowedHeader("content-type")
-                .allowedHeader("accept")
-                .allowedHeader("authorization")
-                .allowedMethod(HttpMethod.GET)
-                .allowedMethod(HttpMethod.PUT)
-                .allowedMethod(HttpMethod.OPTIONS)
-                .allowedMethod(HttpMethod.POST)
-                .allowedMethod(HttpMethod.DELETE)
-                .allowedMethod(HttpMethod.PATCH));
-        router.route().handler(BodyHandler.create());
-        router.route().handler(ResponseContentTypeHandler.create());
-        router.route().handler(CookieHandler.create());
+        Jvertx.enableCommon(router);
+        Jvertx.enableCors(router, Sets.newHashSet("10\\.2\\.0\\.215"));
+
+        final JWTAuth jwtAuth = Jvertx.getProxy(JWTAuth.class);
+        router.route("/api/*").handler(JWTAuthHandler.create(jwtAuth));
 
         router.route("/*").handler(StaticHandler.create());
         router.route("/eventbus/*").handler(eventBusHandler());
