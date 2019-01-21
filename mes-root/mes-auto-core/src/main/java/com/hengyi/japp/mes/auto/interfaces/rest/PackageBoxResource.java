@@ -26,8 +26,10 @@ import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -111,6 +113,7 @@ public class PackageBoxResource {
                                                 @QueryParam("gradeId") String gradeId,
                                                 @QueryParam("batchId") String batchId,
                                                 @QueryParam("productId") String productId) {
+        final Set<String> budatClassIds = J.nonBlank(budatClassId) ? Sets.newHashSet(budatClassId) : Collections.EMPTY_SET;
         final LocalDate startLd = Optional.ofNullable(startDate)
                 .filter(J::nonBlank)
                 .map(LocalDate::parse)
@@ -133,7 +136,7 @@ public class PackageBoxResource {
                 .gradeId(gradeId)
                 .batchId(batchId)
                 .productId(productId)
-                .budatClassIds(Sets.newHashSet(budatClassId))
+                .budatClassIds(budatClassIds)
                 .build();
         return packageBoxRepository.query(packageBoxQuery);
     }

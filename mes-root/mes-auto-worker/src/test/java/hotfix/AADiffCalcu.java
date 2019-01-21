@@ -1,6 +1,7 @@
 package hotfix;
 
 import com.hengyi.japp.mes.auto.domain.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 
 import java.util.Collection;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 /**
  * @author jzb 2019-01-09
  */
+@Slf4j
 public class AADiffCalcu extends DiffCalcu {
     private List<AAReportItem> items;
 
@@ -59,7 +61,7 @@ public class AADiffCalcu extends DiffCalcu {
             final int silkCount = packageBoxes.parallelStream().mapToInt(PackageBox::getSilkCount).sum();
             final double netWeight = packageBoxes.parallelStream().mapToDouble(PackageBox::getNetWeight).sum();
             final String join = String.join("\t", "error:", batch.getBatchNo(), grade.getName(), "" + silkCount, "" + netWeight);
-            System.out.println(join);
+            log.error(join);
             return;
         }
 

@@ -22,10 +22,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 
@@ -40,20 +43,25 @@ public class AAReport {
 
     @SneakyThrows
     public static void main(String[] args) {
-//        final LocalDate startLd = LocalDate.of(2019, 1, 8);
-//        final LocalDate endLd = LocalDate.of(2019, 1, 10);
-//        final List<AAReportExcel> excelList = Stream.iterate(startLd, d -> d.plusDays(1))
-//                .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1)
-//                .map(AAReportExcel::new)
-//                .peek(ForkJoinPool.commonPool()::invoke)
-//                .collect(Collectors.toList());
-//        excelList.forEach(AAReportExcel::toExcel);
+        final long startL = System.currentTimeMillis();
+        final LocalDate startLd = LocalDate.of(2019, 1, 14);
+        final LocalDate endLd = LocalDate.of(2019, 1, 20);
+        final List<AAReportExcel> excelList = Stream.iterate(startLd, d -> d.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1)
+                .map(AAReportExcel::new)
+                .peek(ForkJoinPool.commonPool()::invoke)
+                .collect(Collectors.toList());
+        excelList.forEach(AAReportExcel::toExcel); //194,728.88
 
-        final LocalDate ld = LocalDate.of(2019, 1, 15);
-        final AAReportExcel aaReportExcel = new AAReportExcel(ld);
-//        ForkJoinPool.commonPool().submit(aaReportExcel);
-        ForkJoinPool.commonPool().invoke(aaReportExcel);
-        aaReportExcel.toExcel();
+//        final LocalDate ld = LocalDate.of(2019, 1, 18);
+//        final AAReportExcel aaReportExcel = new AAReportExcel(ld);
+//        ForkJoinPool.commonPool().invoke(aaReportExcel);
+//        aaReportExcel.toExcel();
+//
+        final long endL = System.currentTimeMillis();
+        final long l = (endL - startL) / 1000;
+        System.out.println("用时：" + l);
+
 //        aaReportExcel.printByDay();
 //        aaReportExcel.printDetail();
     }

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author jzb 2019-01-08
@@ -114,9 +115,17 @@ public class AAReportExcel extends RecursiveAction {
         cell = Jpoi.cell(sheet, 0, 4);
         cell.setCellValue("AA");
         cell = Jpoi.cell(sheet, 0, 5);
-        cell.setCellValue("B");
+        cell.setCellValue("A");
         cell = Jpoi.cell(sheet, 0, 6);
+        cell.setCellValue("B");
+        cell = Jpoi.cell(sheet, 0, 7);
         cell.setCellValue("C");
+        cell = Jpoi.cell(sheet, 0, 8);
+        cell.setCellValue("合计");
+        cell = Jpoi.cell(sheet, 0, 9);
+        cell.setCellValue("AA率");
+        cell = Jpoi.cell(sheet, 0, 10);
+        cell.setCellValue("一等率");
 
         final List<StatisticsReportDay.XlsxItem> xlsxItems = tasks.stream().filter(it -> J.nonEmpty(it.packageBoxes))
                 .flatMap(task -> task.diffCalcus.stream()
@@ -197,9 +206,20 @@ public class AAReportExcel extends RecursiveAction {
                     cell.setCellValue(pair.getRight().toString());
                 }
             }
+            final int formulaRow = rowIndex + 1;
+            cell = Jpoi.cell(sheet, rowIndex, 8);
+            final String sumFormula = Stream.of("E", "F", "G", "H")
+                    .map(it -> it + formulaRow)
+                    .collect(Collectors.joining("+"));
+            cell.setCellFormula(sumFormula);
+            cell = Jpoi.cell(sheet, rowIndex, 9);
+            cell.setCellFormula("E" + formulaRow + "/I" + formulaRow + "*100");
+            cell = Jpoi.cell(sheet, rowIndex, 10);
+            cell.setCellFormula("(E" + formulaRow + "+F" + formulaRow + ")/I" + formulaRow + "*100");
             rowIndex++;
         }
-        @Cleanup final FileOutputStream fileOutputStream = new FileOutputStream("/home/jzb/test.xlsx");
+        wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
+        @Cleanup final FileOutputStream fileOutputStream = new FileOutputStream("/home/jzb/" + ld + ".xlsx");
         wb.write(fileOutputStream);
 //        @Cleanup final ByteArrayOutputStream os = new ByteArrayOutputStream();
 //        wb.write(os);
