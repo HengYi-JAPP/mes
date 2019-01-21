@@ -49,13 +49,13 @@ public class AAReport {
 //                .collect(Collectors.toList());
 //        excelList.forEach(AAReportExcel::toExcel);
 
-        final LocalDate ld = LocalDate.of(2019, 1, 13);
+        final LocalDate ld = LocalDate.of(2019, 1, 15);
         final AAReportExcel aaReportExcel = new AAReportExcel(ld);
-        ForkJoinPool.commonPool().submit(aaReportExcel);
+//        ForkJoinPool.commonPool().submit(aaReportExcel);
         ForkJoinPool.commonPool().invoke(aaReportExcel);
-//        aaReportExcel.toExcel();
+        aaReportExcel.toExcel();
 //        aaReportExcel.printByDay();
-        aaReportExcel.printDetail();
+//        aaReportExcel.printDetail();
     }
 
     @SneakyThrows

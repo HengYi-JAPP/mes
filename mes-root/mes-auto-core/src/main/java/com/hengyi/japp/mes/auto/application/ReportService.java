@@ -10,6 +10,12 @@ import java.time.LocalDate;
  */
 public interface ReportService {
 
+    Single<MeasurePackageBoxReport> measurePackageBoxReport(LocalDate ld, String budatClassId);
+
+    Single<MeasureReport> measureReport(String workshopId, String budatClassId, LocalDate parse);
+
+    Single<StatisticsReport> statisticsReport(String workshopId, LocalDate startLd, LocalDate endLd);
+
     Single<WorkshopProductPlanReport> workshopProductPlanReport(String workshopId, String lineId);
 
     Single<DoffingReport> doffingReport(String workshopId, LocalDate ldStart, LocalDate ldEnd);
@@ -29,10 +35,4 @@ public interface ReportService {
     default Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
         return silkExceptionReport(workshopId, ldStart, ldStart.plusDays(1));
     }
-
-    Single<MeasurePackageBoxReport> measurePackageBoxReport(LocalDate ld, String budatClassId);
-
-    Single<MeasureReport> measureReport(MeasureReport.Command command);
-
-    Single<StatisticsReport> statisticsReport(StatisticsReport.Command command);
 }

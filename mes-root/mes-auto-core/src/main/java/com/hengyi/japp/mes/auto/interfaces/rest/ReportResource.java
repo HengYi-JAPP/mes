@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.interfaces.rest;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ReportService;
@@ -10,8 +11,12 @@ import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -43,16 +48,24 @@ public class ReportResource {
         return reportService.measurePackageBoxReport(LocalDate.parse(dateString), budatClassId);
     }
 
-    @Path("statisticsReport")
-    @POST
-    public Single<StatisticsReport> measureReport(StatisticsReport.Command command) {
-        return reportService.statisticsReport(command);
+    @Path("measureReport")
+    @GET
+    public Single<MeasureReport> measureReport(@QueryParam("workshopId") String workshopId,
+                                               @QueryParam("budatClassId") String budatClassId,
+                                               @QueryParam("date") @NotBlank String dateString) {
+        final LocalDate ld = Optional.ofNullable(dateString)
+                .filter(J::nonBlank)
+                .map(LocalDate::parse)
+                .orElse(LocalDate.now());
+        return reportService.measureReport(workshopId, budatClassId, ld);
     }
 
-    @Path("measureReport")
-    @POST
-    public Single<MeasureReport> measureReport(MeasureReport.Command command) {
-        return reportService.measureReport(command);
+    @Path("statisticsReport")
+    @GET
+    public Single<StatisticsReport> statisticsReport(@QueryParam("workshopId") String workshopId,
+                                                     @QueryParam("startDate") @NotBlank String startLdString,
+                                                     @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.statisticsReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
     }
 
 //    @Path("dailyDoffingReport")

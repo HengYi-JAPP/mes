@@ -1,13 +1,23 @@
 package hotfix;
 
 import com.github.ixtf.japp.core.J;
+import com.github.ixtf.japp.poi.Jpoi;
 import com.google.common.collect.ComparisonChain;
+import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay;
 import com.hengyi.japp.mes.auto.domain.*;
+import lombok.Cleanup;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.FileOutputStream;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -87,9 +97,28 @@ public class AAReportExcel extends RecursiveAction {
                 });
     }
 
+    @SneakyThrows
     public void toExcel() {
         System.out.println("=====" + ld + "=====");
-        tasks.stream().filter(it -> J.nonEmpty(it.packageBoxes))
+
+        @Cleanup final Workbook wb = new XSSFWorkbook();
+        final Sheet sheet = wb.createSheet();
+        Cell cell = Jpoi.cell(sheet, 0, 0);
+        cell.setCellValue("线别");
+        cell = Jpoi.cell(sheet, 0, 1);
+        cell.setCellValue("品名");
+        cell = Jpoi.cell(sheet, 0, 2);
+        cell.setCellValue("规格");
+        cell = Jpoi.cell(sheet, 0, 3);
+        cell.setCellValue("批号");
+        cell = Jpoi.cell(sheet, 0, 4);
+        cell.setCellValue("AA");
+        cell = Jpoi.cell(sheet, 0, 5);
+        cell.setCellValue("B");
+        cell = Jpoi.cell(sheet, 0, 6);
+        cell.setCellValue("C");
+
+        final List<StatisticsReportDay.XlsxItem> xlsxItems = tasks.stream().filter(it -> J.nonEmpty(it.packageBoxes))
                 .flatMap(task -> task.diffCalcus.stream()
                         .flatMap(diffCalcu -> J.emptyIfNull(diffCalcu.items()).stream())
                 )
@@ -116,14 +145,64 @@ public class AAReportExcel extends RecursiveAction {
                     item.setNetWeight(netWeight);
                     return item;
                 })
-                .sorted()
-                .forEach(item -> {
-                    final Line line = item.getLine();
-                    final String join = String.join("\t", line.getName(), item.getBatch().getBatchNo(), item.getGrade().getName(),
-                            "" + item.getSilkCount(), "" + item.getNetWeight());
-                    System.out.println(join);
-                });
-        ;
+                .collect(Collectors.groupingBy(it -> Pair.of(it.getLine(), it.getBatch())))
+                .entrySet().stream()
+                .map(entry -> {
+                    final Pair<Line, Batch> pair = entry.getKey();
+                    final Line line = pair.getLeft();
+                    final Batch batch = pair.getRight();
+                    final StatisticsReportDay.XlsxItem xlsxItem = new StatisticsReportDay.XlsxItem(line, batch);
+                    J.emptyIfNull(entry.getValue()).forEach(it -> {
+                        final Grade grade = it.getGrade();
+                        final Pair<Integer, BigDecimal> value = Pair.of(it.getSilkCount(), BigDecimal.valueOf(it.getNetWeight()));
+                        xlsxItem.getGradePairMap().put(grade, value);
+                    });
+                    return xlsxItem;
+                })
+                .collect(Collectors.toList());
+//                .sorted()
+//                .forEach(item -> {
+//                    final Line line = item.getLine();
+//                    final String join = String.join("\t", line.getName(), item.getBatch().getBatchNo(), item.getGrade().getName(),
+//                            "" + item.getSilkCount(), "" + item.getNetWeight());
+//                    System.out.println(join);
+//                });
+
+        int rowIndex = 1;
+        for (StatisticsReportDay.XlsxItem item : J.emptyIfNull(xlsxItems)) {
+            final Line line = item.getLine();
+            final Batch batch = item.getBatch();
+            final Product product = batch.getProduct();
+            cell = Jpoi.cell(sheet, rowIndex, 0);
+            cell.setCellValue(line.getName());
+            cell = Jpoi.cell(sheet, rowIndex, 1);
+            cell.setCellValue(product.getName());
+            cell = Jpoi.cell(sheet, rowIndex, 2);
+            cell.setCellValue(batch.getSpec());
+            cell = Jpoi.cell(sheet, rowIndex, 3);
+            cell.setCellValue(batch.getBatchNo());
+            for (Grade grade : item.getGradePairMap().keySet()) {
+                final Pair<Integer, BigDecimal> pair = item.getGradePairMap().get(grade);
+                if ("AA".equals(grade.getName())) {
+                    cell = Jpoi.cell(sheet, rowIndex, 4);
+                    cell.setCellValue(pair.getRight().toString());
+                } else if ("A".equals(grade.getName())) {
+                    cell = Jpoi.cell(sheet, rowIndex, 5);
+                    cell.setCellValue(pair.getRight().toString());
+                } else if ("B".equals(grade.getName())) {
+                    cell = Jpoi.cell(sheet, rowIndex, 6);
+                    cell.setCellValue(pair.getRight().toString());
+                } else if ("C".equals(grade.getName())) {
+                    cell = Jpoi.cell(sheet, rowIndex, 7);
+                    cell.setCellValue(pair.getRight().toString());
+                }
+            }
+            rowIndex++;
+        }
+        @Cleanup final FileOutputStream fileOutputStream = new FileOutputStream("/home/jzb/test.xlsx");
+        wb.write(fileOutputStream);
+//        @Cleanup final ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        wb.write(os);
     }
 
     @Data

@@ -11,6 +11,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellUtil;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 
 /**
@@ -22,7 +24,7 @@ public class UserImport {
     public static final Vertx vertx = Vertx.vertx();
     public static final Injector injector = Guice.createInjector(new WorkerModule(vertx));
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final OkHttpClient client = new OkHttpClient();
+    public static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.DAYS).readTimeout(1, TimeUnit.DAYS).build();
 
     public static void main(String[] args) {
     }

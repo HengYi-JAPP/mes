@@ -34,6 +34,11 @@ public class Worker {
             RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
             RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
 
+//            final PackageBoxRepository packageBoxRepository = Jvertx.getProxy(PackageBoxRepository.class);
+//            packageBoxRepository.findByCode("test").subscribe(it->{
+//                System.out.println(it);
+//            });
+
 //            final SilkCarRuntimeRepository silkCarRuntimeRepository = Jvertx.getProxy(SilkCarRuntimeRepository.class);
 //            silkCarRuntimeRepository.findByCode("3000F48394").subscribe(silkCarRuntime -> {
 //                for (SilkRuntime silkRuntime : silkCarRuntime.getSilkRuntimes()) {

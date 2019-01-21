@@ -81,6 +81,7 @@ public class WorkerModule extends GuiceModule {
         bind(PackageClassService.class).to(PackageClassServiceImpl.class);
         bind(PackageBoxService.class).to(PackageBoxServiceImpl.class);
         bind(ReportService.class).to(ReportServiceImpl.class);
+        bind(DownloadService.class).to(DownloadServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.hengyi.japp.mes.auto.application.report.MeasureReport;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.Grade;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
@@ -12,8 +11,6 @@ import lombok.Cleanup;
 import lombok.SneakyThrows;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -42,22 +39,22 @@ public class MeasureReportTest {
 //        printReport(packageBoxes);
     }
 
-    private static void printReport(Collection<PackageBox> packageBoxes) {
-        final MeasureReport measureReport = new MeasureReport(packageBoxes);
-        measureReport.getItems().forEach(item -> {
-            final Batch batch = item.getBatch();
-            final Grade grade = item.getGrade();
-            final int silkCount = item.getPackageBoxes().parallelStream()
-                    .mapToInt(PackageBox::getSilkCount)
-                    .sum();
-            final double netWeight = item.getPackageBoxes().parallelStream()
-                    .mapToDouble(PackageBox::getNetWeight)
-                    .sum();
-            final BigDecimal bigDecimal = BigDecimal.valueOf(netWeight).setScale(3, RoundingMode.HALF_UP);
-            final String join = String.join("\t", batch.getBatchNo(), grade.getName(), "" + silkCount, "" + bigDecimal);
-            System.out.println(join);
-        });
-    }
+//    private static void printReport(Collection<PackageBox> packageBoxes) {
+//        final MeasureReport measureReport = new MeasureReport(workshop, ld, budatClass, packageBoxes);
+//        measureReport.getItems().forEach(item -> {
+//            final Batch batch = item.getBatch();
+//            final Grade grade = item.getGrade();
+//            final int silkCount = item.getPackageBoxes().parallelStream()
+//                    .mapToInt(PackageBox::getSilkCount)
+//                    .sum();
+//            final double netWeight = item.getPackageBoxes().parallelStream()
+//                    .mapToDouble(PackageBox::getNetWeight)
+//                    .sum();
+//            final BigDecimal bigDecimal = BigDecimal.valueOf(netWeight).setScale(3, RoundingMode.HALF_UP);
+//            final String join = String.join("\t", batch.getBatchNo(), grade.getName(), "" + silkCount, "" + bigDecimal);
+//            System.out.println(join);
+//        });
+//    }
 
     private static void printDetail(Collection<PackageBox> packageBoxes) {
         packageBoxes.forEach(it -> {

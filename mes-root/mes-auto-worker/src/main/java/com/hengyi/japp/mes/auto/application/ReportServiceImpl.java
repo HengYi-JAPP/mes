@@ -1,5 +1,7 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.github.ixtf.japp.core.J;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -9,8 +11,8 @@ import com.hengyi.japp.mes.auto.application.query.SilkQuery;
 import com.hengyi.japp.mes.auto.application.report.*;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
+import com.hengyi.japp.mes.auto.domain.PackageClass;
 import com.hengyi.japp.mes.auto.domain.Workshop;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -18,9 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author jzb 2018-08-08
@@ -46,36 +51,52 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Single<MeasureReport> measureReport(MeasureReport.Command command) {
-        final Set<String> budatClassIds = command.getBudatClasses().stream()
-                .map(EntityDTO::getId)
-                .collect(Collectors.toSet());
-        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
-                .pageSize(Integer.MAX_VALUE)
-                .workshopId(command.getWorkshop().getId())
-                .budatClassIds(budatClassIds)
-                .budatRange(new LocalDateRange(command.getStartLd(), command.getEndLd()))
-                .build();
-        return packageBoxRepository.query(packageBoxQuery).map(it -> {
-            final Collection<PackageBox> packageBoxes = it.getPackageBoxes();
-            return new MeasureReport(packageBoxes);
-        });
+    public Single<MeasureReport> measureReport(String workshopId, String budatClassId, LocalDate ld) {
+        final Single<Workshop> workshop$ = J.isBlank(workshopId) ? workshopRepository.list().firstOrError() : workshopRepository.find(workshopId);
+        final Single<PackageClass> budatClass$ = J.isBlank(budatClassId) ? packageClassRepository.list().firstOrError() : packageClassRepository.find(budatClassId);
+        return workshop$.flatMap(workshop -> budatClass$.flatMap(budatClass -> {
+            final Set<String> budatClassIds = ImmutableSet.of(budatClass.getId());
+            final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+                    .pageSize(Integer.MAX_VALUE)
+                    .workshopId(workshop.getId())
+                    .budatClassIds(budatClassIds)
+                    .budatRange(new LocalDateRange(ld, ld.plusDays(1)))
+                    .build();
+            return packageBoxRepository.query(packageBoxQuery).map(it -> {
+                final Collection<PackageBox> packageBoxes = it.getPackageBoxes();
+                return new MeasureReport(workshop, ld, budatClass, packageBoxes);
+            });
+        }));
     }
 
     @Override
-    public Single<StatisticsReport> statisticsReport(StatisticsReport.Command command) {
-        final Set<String> budatClassIds = command.getBudatClasses().stream()
-                .map(EntityDTO::getId)
-                .collect(Collectors.toSet());
+    public Single<StatisticsReport> statisticsReport(String workshopId, LocalDate startLd, LocalDate endLd) {
+        final Single<Workshop> workshop$ = J.isBlank(workshopId) ? workshopRepository.list().firstOrError() : workshopRepository.find(workshopId);
+        return workshop$.flatMap(workshop -> {
+            final List<LocalDate> lds = Stream.iterate(startLd, d -> d.plusDays(1))
+                    .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1)
+                    .collect(Collectors.toList());
+            return Flowable.fromIterable(lds)
+                    .flatMapSingle(ld -> statisticsReportDay(workshop, ld)).toList()
+                    .map(days -> new StatisticsReport(workshop, startLd, endLd, days));
+//            return Flowable.fromIterable(lds)
+//                    .parallel(7)
+//                    .flatMap(ld -> statisticsReportDay(workshop, ld).toFlowable())
+//                    .sequential()
+//                    .toList()
+//                    .map(days -> new StatisticsReport(workshop, startLd, endLd, days));
+        });
+    }
+
+    private Single<StatisticsReportDay> statisticsReportDay(Workshop workshop, LocalDate ld) {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
-                .workshopId(command.getWorkshop().getId())
-                .budatClassIds(budatClassIds)
-                .budatRange(new LocalDateRange(command.getStartLd(), command.getEndLd()))
+                .workshopId(workshop.getId())
+                .budatRange(new LocalDateRange(ld, ld.plusDays(1)))
                 .build();
         return packageBoxRepository.query(packageBoxQuery).map(it -> {
             final Collection<PackageBox> packageBoxes = it.getPackageBoxes();
-            return new StatisticsReport(packageBoxes);
+            return new StatisticsReportDay(workshop, ld, packageBoxes);
         });
     }
 
