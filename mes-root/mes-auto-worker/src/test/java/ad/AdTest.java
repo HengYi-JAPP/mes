@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.stream.Stream;
 
 public class AdTest {
     static final Vertx vertx = Vertx.vertx();
@@ -19,6 +20,11 @@ public class AdTest {
 
     @SneakyThrows
     public static void main(String[] args) {
+        Stream.of("E", "F", "G", "H", "I").forEach(it -> {
+            final int c = it.charAt(0);
+            System.out.println(c);
+        });
+
         final String tokenTest = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZW5neWkiLCJhZG1pbiI6InBhc3N3b3JkIiwiaWF0IjoxNTQwMjgwODgzfQ.5rnFIqnn9bdBKUuMzxQc0UxS8-SX2uSQIozOwil_NbI";
         final String[] split = tokenTest.split("\\.");
         final byte[] decode0 = Base64.getDecoder().decode(split[0]);

@@ -64,13 +64,13 @@ public class PackageBoxResource {
     @Path("packageBoxes/{id}/silks")
     @GET
     public Flowable<Silk> silks(@PathParam("id") String id) {
-        return packageBoxRepository.find(id).flattenAsFlowable(PackageBox::getSilks);
+        return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilks()));
     }
 
     @Path("packageBoxes/{id}/silkCarRecords")
     @GET
     public Flowable<SilkCarRecord> silkCarRecords(@PathParam("id") String id) {
-        return packageBoxRepository.find(id).flattenAsFlowable(PackageBox::getSilkCarRecords);
+        return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecords()));
     }
 
     @Path("packageBoxes/{id}")

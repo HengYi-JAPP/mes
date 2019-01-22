@@ -1,20 +1,15 @@
 package com.hengyi.japp.mes.auto.application.report;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.ixtf.japp.core.J;
-import com.google.common.collect.Maps;
-import com.hengyi.japp.mes.auto.domain.*;
+import com.google.common.collect.ComparisonChain;
+import com.hengyi.japp.mes.auto.domain.PackageBox;
+import com.hengyi.japp.mes.auto.domain.Workshop;
 import lombok.Data;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -23,46 +18,42 @@ import java.util.stream.Collectors;
  * @author jzb 2018-08-12
  */
 @Data
-public class StatisticsReportDay implements Serializable {
+public class StatisticsReportDay implements Comparable<StatisticsReportDay>, Serializable {
     private final Workshop workshop;
-    @JsonIgnore
     private final LocalDate ld;
-    private final Collection<Item> items;
+    private final Collection<PackageBox> packageBoxes;
+    private final int silkCount;
+    private final BigDecimal silkWeight;
+    private final Collection<StatisticsReport.Item> items;
 
     public StatisticsReportDay(Workshop workshop, LocalDate ld, Collection<PackageBox> packageBoxes) {
         this.workshop = workshop;
         this.ld = ld;
-        items = J.emptyIfNull(packageBoxes).stream()
+        this.packageBoxes = J.emptyIfNull(packageBoxes);
+        silkCount = this.packageBoxes.parallelStream()
+                .mapToInt(PackageBox::getSilkCount)
+                .sum();
+        silkWeight = this.packageBoxes.parallelStream()
+                .map(PackageBox::getNetWeight)
+                .map(BigDecimal::valueOf)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        items = calcItems();
+    }
+
+    protected Collection<StatisticsReport.Item> calcItems() {
+        return packageBoxes.parallelStream()
                 .collect(Collectors.groupingBy(PackageBox::getBatch))
-                .entrySet().stream()
-                .map(entry -> {
-                    final Batch batch = entry.getKey();
-                    final List<PackageBox> packageBoxList = entry.getValue();
-                    return new StatisticsReportDayLineDiff(batch, packageBoxList);
-                })
-                .flatMap(StatisticsReportDayLineDiff::itemStream)
+                .entrySet().parallelStream()
+                .map(entry -> new StatisticsReportDay_Batch(entry.getKey(), entry.getValue()))
+                .flatMap(StatisticsReportDay_Batch::lineDiff)
                 .collect(Collectors.toList());
     }
 
-    @JsonGetter("date")
-    public Date ldJson() {
-        return J.date(ld);
-    }
-
-    @Data
-    public static class Item implements Serializable {
-        private final Line line;
-        private final Batch batch;
-        private final Grade grade;
-        private int silkCount;
-        private BigDecimal silkWeight;
-    }
-
-    @Data
-    public static class XlsxItem implements Serializable {
-        private final Line line;
-        private final Batch batch;
-        private Map<Grade, Pair<Integer, BigDecimal>> gradePairMap = Maps.newConcurrentMap();
+    @Override
+    public int compareTo(StatisticsReportDay o) {
+        return ComparisonChain.start()
+                .compare(ld, o.ld)
+                .result();
     }
 
 }
