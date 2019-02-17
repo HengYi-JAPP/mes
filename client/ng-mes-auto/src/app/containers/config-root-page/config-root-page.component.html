@@ -1,5 +1,5 @@
-<mat-sidenav-container autosize class="viewer-sidenav-container " fxFlex>
-  <mat-sidenav class="viewer-sidenav mat-elevation-z3" mode="side" opened>
+<mat-sidenav-container fxFlex>
+  <mat-sidenav class="mat-elevation-z3" mode="side" opened>
     <mat-nav-list>
       <a [routerLink]="['workshops']" mat-list-item routerLinkActive="active">
         {{'Nav.workshops'|translate}}
@@ -22,7 +22,7 @@
     </mat-nav-list>
   </mat-sidenav>
 
-  <mat-sidenav-content class="viewer-sidenav-content" fxLayout="column">
+  <mat-sidenav-content fxLayout="column">
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

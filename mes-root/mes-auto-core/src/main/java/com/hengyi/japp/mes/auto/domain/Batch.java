@@ -6,6 +6,7 @@ import com.hengyi.japp.mes.auto.application.persistence.annotations.MongoCache;
 import com.hengyi.japp.mes.auto.interfaces.jackson.ProductEmbedSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -14,6 +15,7 @@ import lombok.ToString;
  * @author jzb 2018-06-21
  */
 @Data
+@NoArgsConstructor
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @MongoCache

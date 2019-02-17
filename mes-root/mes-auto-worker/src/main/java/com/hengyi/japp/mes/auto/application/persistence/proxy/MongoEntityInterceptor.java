@@ -44,7 +44,8 @@ public class MongoEntityInterceptor<T extends MongoEntity> extends JsonEntityInt
         final MongoClient mongoClient = mongoEntiyManager.getMongoClient();
         final JsonObject document = collectFields().put("_id", _id);
         return mongoClient.rxSave(collectionName, document)
-                .map(it -> _id);
+                .map(it -> _id)
+                .toSingle();
     }
 
     private JsonObject collectFields() {

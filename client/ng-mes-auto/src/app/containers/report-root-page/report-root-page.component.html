@@ -1,28 +1,16 @@
-<mat-sidenav-container autosize class="viewer-sidenav-container " fxFlex>
-  <mat-sidenav class="viewer-sidenav mat-elevation-z3" mode="side" opened>
+<mat-sidenav-container fxFlex>
+  <mat-sidenav class="mat-elevation-z3" mode="side" opened>
     <mat-nav-list>
-      <a [routerLink]="['workshops']" mat-list-item routerLinkActive="active">
-        {{'Nav.workshops'|translate}}
+      <a [routerLink]="['measureReport']" mat-list-item routerLinkActive="active">
+        {{'Nav.measureReport'|translate}}
       </a>
-      <a [routerLink]="['lines']" mat-list-item routerLinkActive="active">
-        {{'Nav.lines'|translate}}
-      </a>
-      <a [routerLink]="['lineMachines']" mat-list-item routerLinkActive="active">
-        {{'Nav.lineMachines'|translate}}
-      </a>
-      <a [routerLink]="['products']" mat-list-item routerLinkActive="active">
-        {{'Nav.products'|translate}}
-      </a>
-      <a [routerLink]="['silkCars']" mat-list-item routerLinkActive="active">
-        {{'Nav.silkCars'|translate}}
-      </a>
-      <a [routerLink]="['grades']" mat-list-item routerLinkActive="active">
-        {{'Nav.grades'|translate}}
+      <a [routerLink]="['statisticsReport']" mat-list-item routerLinkActive="active">
+        {{'Nav.statisticsReport'|translate}}
       </a>
     </mat-nav-list>
   </mat-sidenav>
 
-  <mat-sidenav-content class="viewer-sidenav-content" fxLayout="column">
+  <mat-sidenav-content fxLayout="column">
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

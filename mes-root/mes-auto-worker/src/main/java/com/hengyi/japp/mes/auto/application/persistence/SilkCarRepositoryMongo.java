@@ -40,7 +40,8 @@ public class SilkCarRepositoryMongo extends MongoEntityRepository<SilkCar> imple
     public Single<SilkCar> findByCode(String code) {
         final JsonObject query = unDeletedQuery(Filters.eq("code", code));
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())
-                .flatMap(this::rxCreateMongoEntiy);
+                // fixme maybe single
+                .flatMapSingle(this::rxCreateMongoEntiy);
     }
 
     @Override

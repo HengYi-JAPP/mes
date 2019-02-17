@@ -8,6 +8,7 @@
   "lineMachine": "机台",
   "batchNo": "批号",
   "grade": "等级",
+  "packageClass": "班次",
   "productPlan": "生产计划",
   "productProcess": "生产工艺",
   "silkException": "丝锭异常",
@@ -22,6 +23,21 @@
   "tubeColor": "纸管颜色",
   "silkDetach": "丝锭解绑",
   "lineMachineCount": "机台数",
+  "packageBoxCount": "包数",
+  "silkCount": "颗数",
+  "weightCount": "重量",
+  "foamCount": "泡沫数",
+  "MeasureReport": {
+    "sumInfo": "(总/内/外)",
+    "total": "总计"
+  },
+  "StatisticsReport": {
+    "exportDay": "日报表",
+    "exportWeek": "周报表",
+    "exportMonth": "月报表",
+    "exportYear": "年报表"
+  },
+  "foamCount": "泡沫数",
   "RoleType": {
     "DOFFING": "落丝",
     "SUBMIT_GRADE": "等级确认",
@@ -98,6 +114,9 @@
     "permissions": "权限",
     "config": "配置",
     "operators": "用户",
+    "report": "报表中心",
+    "measureReport": "计量报表",
+    "statisticsReport": "统计报表",
     "admin": "管理员"
   },
   "Btn": {
@@ -148,9 +167,11 @@
     "unSelectAll": "全不选",
     "timeDesc": "时间倒序",
     "timeAsc": "时间升序",
+    "export": "导出",
     "end": "结束",
     "type": "类型",
     "batch": "批量",
+    "date": "日期",
     "startDate": "开始日期",
     "endDate": "结束日期",
     "batchStart": "批量开始",

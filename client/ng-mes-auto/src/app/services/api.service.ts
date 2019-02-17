@@ -11,8 +11,10 @@ import {Grade} from '../models/grade';
 import {Line} from '../models/line';
 import {LineMachine} from '../models/line-machine';
 import {LineMachineProductPlan} from '../models/line-machine-product-plan';
+import {MeasureReport} from '../models/measure-report';
 import {Operator} from '../models/operator';
 import {OperatorGroup} from '../models/operator-group';
+import {PackageClass} from '../models/package-class';
 import {Permission} from '../models/permission';
 import {Product} from '../models/product';
 import {ProductPlanNotify} from '../models/product-plan-notify';
@@ -21,6 +23,7 @@ import {SilkCar} from '../models/silk-car';
 import {SilkCarRuntime} from '../models/silk-car-runtime';
 import {SilkException} from '../models/silk-exception';
 import {SilkNote} from '../models/silk-note';
+import {StatisticsReport} from '../models/statistics-report';
 import {SuggestOperator} from '../models/suggest-operator';
 import {Workshop} from '../models/workshop';
 import {WorkshopProductPlanReport} from '../models/workshop-product-plan-report';
@@ -268,6 +271,10 @@ export class ApiService {
     return this.http.delete(`${baseApiUrl}/grades/${id}`);
   }
 
+  listPackageClass(params?: HttpParams): Observable<PackageClass []> {
+    return this.http.get<PackageClass[]>(`${baseApiUrl}/packageClasses`, {params});
+  }
+
   /*权限*/
   savePermission(permission: Permission): Observable<Permission> {
     return permission.id ? this.updatePermission(permission) : this.createPermission(permission);
@@ -303,6 +310,14 @@ export class ApiService {
 
   getProductProcess(id: string): Observable<ProductProcess> {
     return this.http.get<ProductProcess>(`${baseApiUrl}/productProcesses/${id}`);
+  }
+
+  measureReport(params?: HttpParams): Observable<MeasureReport> {
+    return this.http.get<MeasureReport>(`${baseApiUrl}/reports/measureReport`, {params});
+  }
+
+  statisticsReport(params?: HttpParams): Observable<StatisticsReport> {
+    return this.http.get<StatisticsReport>(`${baseApiUrl}/reports/statisticsReport`, {params});
   }
 
   private updateProductPlanNotify(productPlanNotify: ProductPlanNotify): Observable<ProductPlanNotify> {
@@ -424,4 +439,5 @@ export class ApiService {
   private createProductProcess(productProcess: ProductProcess): Observable<ProductProcess> {
     return this.http.post<ProductProcess>(`${baseApiUrl}/productProcesses`, productProcess);
   }
+
 }

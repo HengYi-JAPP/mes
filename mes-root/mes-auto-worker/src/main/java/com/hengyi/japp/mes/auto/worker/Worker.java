@@ -1,10 +1,8 @@
 package com.hengyi.japp.mes.auto.worker;
 
-import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hazelcast.config.Config;
-import com.hengyi.japp.mes.auto.application.ReportService;
 import com.hengyi.japp.mes.auto.worker.verticle.BackendWorkerVerticle;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
 import io.reactivex.Completable;
@@ -19,7 +17,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
-import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,16 +34,16 @@ public class Worker {
             RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
             RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
 
-            final ReportService reportService = Jvertx.getProxy(ReportService.class);
-            final LocalDate startLd = LocalDate.of(2019, 1, 14);
-            final LocalDate endLd = LocalDate.of(2019, 1, 14);
-            reportService.statisticsReport("5bffa63d8857b85a437d1fc5", startLd, endLd)
-                    .subscribe(report -> {
-                        System.out.println(report);
-                    });
+//            final ReportService reportService = Jvertx.getProxy(ReportService.class);
+//            final LocalDate startLd = LocalDate.of(2019, 1, 14);
+//            final LocalDate endLd = LocalDate.of(2019, 1, 14);
+//            reportService.statisticsReport("5bffa63d8857b85a437d1fc5", startLd, endLd)
+//                    .subscribe(report -> {
+//                        System.out.println(report);
+//                    });
 
 //            final SilkCarRuntimeRepository silkCarRuntimeRepository = Jvertx.getProxy(SilkCarRuntimeRepository.class);
-//            silkCarRuntimeRepository.findByCode("3000F48394").subscribe(silkCarRuntime -> {
+//            silkCarRuntimeRepository.findByCode("3000F48037").subscribe(silkCarRuntime -> {
 //                for (SilkRuntime silkRuntime : silkCarRuntime.getSilkRuntimes()) {
 //                    try {
 //                        final SilkRuntime.DyeingResultInfo firstDyeingResultInfo = silkRuntime.getFirstDyeingResultInfo();
@@ -96,7 +93,7 @@ public class Worker {
         return new VertxOptions()
                 .setClusterManager(hazelcastClusterManager)
                 .setClusterHost(InetAddress.getLocalHost().getHostAddress())
-                .setWorkerPoolSize(10_000)
+                .setWorkerPoolSize(1000)
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(6))
                 .setMaxWorkerExecuteTime(TimeUnit.HOURS.toNanos(1));
     }

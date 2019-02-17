@@ -33,7 +33,7 @@ public class MongoEntiyManager implements CachedJsonEntityManager<MongoEntity> {
     private final MongoDatabase mongoDatabase;
     private final LoadingCache<Pair<Class, String>, JsonObject> cache = CacheBuilder.newBuilder()
             .maximumSize(100000)
-            .build(new CacheLoader<Pair<Class, String>, JsonObject>() {
+            .build(new CacheLoader<>() {
                 @Override
                 public JsonObject load(Pair<Class, String> pair) throws Exception {
                     final Class entityClass = pair.getLeft();
@@ -80,13 +80,15 @@ public class MongoEntiyManager implements CachedJsonEntityManager<MongoEntity> {
     public <T extends MongoEntity> Single<T> rxFind(Class<T> entityClass, String id) {
         final String collectionName = MongoUtil.collectionName(entityClass);
         final JsonObject query = new JsonObject().put("_id", id);
-        return mongoClient.rxFindOne(collectionName, query, new JsonObject()).flatMap(it -> {
-            if (it == null) {
-                log.error(entityClass + "[" + id + "]");
-                throw new JJsonEntityNotExsitException(entityClass, id);
-            }
-            return rxCreateMongoEntiy(entityClass, it);
-        });
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                // fixme maybe single
+                .flatMapSingle(it -> {
+                    if (it == null) {
+                        log.error(entityClass + "[" + id + "]");
+                        throw new JJsonEntityNotExsitException(entityClass, id);
+                    }
+                    return rxCreateMongoEntiy(entityClass, it);
+                });
     }
 
     @Override

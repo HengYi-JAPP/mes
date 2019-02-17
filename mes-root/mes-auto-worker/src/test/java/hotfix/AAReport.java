@@ -26,7 +26,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -51,16 +50,16 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final LocalDate startLd = LocalDate.of(2019, 1, 14);
-        final LocalDate endLd = LocalDate.of(2019, 1, 20);
+        final LocalDate startLd = LocalDate.of(2019, 2, 11);
+        final LocalDate endLd = LocalDate.of(2019, 2, 17);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(AAReportDay::new).sorted()
                 .collect(Collectors.toList());
 
-//        days.parallelStream().forEach(AAReport::toExcel);
+        days.parallelStream().forEach(AAReport::toExcel);
         toExcel(new StatisticsReport(null, startLd, endLd, days));
-//        pkSap(days);
+
         final long endL = System.currentTimeMillis();
         System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
     }
@@ -81,19 +80,6 @@ public class AAReport {
         PoiUtil.fillData(wb, sheet, report.getItems());
         @Cleanup final FileOutputStream os = new FileOutputStream("/home/jzb/" + report.getStartLd() + "~" + report.getEndLd() + ".xlsx");
         wb.write(os);
-    }
-
-    private static void pkSap(Collection<AAReportDay> days) {
-        int sumSilkCount = 0;
-        BigDecimal sumSilkWeight = BigDecimal.ZERO;
-        for (AAReportDay day : days) {
-            sumSilkCount += day.getSilkCount();
-            sumSilkWeight = sumSilkWeight.add(day.getSilkWeight());
-            final String join = String.join("\t", "" + day.getLd(), "" + day.getSilkCount(), "" + day.getSilkWeight());
-            System.out.println(join);
-        }
-        final String join = String.join("\t", "合计", "" + sumSilkCount, "" + sumSilkWeight);
-        System.out.println(join);
     }
 
     @SneakyThrows
@@ -138,7 +124,7 @@ public class AAReport {
 
     @SneakyThrows
     public static List<PackageBox> packageBoxes(LocalDate ld) {
-        final String urlTpl = baseUrl + "/api/packageBoxes?startDate=${ld}&endDate=${ld}&pageSize=1000&workshopId=5bffa63d8857b85a437d1fc5&productId=5bffa63c8857b85a437d1f93";
+        final String urlTpl = baseUrl + "/api/packageBoxes?startDate=${ld}&endDate=${ld}&pageSize=10000&workshopId=5bffa63d8857b85a437d1fc5&productId=5bffa63c8857b85a437d1f93";
         final Map<String, String> map = ImmutableMap.of("ld", "" + ld);
         final Request request = new Request.Builder()
                 .addHeader("Authorization", "Bearer " + token)

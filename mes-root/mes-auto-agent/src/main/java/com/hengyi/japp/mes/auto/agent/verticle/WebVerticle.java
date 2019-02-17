@@ -28,6 +28,7 @@ import static com.hengyi.japp.mes.auto.agent.Agent.INJECTOR;
  */
 @Slf4j
 public class WebVerticle extends AbstractVerticle {
+
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         final Router router = Router.router(vertx);

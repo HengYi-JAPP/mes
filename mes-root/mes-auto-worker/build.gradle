@@ -1,5 +1,5 @@
 dependencies {
-    compile "com.github.ixtf.japp:poi:${jappVersion}",
+    compile "com.github.ixtf.japp:poi",
             project(':mes-auto-core'),
             project(':mes-auto-search'),
             "cglib:cglib:3.2.10",
@@ -10,8 +10,7 @@ dependencies {
             "commons-beanutils:commons-beanutils:1.9.3",
             "javax.cache:cache-api:1.1.0"
 
-    testCompile "com.github.ixtf.japp:poi:${jappVersion}",
-            "com.squareup.okhttp3:okhttp:3.11.0"
+    testCompile "com.squareup.okhttp3:okhttp:3.11.0"
 }
 
 mainClassName = "com.hengyi.japp.mes.auto.worker.Worker"

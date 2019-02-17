@@ -13,6 +13,7 @@ const routes: Routes = [
       {path: 'silkCar', loadChildren: './silk-car.module#SilkCarModule'},
       {path: 'config', loadChildren: './config.module#ConfigModule'},
       {path: 'productPlan', loadChildren: './product-plan.module#ProductPlanModule'},
+      {path: 'report', loadChildren: './report.module#ReportModule'},
       {path: 'admin', loadChildren: './admin.module#AdminModule', canActivate: [AdminGuard]}
     ]
   }

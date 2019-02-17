@@ -1,0 +1,76 @@
+<div fxLayout fxLayoutAlign="space-around center" fxLayoutGap="16px" style="padding-right: 16px;flex-shrink: 0;">
+  <form [formGroup]="searchForm" fxFlex>
+    <mat-form-field floatLabel="always" fxFlexOffset="2px">
+      <mat-select formControlName="workshopId" [placeholder]="'workshop'|translate">
+        <mat-option *ngFor="let it of workshops$|async" [value]="it.id">
+          {{it.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field floatLabel="always" fxFlexOffset="2px">
+      <input formControlName="date" matInput required [matDatepicker]="datePicker" [placeholder]="'Common.startDate'|translate">
+      <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+      <mat-datepicker #datePicker color="primary"></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field floatLabel="always" fxFlexOffset="2px">
+      <mat-select formControlName="budatClassId" [placeholder]="'packageClass'|translate">
+        <mat-option *ngFor="let it of budatClasses$|async" [value]="it.id">
+          {{it.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button type="button" (click)="search()" mat-icon-button tabindex="-1">
+      <mat-icon>search</mat-icon>
+    </button>
+  </form>
+</div>
+
+<mat-table [dataSource]="reportItems$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="batch">
+    <mat-header-cell *matHeaderCellDef>{{'batchNo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.batch.batchNo}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef>{{'MeasureReport.total'|translate}}</mat-footer-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="grade">
+    <mat-header-cell *matHeaderCellDef>{{'grade'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.grade.name}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="silkCount">
+    <mat-header-cell *matHeaderCellDef>{{'silkCount'|translate}}{{'MeasureReport.sumInfo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.sumSilkCount}} / {{row.domesticSilkCount}}
+      / {{row.foreignSilkCount}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="foamCount">
+    <mat-header-cell *matHeaderCellDef>{{'foamCount'|translate}}{{'MeasureReport.sumInfo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.sumFoamCount}} / {{row.domesticFoamCount}}
+      / {{row.foreignFoamCount}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="packageBoxCount">
+    <mat-header-cell *matHeaderCellDef>{{'packageBoxCount'|translate}}{{'MeasureReport.sumInfo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.sumPackageBoxCount}} / {{row.domesticPackageBoxCount}}
+      / {{row.foreignPackageBoxCount}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="weightCount">
+    <mat-header-cell *matHeaderCellDef>{{'weightCount'|translate}}
+      KG{{'MeasureReport.sumInfo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.sumNetWeight|number:'1.3-3'}} / {{row.domesticNetWeight|number:'1.3-3'}}
+      / {{row.foreignNetWeight|number:'1.3-3'}}</mat-cell>
+    <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <mat-footer-row *matFooterRowDef="displayedColumns; sticky: true;"></mat-footer-row>
+</mat-table>

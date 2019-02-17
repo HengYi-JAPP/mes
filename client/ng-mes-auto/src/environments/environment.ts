@@ -22,9 +22,10 @@ export function logger(reducer: ActionReducer<any>): ActionReducer<any> {
 export const metaReducers: MetaReducer<any>[] = [logger];
 
 // const baseUrl = 'http://localhost';
-const baseUrl = 'http://10.2.0.215';
+const baseUrl = 'http://192.168.117.233';
+// const baseUrl = 'http://10.2.0.215';
 export const baseApiUrl = baseUrl + ':9998/api';
-export const baseEventbusUrl = baseUrl + ':8080/eventbus';
+export const baseEventbusUrl = baseUrl + ':9999/eventbus';
 
 export const SEARCH_DEBOUNCE_TIME = 500;
 

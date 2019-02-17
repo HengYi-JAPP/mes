@@ -21,8 +21,7 @@ export class ProductUpdateDialogComponent {
   constructor(private store: Store<any>,
               private fb: FormBuilder,
               private apiService: ApiService,
-              private dialogRef: MatDialogRef<ProductUpdateDialogComponent>
-    ,
+              private dialogRef: MatDialogRef<ProductUpdateDialogComponent>,
               @Inject(MAT_DIALOG_DATA)  data: { product: Product }) {
     const {product} = data;
     this.dialogTitle = product.id ? 'Common.edit' : 'Common.create';

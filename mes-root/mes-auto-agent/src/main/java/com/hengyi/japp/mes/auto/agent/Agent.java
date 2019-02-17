@@ -66,7 +66,7 @@ public class Agent {
         return new VertxOptions()
                 .setClusterManager(hazelcastClusterManager)
                 .setClusterHost(InetAddress.getLocalHost().getHostAddress())
-                .setWorkerPoolSize(10_000)
+//                .setWorkerPoolSize(10_000)
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(6))
                 .setMaxWorkerExecuteTime(TimeUnit.HOURS.toNanos(1));
     }

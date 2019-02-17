@@ -9,12 +9,10 @@
     </mat-form-field>
   </form>
 
-  <button (click)="create()" [matTooltip]="'Tooltip.singleCreateLineMachine'|translate" mat-mini-fab tabindex="-1"
-          type="button">
+  <button type="button" (click)="create()" [matTooltip]="'Tooltip.singleCreateLineMachine'|translate" mat-mini-fab tabindex="-1">
     <mat-icon>add</mat-icon>
   </button>
-  <button (click)="createBatch()" [matTooltip]="'Tooltip.batchCreateLineMachine'|translate" mat-mini-fab tabindex="-1"
-          type="button">
+  <button type="button" (click)="createBatch()" [matTooltip]="'Tooltip.batchCreateLineMachine'|translate" mat-mini-fab tabindex="-1">
     <mat-icon>playlist_add</mat-icon>
   </button>
 </div>
