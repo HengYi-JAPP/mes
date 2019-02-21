@@ -7,7 +7,6 @@ import com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterPackageBoxEve
 import com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterSilkCarInfoFetchEvent;
 import com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterSilkDetachEvent;
 import io.reactivex.Single;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.POST;
@@ -33,11 +32,10 @@ public class JikonAdapterResource {
         this.jikonAdapter = jikonAdapter;
     }
 
-    @SneakyThrows
     @ApmTrace(type = "JikonAdapterSilkCarInfoFetchEvent")
     @Path("open/automaticintegration/production/getSilkSpindleInfo")
     @POST
-    public Single<String> getSilkSpindleInfo(String request) {
+    public Single<String> getSilkSpindleInfo(String request) throws Exception {
         final StringBuilder sb = new StringBuilder("JikonAdapterSilkCarInfoFetchEvent").append(request);
         log.info(sb.toString());
         final JikonAdapterSilkCarInfoFetchEvent.Command command = MAPPER.readValue(request, JikonAdapterSilkCarInfoFetchEvent.Command.class);
@@ -45,11 +43,10 @@ public class JikonAdapterResource {
                 .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
     }
 
-    @SneakyThrows
     @ApmTrace(type = "JikonAdapterSilkDetachEvent")
     @Path("open/automaticintegration/production/relieveBindSilkCar")
     @POST
-    public Single<String> relieveBindSilkCar(String request) {
+    public Single<String> relieveBindSilkCar(String request) throws Exception {
         final StringBuilder sb = new StringBuilder("JikonAdapterSilkDetachEvent").append(request);
         log.info(sb.toString());
         final JikonAdapterSilkDetachEvent.Command command = MAPPER.readValue(request, JikonAdapterSilkDetachEvent.Command.class);
@@ -57,11 +54,10 @@ public class JikonAdapterResource {
                 .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
     }
 
-    @SneakyThrows
     @ApmTrace(type = "JikonAdapterPackageBoxEvent")
     @Path("open/automaticintegration/production/getSilkBoxAndspilkInfo")
     @POST
-    public Single<String> getSilkBoxAndspilkInfo(String request) {
+    public Single<String> getSilkBoxAndspilkInfo(String request) throws Exception {
         final StringBuilder sb = new StringBuilder("JikonAdapterPackageBoxEvent").append(request);
         log.info(sb.toString());
         final JikonAdapterPackageBoxEvent.Command command = MAPPER.readValue(request, JikonAdapterPackageBoxEvent.Command.class);

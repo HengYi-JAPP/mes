@@ -172,6 +172,10 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             if (J.nonEmpty(eventSourceList)) {
                 throw new RuntimeException("已经有其他人对丝车操作，无法删除");
             }
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            if (silkCarRecord.getCarpoolDateTime() != null) {
+                throw new RuntimeException("拼车，无法删除");
+            }
             return silkCarRuntimeRepository.delete(silkCarRuntime);
         });
         final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);

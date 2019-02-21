@@ -175,8 +175,8 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
         final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
         final SilkCar silkCar = silkCarRecord.getSilkCar();
         final String redisKey = SilkCarRuntimeRepository.redisKey(silkCar.getCode());
-        final Completable delSilkCarRuntime$ = redisClient.rxDel(redisKey).ignoreElement();
         final Completable delSilkCarRecord$ = silkCarRecordRepository.delete(silkCarRecord);
-        return Completable.mergeArray(delSilkCarRuntime$, delSilkCarRecord$);
+        final Completable delSilkCarRuntime$ = redisClient.rxDel(redisKey).ignoreElement();
+        return delSilkCarRecord$.andThen(delSilkCarRuntime$);
     }
 }

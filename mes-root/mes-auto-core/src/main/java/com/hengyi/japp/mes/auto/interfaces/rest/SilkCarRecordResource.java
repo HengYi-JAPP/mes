@@ -8,14 +8,12 @@ import com.hengyi.japp.mes.auto.application.SilkCarRecordService;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
-import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
-import java.security.Principal;
 import java.time.LocalDate;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -68,9 +66,14 @@ public class SilkCarRecordResource {
         });
     }
 
-    @Path("silkCarRecords/{id}")
-    @DELETE
-    public Completable delete(Principal principal, @PathParam("id") @NotBlank String id) {
-        return silkCarRecordRepository.find(id).flatMapCompletable(silkCarRecordRepository::delete);
-    }
+//    @Path("silkCarRecords/{id}")
+//    @DELETE
+//    public Completable delete(Principal principal, @PathParam("id") @NotBlank String id) {
+//        return silkCarRecordRepository.find(id).flatMapCompletable(silkCarRecord -> {
+//            if (silkCarRecord.getCarpoolDateTime() != null) {
+//                throw new RuntimeException("拼车,无法删除");
+//            }
+//            return silkCarRecordRepository.delete(silkCarRecord);
+//        });
+//    }
 }
