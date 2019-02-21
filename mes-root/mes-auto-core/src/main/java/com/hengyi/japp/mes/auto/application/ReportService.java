@@ -10,7 +10,7 @@ import java.time.LocalDate;
  */
 public interface ReportService {
 
-    Single<MeasurePackageBoxReport> measurePackageBoxReport(LocalDate ld, String budatClassId);
+    Single<MeasurePackageBoxReport> measurePackageBoxReport(String workshopId, LocalDate ld, String budatClassId);
 
     Single<MeasureReport> measureReport(String workshopId, String budatClassId, LocalDate parse);
 

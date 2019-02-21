@@ -149,9 +149,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Single<MeasurePackageBoxReport> measurePackageBoxReport(LocalDate ld, String budatClassId) {
+    public Single<MeasurePackageBoxReport> measurePackageBoxReport(String workshopId, LocalDate ld, String budatClassId) {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
+                .workshopId(workshopId)
                 .budatRange(new LocalDateRange(ld, ld.plusDays(1)))
                 .budatClassIds(Sets.newHashSet(budatClassId))
                 .build();

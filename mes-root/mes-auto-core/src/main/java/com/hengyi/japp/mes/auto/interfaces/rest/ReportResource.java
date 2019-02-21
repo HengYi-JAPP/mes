@@ -43,9 +43,10 @@ public class ReportResource {
 
     @Path("measurePackageBoxReport")
     @GET
-    public Single<MeasurePackageBoxReport> measurePackageBoxReport(@QueryParam("date") @NotBlank String dateString,
+    public Single<MeasurePackageBoxReport> measurePackageBoxReport(@QueryParam("workshopId") String workshopId,
+                                                                   @QueryParam("date") @NotBlank String dateString,
                                                                    @QueryParam("budatClassId") @NotBlank String budatClassId) {
-        return reportService.measurePackageBoxReport(LocalDate.parse(dateString), budatClassId);
+        return reportService.measurePackageBoxReport(workshopId, LocalDate.parse(dateString), budatClassId);
     }
 
     @Path("measureReport")
