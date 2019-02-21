@@ -1,17 +1,20 @@
 package com.hengyi.japp.mes.auto.application.report;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.Batch;
+import com.hengyi.japp.mes.auto.domain.Grade;
+import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.data.SaleType;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -19,19 +22,12 @@ import java.util.stream.Collectors;
  */
 @Data
 public class MeasureReport implements Serializable {
-    private final Workshop workshop;
-    @JsonIgnore
-    private final LocalDate ld;
-    private final PackageClass budatClass;
     private final Collection<Item> items;
     private final int totalPackageBoxCount;
     private final int totalDomesticPackageBoxCount;
     private final int totalForeignPackageBoxCount;
 
-    public MeasureReport(Workshop workshop, LocalDate ld, PackageClass budatClass, Collection<PackageBox> packageBoxes) {
-        this.workshop = workshop;
-        this.ld = ld;
-        this.budatClass = budatClass;
+    public MeasureReport(Collection<PackageBox> packageBoxes) {
         items = J.emptyIfNull(packageBoxes).parallelStream()
                 .collect(Collectors.groupingBy(it -> Pair.of(it.getBatch(), it.getGrade())))
                 .entrySet().parallelStream()
@@ -52,11 +48,6 @@ public class MeasureReport implements Serializable {
         totalForeignPackageBoxCount = J.emptyIfNull(items).parallelStream()
                 .mapToInt(Item::getForeignPackageBoxCount)
                 .sum();
-    }
-
-    @JsonGetter("date")
-    public Date ldJson() {
-        return J.date(ld);
     }
 
     @Data

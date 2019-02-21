@@ -1,9 +1,9 @@
 package com.hengyi.japp.mes.auto.interfaces.rest;
 
-import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ReportService;
+import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.report.MeasurePackageBoxReport;
 import com.hengyi.japp.mes.auto.application.report.MeasureReport;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
@@ -11,12 +11,8 @@ import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -42,25 +38,16 @@ public class ReportResource {
     }
 
     @Path("measurePackageBoxReport")
-    @GET
-    public Single<MeasurePackageBoxReport> measurePackageBoxReport(@QueryParam("workshopId") String workshopId,
-                                                                   @QueryParam("startDate") @NotBlank String startLdString,
-                                                                   @QueryParam("endDate") @NotBlank String endLdString,
-                                                                   @QueryParam("budatClassId") @NotBlank String budatClassId) {
+    @POST
+    public Single<MeasurePackageBoxReport> measurePackageBoxReport(ReportCommand command) {
 
-        return reportService.measurePackageBoxReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString), budatClassId);
+        return reportService.measurePackageBoxReport(command);
     }
 
     @Path("measureReport")
-    @GET
-    public Single<MeasureReport> measureReport(@QueryParam("workshopId") String workshopId,
-                                               @QueryParam("budatClassId") String budatClassId,
-                                               @QueryParam("date") @NotBlank String dateString) {
-        final LocalDate ld = Optional.ofNullable(dateString)
-                .filter(J::nonBlank)
-                .map(LocalDate::parse)
-                .orElse(LocalDate.now());
-        return reportService.measureReport(workshopId, budatClassId, ld);
+    @POST
+    public Single<MeasureReport> measureReport(ReportCommand command) {
+        return reportService.measureReport(command);
     }
 
     @Path("statisticsReport")

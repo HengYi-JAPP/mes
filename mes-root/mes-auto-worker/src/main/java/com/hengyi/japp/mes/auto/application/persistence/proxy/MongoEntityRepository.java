@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.application.persistence.proxy;
 
 import com.hengyi.japp.mes.auto.application.persistence.MongoEntity;
+import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
@@ -43,6 +44,10 @@ public abstract class MongoEntityRepository<T extends MongoEntity> {
 
     public Single<T> save(T t) {
         return t._save().flatMap(this::find);
+    }
+
+    public Single<T> find(EntityDTO dto) {
+        return find(dto.getId());
     }
 
     public Single<T> find(String id) {

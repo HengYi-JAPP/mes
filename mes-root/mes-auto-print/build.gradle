@@ -1,6 +1,6 @@
 dependencies {
-    compile "com.github.ixtf.japp:zxing:${jappVersion}",
-            "com.github.ixtf.japp:print:${jappVersion}",
+    compile "com.github.ixtf.japp:zxing",
+            "com.github.ixtf.japp:print",
             "commons-daemon:commons-daemon:1.1.0"
 }
 

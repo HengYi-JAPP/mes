@@ -2,12 +2,13 @@ dependencies {
     compile "com.github.ixtf.japp:poi",
             project(':mes-auto-core'),
             project(':mes-auto-search'),
-            "cglib:cglib:3.2.10",
+            project(':mes-auto-report'),
+            "cglib:cglib",
             // vertx 用了3.6
             'org.mongodb:mongo-java-driver:3.6.3',
             'mysql:mysql-connector-java:8.0.13',
             "com.zaxxer:HikariCP:${hikariVersion}",
-            "commons-beanutils:commons-beanutils:1.9.3",
+            "commons-beanutils:commons-beanutils",
             "javax.cache:cache-api:1.1.0"
 
     testCompile "com.squareup.okhttp3:okhttp:3.11.0"

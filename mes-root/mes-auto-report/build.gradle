@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':mes-auto-core'),
+            "io.vertx:vertx-hazelcast"
+}
+
+mainClassName = "com.hengyi.japp.mes.auto.report.Report"

@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.report.*;
 import io.reactivex.Single;
 
@@ -10,9 +11,9 @@ import java.time.LocalDate;
  */
 public interface ReportService {
 
-    Single<MeasurePackageBoxReport> measurePackageBoxReport(String workshopId, LocalDate startLd, LocalDate endLd, String budatClassId);
+    Single<MeasurePackageBoxReport> measurePackageBoxReport(ReportCommand command);
 
-    Single<MeasureReport> measureReport(String workshopId, String budatClassId, LocalDate parse);
+    Single<MeasureReport> measureReport(ReportCommand command);
 
     Single<StatisticsReport> statisticsReport(String workshopId, LocalDate startLd, LocalDate endLd);
 

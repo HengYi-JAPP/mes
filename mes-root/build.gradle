@@ -40,7 +40,7 @@ subprojects {
     }
 
     dependencies {
-        compile "com.github.ixtf.japp:vertx:${jappVersion}",
+        compile "com.github.ixtf.japp:vertx",
                 "io.vertx:vertx-rabbitmq-client"
 
         compileOnly "io.vertx:vertx-codegen"
