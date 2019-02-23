@@ -3,7 +3,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxFlipQuery;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -29,8 +28,8 @@ import java.util.Optional;
 public class PackageBoxFlipLucene extends BaseLucene<PackageBoxFlip> {
 
     @Inject
-    private PackageBoxFlipLucene(@Named("luceneRootPath") Path luceneRootPath) throws IOException {
-        super(luceneRootPath);
+    private PackageBoxFlipLucene(MesAutoConfig config) throws IOException {
+        super(config);
     }
 
     @Override

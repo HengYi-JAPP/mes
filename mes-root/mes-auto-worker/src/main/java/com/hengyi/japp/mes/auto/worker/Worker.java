@@ -1,22 +1,18 @@
 package com.hengyi.japp.mes.auto.worker;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.hazelcast.config.Config;
-import com.hengyi.japp.mes.auto.worker.verticle.BackendWorkerVerticle;
+import com.hengyi.japp.mes.auto.GuiceModule;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
-import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.reactivex.plugins.RxJavaPlugins;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
-import io.vertx.reactivex.core.RxHelper;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetAddress;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,11 +24,7 @@ public class Worker {
 
     public static void main(String[] args) {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
-            INJECTOR = Guice.createInjector(new WorkerModule(vertx));
-
-            RxJavaPlugins.setComputationSchedulerHandler(s -> RxHelper.scheduler(vertx));
-            RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
-            RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
+            INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
 //            final ReportService reportService = Jvertx.getProxy(ReportService.class);
 //            final LocalDate startLd = LocalDate.of(2019, 1, 14);
@@ -64,37 +56,26 @@ public class Worker {
 //            tokenCommand.setLoginPassword("123456");
 //            authService.token(tokenCommand).subscribe(System.out::println);
 
-            final Completable agent$ = deployAgentWorker(vertx).ignoreElement();
-            final Completable backend$ = deployBackendWorker(vertx).ignoreElement();
-            return Completable.mergeArray(agent$, backend$);
+            return deployAgentWorker(vertx).ignoreElement();
         }).subscribe();
     }
 
     private static Single<String> deployAgentWorker(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()
-                .setInstances(32)
+                .setInstances(1000)
                 .setWorker(true);
         return vertx.rxDeployVerticle(WorkerVerticle.class.getName(), deploymentOptions);
     }
 
-    private static Single<String> deployBackendWorker(Vertx vertx) {
-        final DeploymentOptions deploymentOptions = new DeploymentOptions()
-                .setInstances(1)
-                .setWorker(true);
-        return vertx.rxDeployVerticle(BackendWorkerVerticle.class.getName(), deploymentOptions);
-    }
-
     @SneakyThrows
     private static VertxOptions vertxOptions() {
-        final Config config = new Config();
-        config.getGroupConfig().setName("mes-auto-cluster");
-        final HazelcastClusterManager hazelcastClusterManager = new HazelcastClusterManager(config);
-
-        return new VertxOptions()
-                .setClusterManager(hazelcastClusterManager)
-                .setClusterHost(InetAddress.getLocalHost().getHostAddress())
+        final VertxOptions vertxOptions = new VertxOptions()
                 .setWorkerPoolSize(1000)
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(6))
                 .setMaxWorkerExecuteTime(TimeUnit.HOURS.toNanos(1));
+        Optional.ofNullable(System.getProperty("vertx.cluster.host"))
+                .filter(J::nonBlank)
+                .ifPresent(vertxOptions::setClusterHost);
+        return vertxOptions;
     }
 }

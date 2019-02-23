@@ -33,7 +33,7 @@ public class SilkPrintable implements Printable {
     private final SilkPrintCommand command;
     private final int numPages;
 
-    SilkPrintable(SilkPrintConfig config, SilkPrintCommand command) {
+    public SilkPrintable(SilkPrintConfig config, SilkPrintCommand command) {
         this.config = config;
         this.command = command;
 

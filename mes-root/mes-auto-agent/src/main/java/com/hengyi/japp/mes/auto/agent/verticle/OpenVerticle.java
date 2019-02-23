@@ -3,12 +3,7 @@ package com.hengyi.japp.mes.auto.agent.verticle;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.github.ixtf.japp.vertx.annotations.FileDownload;
 import com.google.common.collect.Sets;
-import com.google.inject.Key;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
-import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
-import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
-import com.hengyi.japp.mes.auto.repository.SilkRepository;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -31,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.agent.Agent.INJECTOR;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 /**
@@ -39,6 +33,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
  */
 @Slf4j
 public class OpenVerticle extends AbstractVerticle {
+    final MesAutoConfig config = INJECTOR.getInstance(MesAutoConfig.class);
 
     @Override
     public void start(Future<Void> startFuture) {
@@ -68,27 +63,11 @@ public class OpenVerticle extends AbstractVerticle {
         Jvertx.apiGateway().rxMount(router)
                 .toSingleDefault(vertx.createHttpServer(httpServerOptions))
                 .flatMap(httpServer -> {
-                    final Named named = Names.named("open.port");
-                    final Key<Integer> key = Key.get(Integer.class, named);
-                    final Integer port = INJECTOR.getInstance(key);
+                    final Integer port = config.getOpenConfig().getInteger("port", 9999);
                     return httpServer.requestHandler(router).rxListen(port);
-                }).ignoreElement()
+                })
+                .ignoreElement()
                 .subscribe(startFuture::complete, startFuture::fail);
-    }
-
-    private void router(Router router) {
-        router.get("/lucences/SilkBarcodes").produces(APPLICATION_JSON).handler(rc -> {
-            final SilkBarcodeRepository silkBarcodeRepository = Jvertx.getProxy(SilkBarcodeRepository.class);
-            silkBarcodeRepository.list().forEach(silkBarcodeRepository::index);
-        });
-        router.get("/lucences/SilkCarRecords").produces(APPLICATION_JSON).handler(rc -> {
-            final SilkCarRecordRepository silkCarRecordRepository = Jvertx.getProxy(SilkCarRecordRepository.class);
-            silkCarRecordRepository.list().forEach(silkCarRecordRepository::index);
-        });
-        router.get("/lucences/Silks").produces(APPLICATION_JSON).handler(rc -> {
-            final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
-            silkRepository.list().forEach(silkRepository::index);
-        });
     }
 
     // todo websocket 权限

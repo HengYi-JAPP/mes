@@ -10,9 +10,6 @@ import java.io.Serializable;
  */
 @Data
 public class SilkPrintConfig implements Serializable {
-    private boolean debug;
-    @NotNull
-    private PrinterConfig printerConfig;
     @NotNull
     private PaperConfig paperConfig;
     @NotNull
@@ -21,8 +18,4 @@ public class SilkPrintConfig implements Serializable {
     private BarcodeConfig barcodeConfig;
 
 
-    @Data
-    public class FontConfig implements Serializable {
-        private int size;
-    }
 }

@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.interfaces.riamb.dto;
 
+import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -12,8 +13,14 @@ import java.util.List;
 @Data
 public class RiambSilkDetachEventDTO implements Serializable {
     @NotBlank
-    private String silkCarCode;
+    private SilkCarInfo silkCarInfo;
     @NotBlank
     private List<String> silkCodes;
+
+    @Data
+    public static class SilkCarInfo extends EntityDTO {
+        @NotBlank
+        private String code;
+    }
 
 }

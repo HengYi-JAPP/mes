@@ -2,7 +2,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,6 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -28,8 +27,8 @@ import java.util.Optional;
 public class SilkLucene extends BaseLucene<Silk> {
 
     @Inject
-    private SilkLucene(@Named("luceneRootPath") Path luceneRootPath) throws IOException {
-        super(luceneRootPath);
+    private SilkLucene(MesAutoConfig config) throws IOException {
+        super(config);
     }
 
     @Override

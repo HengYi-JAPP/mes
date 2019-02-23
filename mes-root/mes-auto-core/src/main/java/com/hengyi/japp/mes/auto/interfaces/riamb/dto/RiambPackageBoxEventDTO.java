@@ -57,6 +57,7 @@ public class RiambPackageBoxEventDTO implements Serializable {
         private String creatorHrId;
         @NotNull
         private Date createDateTime;
+        private String lgort;
         private String otherInfo;
     }
 

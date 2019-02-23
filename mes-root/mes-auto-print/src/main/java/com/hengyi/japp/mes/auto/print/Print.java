@@ -2,21 +2,15 @@ package com.hengyi.japp.mes.auto.print;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.hengyi.japp.mes.auto.print.application.SilkPrintPubSub;
 import com.hengyi.japp.mes.auto.print.application.command.SilkPrintCommand;
-import com.hengyi.japp.mes.auto.print.verticle.AmqpVerticle;
-import com.hengyi.japp.mes.auto.print.verticle.PrintVerticle;
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.plugins.RxJavaPlugins;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.VertxOptions;
-import io.vertx.reactivex.core.RxHelper;
-import io.vertx.reactivex.core.Vertx;
+import com.hengyi.japp.mes.auto.print.application.config.PrinterConfig;
 import lombok.extern.slf4j.Slf4j;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,38 +19,25 @@ import java.util.stream.IntStream;
  */
 @Slf4j
 public class Print {
-    public static Injector INJECTOR;
+    public static final Injector INJECTOR = Guice.createInjector(new PrintModule());
 
     public static void start(String[] args) {
     }
 
     public static void stop(String[] args) {
+        final JedisPool jedisPool = INJECTOR.getInstance(JedisPool.class);
+        jedisPool.close();
         System.exit(0);
     }
 
     public static void main(String[] args) {
-        final VertxOptions vertxOptions = new VertxOptions()
-                .setMaxEventLoopExecuteTime(TimeUnit.DAYS.toNanos(1));
-        final Vertx vertx = Vertx.vertx(vertxOptions);
-        INJECTOR = Guice.createInjector(new PrintModule(vertx));
-
-        RxJavaPlugins.setComputationSchedulerHandler(s -> RxHelper.scheduler(vertx));
-        RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
-        RxJavaPlugins.setNewThreadSchedulerHandler(s -> RxHelper.scheduler(vertx));
-
-        final Completable print$ = deployPrint(vertx).toCompletable();
-        final Completable amqp$ = deployAmqp(vertx).toCompletable();
-        Completable.mergeArray(print$, amqp$).subscribe(() -> test());
-    }
-
-    private static Single<String> deployPrint(Vertx vertx) {
-        final DeploymentOptions deploymentOptions = new DeploymentOptions();
-        return vertx.rxDeployVerticle(PrintVerticle.class.getName(), deploymentOptions);
-    }
-
-    private static Single<String> deployAmqp(Vertx vertx) {
-        final DeploymentOptions deploymentOptions = new DeploymentOptions();
-        return vertx.rxDeployVerticle(AmqpVerticle.class.getName(), deploymentOptions);
+        final JedisPool jedisPool = INJECTOR.getInstance(JedisPool.class);
+        try (Jedis jedis = jedisPool.getResource()) {
+            final SilkPrintPubSub silkPrintPubSub = INJECTOR.getInstance(SilkPrintPubSub.class);
+            final PrinterConfig printerConfig = INJECTOR.getInstance(PrinterConfig.class);
+            final String channel = String.join("-", "SilkBarcodePrinter", printerConfig.getId(), printerConfig.getName());
+            jedis.subscribe(silkPrintPubSub, channel);
+        }
     }
 
     static void test() throws Exception {

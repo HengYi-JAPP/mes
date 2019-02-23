@@ -5,6 +5,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
  */
 
 import com.github.ixtf.japp.core.J;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.persistence.JsonEntity;
 import com.hengyi.japp.mes.auto.domain.LoggableMongoEntity;
 import com.hengyi.japp.mes.auto.domain.Operator;
@@ -34,11 +35,11 @@ public abstract class BaseLucene<T extends JsonEntity> {
     protected final FacetsConfig facetsConfig;
 
     @SneakyThrows
-    protected BaseLucene(Path luceneRootPath) {
+    protected BaseLucene(MesAutoConfig config) {
         entityClass = entityClass();
-        final Path indexPath = luceneRootPath.resolve(entityClass.getSimpleName());
+        final Path indexPath = config.luceneIndexPath(entityClass);
         indexWriter = new IndexWriter(FSDirectory.open(indexPath), new IndexWriterConfig(new SmartChineseAnalyzer()));
-        final Path taxoPath = luceneRootPath.resolve(entityClass.getSimpleName() + "_Taxonomy");
+        final Path taxoPath = config.luceneTaxoPath(entityClass);
         taxoWriter = new DirectoryTaxonomyWriter(FSDirectory.open(taxoPath));
         facetsConfig = facetsConfig();
     }

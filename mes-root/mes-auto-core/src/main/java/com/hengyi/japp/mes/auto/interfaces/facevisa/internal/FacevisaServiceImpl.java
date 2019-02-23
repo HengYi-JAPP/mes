@@ -4,7 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.interfaces.facevisa.FacevisaService;
 import com.hengyi.japp.mes.auto.interfaces.facevisa.dto.AutoVisualInspectionSilkInfoDTO;
@@ -13,6 +13,8 @@ import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,12 +33,14 @@ import static com.hengyi.japp.mes.auto.interfaces.jikon.dto.GetSilkSpindleInfoDT
 @Slf4j
 @Singleton
 public class FacevisaServiceImpl implements FacevisaService {
-    private final JDBCClient jikonDS;
+    private final Vertx vertx;
+    private final MesAutoConfig config;
     private final SilkRepository silkRepository;
 
     @Inject
-    private FacevisaServiceImpl(@Named("jikonDS") JDBCClient jikonDS, SilkRepository silkRepository) {
-        this.jikonDS = jikonDS;
+    private FacevisaServiceImpl(Vertx vertx, MesAutoConfig config, SilkRepository silkRepository) {
+        this.vertx = vertx;
+        this.config = config;
         this.silkRepository = silkRepository;
     }
 
@@ -110,9 +114,14 @@ public class FacevisaServiceImpl implements FacevisaService {
             return J.strTpl(SQL_TPL, map);
         }).toList().flatMapCompletable(sqls -> {
             log.info(sqls.toString());
-            return jikonDS.rxGetConnection().flatMap(sqlConnection ->
+            return jikonDS().rxGetConnection().flatMap(sqlConnection ->
                     sqlConnection.rxBatch(sqls).doAfterTerminate(sqlConnection::close)
             ).ignoreElement();
         }).doOnError(ex -> log.error("prepareFacevisa", ex));
+    }
+
+    private JDBCClient jikonDS() {
+        final JsonObject jikonDsOptions = config.getJikonDsOptions();
+        return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
     }
 }

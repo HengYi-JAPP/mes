@@ -3,7 +3,7 @@ package com.hengyi.japp.mes.auto.interfaces.riamb.dto;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.domain.dto.EntityByCodeDTO;
+import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -27,9 +27,11 @@ public class RiambFetchSilkCarRecordResultDTO implements Serializable {
     private List<SilkInfo> silkInfos;
 
     @Data
-    public static class SilkCarInfo extends EntityByCodeDTO {
+    public static class SilkCarInfo extends EntityDTO {
+        private String code;
         private int row;
         private int col;
+        private String batchNo;
     }
 
     @Data

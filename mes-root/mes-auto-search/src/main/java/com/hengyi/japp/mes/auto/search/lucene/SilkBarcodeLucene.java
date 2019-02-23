@@ -3,7 +3,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
@@ -30,8 +29,8 @@ import java.util.Optional;
 public class SilkBarcodeLucene extends BaseLucene<SilkBarcode> {
 
     @Inject
-    private SilkBarcodeLucene(@Named("luceneRootPath") Path luceneRootPath) {
-        super(luceneRootPath);
+    private SilkBarcodeLucene(MesAutoConfig config) {
+        super(config);
     }
 
     @Override

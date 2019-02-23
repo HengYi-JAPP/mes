@@ -1,7 +1,5 @@
 package com.hengyi.japp.mes.auto.print.application.command;
 
-import com.github.ixtf.japp.vertx.Jvertx;
-import com.hengyi.japp.mes.auto.print.application.config.SilkPrintConfig;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
@@ -20,11 +18,6 @@ public class SilkPrintCommand implements Serializable {
     @NotNull
     @Size(min = 1)
     private Collection<Item> silks;
-
-    public SilkPrintable toPrintable() {
-        final SilkPrintConfig silkPrintConfig = Jvertx.getProxy(SilkPrintConfig.class);
-        return new SilkPrintable(silkPrintConfig, this);
-    }
 
     @Data
     public static class Item implements Serializable {

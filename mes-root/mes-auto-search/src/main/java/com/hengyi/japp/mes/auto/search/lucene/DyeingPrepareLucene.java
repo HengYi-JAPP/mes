@@ -3,7 +3,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.domain.*;
@@ -21,7 +21,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,7 +33,7 @@ import java.util.stream.Stream;
 public class DyeingPrepareLucene extends BaseLucene<DyeingPrepare> {
 
     @Inject
-    private DyeingPrepareLucene(@Named("luceneRootPath") Path luceneRootPath) throws IOException {
+    private DyeingPrepareLucene(MesAutoConfig luceneRootPath) throws IOException {
         super(luceneRootPath);
     }
 

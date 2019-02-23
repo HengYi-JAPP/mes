@@ -11,5 +11,6 @@ import javax.validation.constraints.NotBlank;
 public class PrinterConfig {
     @NotBlank
     private String id;
+    @NotBlank
     private String name;
 }

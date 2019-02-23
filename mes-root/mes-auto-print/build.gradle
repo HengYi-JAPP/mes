@@ -1,6 +1,12 @@
 dependencies {
     compile "com.github.ixtf.japp:zxing",
             "com.github.ixtf.japp:print",
+            "com.google.inject:guice",
+            "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
+            "javax:javaee-api",
+            "org.hibernate.validator:hibernate-validator",
+            "org.glassfish:javax.el",
+            "redis.clients:jedis:3.0.1",
             "commons-daemon:commons-daemon:1.1.0"
 }
 
