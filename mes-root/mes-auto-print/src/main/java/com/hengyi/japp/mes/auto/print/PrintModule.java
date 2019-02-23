@@ -7,8 +7,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.hengyi.japp.mes.auto.print.application.config.PrinterConfig;
-import com.hengyi.japp.mes.auto.print.application.config.SilkPrintConfig;
+import com.hengyi.japp.mes.auto.print.config.PrinterConfig;
+import com.hengyi.japp.mes.auto.print.config.SilkPrintConfig;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 

@@ -1,4 +1,4 @@
-package com.hengyi.japp.mes.auto.print.application.command;
+package com.hengyi.japp.mes.auto.print.printable;
 
 import com.google.common.collect.Maps;
 import com.google.zxing.BarcodeFormat;
@@ -7,8 +7,9 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.hengyi.japp.mes.auto.print.application.config.PaperConfig;
-import com.hengyi.japp.mes.auto.print.application.config.SilkPrintConfig;
+import com.hengyi.japp.mes.auto.print.command.SilkPrintCommand;
+import com.hengyi.japp.mes.auto.print.config.PaperConfig;
+import com.hengyi.japp.mes.auto.print.config.SilkPrintConfig;
 import lombok.SneakyThrows;
 
 import javax.print.PrintService;

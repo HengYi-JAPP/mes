@@ -1,4 +1,4 @@
-package com.hengyi.japp.mes.auto.print.application.config;
+package com.hengyi.japp.mes.auto.print.config;
 
 import lombok.Data;
 

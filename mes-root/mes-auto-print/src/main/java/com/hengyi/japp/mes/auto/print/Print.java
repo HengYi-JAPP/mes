@@ -2,9 +2,7 @@ package com.hengyi.japp.mes.auto.print;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.hengyi.japp.mes.auto.print.application.SilkPrintPubSub;
-import com.hengyi.japp.mes.auto.print.application.command.SilkPrintCommand;
-import com.hengyi.japp.mes.auto.print.application.config.PrinterConfig;
+import com.hengyi.japp.mes.auto.print.command.SilkPrintCommand;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -34,9 +32,7 @@ public class Print {
         final JedisPool jedisPool = INJECTOR.getInstance(JedisPool.class);
         try (Jedis jedis = jedisPool.getResource()) {
             final SilkPrintPubSub silkPrintPubSub = INJECTOR.getInstance(SilkPrintPubSub.class);
-            final PrinterConfig printerConfig = INJECTOR.getInstance(PrinterConfig.class);
-            final String channel = String.join("-", "SilkBarcodePrinter", printerConfig.getId(), printerConfig.getName());
-            jedis.subscribe(silkPrintPubSub, channel);
+            jedis.subscribe(silkPrintPubSub, silkPrintPubSub.getCHANNEL());
         }
     }
 
