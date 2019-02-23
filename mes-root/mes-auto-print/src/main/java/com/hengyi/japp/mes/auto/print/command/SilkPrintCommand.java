@@ -31,7 +31,6 @@ public class SilkPrintCommand implements Serializable {
         private int lineMachineItem;
         @Min(1)
         private int spindle;
-        @NotBlank
         private String doffingNum;
         @NotBlank
         private String batchNo;

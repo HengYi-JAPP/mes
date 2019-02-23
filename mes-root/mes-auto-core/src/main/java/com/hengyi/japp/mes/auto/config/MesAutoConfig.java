@@ -1,10 +1,13 @@
-package com.hengyi.japp.mes.auto;
+package com.hengyi.japp.mes.auto.config;
 
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.Util;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.rabbitmq.RabbitMQOptions;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.redis.RedisOptions;
 import lombok.Getter;
 
@@ -23,6 +26,8 @@ public class MesAutoConfig {
     private final JsonObject pdaConfig;
     @Getter
     private final JsonObject openConfig;
+    //    @Getter
+//    private final JsonObject corsConfig;
     @Getter
     private final JsonObject mongoOptions;
     @Getter
@@ -31,7 +36,6 @@ public class MesAutoConfig {
     private final RabbitMQOptions rabbitMQOptions;
     @Getter
     private final JWTAuthOptions jwtAuthOptions;
-
     @Getter
     private final JsonObject jikonDsOptions;
 
@@ -75,4 +79,9 @@ public class MesAutoConfig {
         final Path path = Paths.get("db", "lucene", clazz.getSimpleName() + "_Taxonomy");
         return rootPath.resolve(path);
     }
+
+    public JDBCClient jikonDS(Vertx vertx) {
+        return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
+    }
+
 }

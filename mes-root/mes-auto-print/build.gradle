@@ -6,8 +6,8 @@ dependencies {
             "javax:javaee-api",
             "org.hibernate.validator:hibernate-validator",
             "org.glassfish:javax.el",
-            "redis.clients:jedis:3.0.1",
-            "commons-daemon:commons-daemon:1.1.0"
+            "commons-daemon:commons-daemon",
+            "redis.clients:jedis:3.0.1"
 }
 
 apply plugin: 'application'

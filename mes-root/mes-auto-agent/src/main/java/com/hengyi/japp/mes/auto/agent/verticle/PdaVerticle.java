@@ -2,7 +2,7 @@ package com.hengyi.japp.mes.auto.agent.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.Sets;
-import com.hengyi.japp.mes.auto.MesAutoConfig;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.AbstractVerticle;

@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.search;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.hengyi.japp.mes.auto.GuiceModule;
 import com.hengyi.japp.mes.auto.search.verticle.SearchVerticle;
 import com.hengyi.japp.mes.auto.search.verticle.WebVerticle;
 import io.reactivex.Completable;
@@ -22,7 +23,7 @@ public class Search {
                 .setWorkerPoolSize(10_000)
                 .setHAEnabled(true);
         final Vertx vertx = Vertx.vertx(vertxOptions);
-        INJECTOR = Guice.createInjector(new SearchModule(vertx));
+        INJECTOR = Guice.createInjector(new GuiceModule(vertx));
 
         RxJavaPlugins.setComputationSchedulerHandler(s -> RxHelper.scheduler(vertx));
         RxJavaPlugins.setIoSchedulerHandler(s -> RxHelper.blockingScheduler(vertx));
