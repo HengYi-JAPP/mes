@@ -3,6 +3,7 @@ package ad;
 import com.github.ixtf.japp.codec.Jcodec;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.hengyi.japp.mes.auto.GuiceModule;
 import com.hengyi.japp.mes.auto.worker.WorkerModule;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jwt.JWTOptions;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 
 public class AdTest {
     static final Vertx vertx = Vertx.vertx();
-    static final Injector injector = Guice.createInjector(new WorkerModule(vertx));
+    static final Injector injector = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
     @SneakyThrows
     public static void main(String[] args) {

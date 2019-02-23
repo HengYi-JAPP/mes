@@ -19,15 +19,6 @@ import java.util.stream.IntStream;
 public class Print {
     public static final Injector INJECTOR = Guice.createInjector(new PrintModule());
 
-    public static void start(String[] args) {
-    }
-
-    public static void stop(String[] args) {
-        final JedisPool jedisPool = INJECTOR.getInstance(JedisPool.class);
-        jedisPool.close();
-        System.exit(0);
-    }
-
     public static void main(String[] args) {
         final JedisPool jedisPool = INJECTOR.getInstance(JedisPool.class);
         try (Jedis jedis = jedisPool.getResource()) {
