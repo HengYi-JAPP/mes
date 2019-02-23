@@ -19,6 +19,7 @@ import com.hengyi.japp.mes.auto.interfaces.riamb.RiambService;
 import com.hengyi.japp.mes.auto.interfaces.riamb.internal.RiambServiceImpl;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.internal.WarehouseServiceImpl;
+import com.hengyi.japp.mes.auto.report.api.ReportServiceImpl;
 import com.hengyi.japp.mes.auto.repository.*;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;

@@ -2,9 +2,9 @@ package com.hengyi.japp.mes.auto.application;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.report.PoiUtil;
 import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
 import com.hengyi.japp.mes.auto.repository.WorkshopRepository;
-import com.hengyi.japp.mes.auto.worker.PoiUtil;
 import io.reactivex.Single;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;

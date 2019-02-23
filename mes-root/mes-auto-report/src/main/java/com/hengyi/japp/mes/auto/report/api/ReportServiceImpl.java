@@ -1,8 +1,9 @@
-package com.hengyi.japp.mes.auto.application;
+package com.hengyi.japp.mes.auto.report.api;
 
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.ReportService;
 import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
@@ -40,16 +41,14 @@ public class ReportServiceImpl implements ReportService {
     private final LineMachineRepository lineMachineRepository;
     private final PackageBoxRepository packageBoxRepository;
     private final SilkRepository silkRepository;
-    private final PackageClassRepository packageClassRepository;
 
     @Inject
-    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, PackageClassRepository packageClassRepository) {
+    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository) {
         this.workshopRepository = workshopRepository;
         this.lineRepository = lineRepository;
         this.lineMachineRepository = lineMachineRepository;
         this.packageBoxRepository = packageBoxRepository;
         this.silkRepository = silkRepository;
-        this.packageClassRepository = packageClassRepository;
     }
 
     @Override

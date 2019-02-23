@@ -1,4 +1,4 @@
-package com.hengyi.japp.mes.auto.worker;
+package com.hengyi.japp.mes.auto.report;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
