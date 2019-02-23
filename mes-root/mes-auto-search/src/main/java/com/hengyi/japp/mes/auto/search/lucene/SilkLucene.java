@@ -2,8 +2,8 @@ package com.hengyi.japp.mes.auto.search.lucene;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;

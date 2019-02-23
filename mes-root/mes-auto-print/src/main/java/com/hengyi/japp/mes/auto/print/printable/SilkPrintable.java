@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.print.printable;
 
+import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Maps;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -70,7 +71,8 @@ public class SilkPrintable implements Printable {
                 final String prefix = "GXHY";
                 final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                 final String dateString = df.format(item.getCodeDate());
-                final String s4 = String.join("", prefix, dateString, item.getDoffingNum());
+                final String doffingNum = J.defaultString(item.getDoffingNum());
+                final String s4 = String.join("", prefix, dateString, doffingNum);
                 y += 3.5;
                 drawString(s4, g2d, font, mmToPix(x), mmToPix(y));
                 final String code = item.getCode();

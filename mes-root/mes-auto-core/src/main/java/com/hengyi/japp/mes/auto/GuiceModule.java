@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;

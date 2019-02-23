@@ -5,8 +5,8 @@ package com.hengyi.japp.mes.auto.search.lucene;
  */
 
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.MesAutoConfig;
 import com.hengyi.japp.mes.auto.application.persistence.JsonEntity;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.LoggableMongoEntity;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import lombok.Cleanup;

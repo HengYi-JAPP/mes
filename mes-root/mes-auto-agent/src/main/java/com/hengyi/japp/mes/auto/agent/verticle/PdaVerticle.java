@@ -1,8 +1,7 @@
 package com.hengyi.japp.mes.auto.agent.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
-import com.google.common.collect.Sets;
-import com.hengyi.japp.mes.auto.MesAutoConfig;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -25,7 +24,7 @@ public class PdaVerticle extends AbstractVerticle {
     public void start(Future<Void> startFuture) {
         final Router router = Router.router(vertx);
         Jvertx.enableCommon(router);
-        Jvertx.enableCors(router, Sets.newHashSet("10\\.2\\.0\\.215"));
+        Jvertx.enableCors(router, config.getCorsConfig().getDomainPatterns());
         router.route().failureHandler(Jvertx::failureHandler);
 
         router.get("/apkInfo").produces(APPLICATION_JSON).handler(rc -> rc.response().end(config.apkInfo().encode()));

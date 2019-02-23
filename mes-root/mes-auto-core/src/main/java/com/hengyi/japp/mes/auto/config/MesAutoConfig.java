@@ -1,10 +1,13 @@
-package com.hengyi.japp.mes.auto;
+package com.hengyi.japp.mes.auto.config;
 
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.Util;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.rabbitmq.RabbitMQOptions;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.redis.RedisOptions;
 import lombok.Getter;
 
@@ -24,6 +27,8 @@ public class MesAutoConfig {
     @Getter
     private final JsonObject openConfig;
     @Getter
+    private final CorsConfig corsConfig;
+    @Getter
     private final JsonObject mongoOptions;
     @Getter
     private final RedisOptions redisOptions;
@@ -31,15 +36,15 @@ public class MesAutoConfig {
     private final RabbitMQOptions rabbitMQOptions;
     @Getter
     private final JWTAuthOptions jwtAuthOptions;
-
     @Getter
     private final JsonObject jikonDsOptions;
 
-    MesAutoConfig() {
+    public MesAutoConfig() {
         rootPath = Paths.get(System.getProperty("japp.mes.auto.path", "/home/mes/auto"));
         rootConfig = Util.readJsonObject(rootPath.resolve("config.yml"));
         pdaConfig = rootConfig.getJsonObject("pda");
         openConfig = rootConfig.getJsonObject("open");
+        corsConfig = new CorsConfig(rootConfig.getJsonObject("cors"));
         mongoOptions = rootConfig.getJsonObject("mongo");
         redisOptions = new RedisOptions(rootConfig.getJsonObject("redis"));
         rabbitMQOptions = new RabbitMQOptions(rootConfig.getJsonObject("rabbit"));
@@ -75,4 +80,9 @@ public class MesAutoConfig {
         final Path path = Paths.get("db", "lucene", clazz.getSimpleName() + "_Taxonomy");
         return rootPath.resolve(path);
     }
+
+    public JDBCClient jikonDS(Vertx vertx) {
+        return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
+    }
+
 }
