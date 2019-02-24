@@ -16,6 +16,8 @@ public class SilkPrintConfig implements Serializable {
     private FontConfig fontConfig;
     @NotNull
     private BarcodeConfig barcodeConfig;
+    @NotNull
+    private ZxingConfig zxingConfig;
 
 
 }

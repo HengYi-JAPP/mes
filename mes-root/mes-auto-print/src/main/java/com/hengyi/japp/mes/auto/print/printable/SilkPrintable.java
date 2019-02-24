@@ -11,10 +11,12 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.hengyi.japp.mes.auto.print.command.SilkPrintCommand;
 import com.hengyi.japp.mes.auto.print.config.PaperConfig;
 import com.hengyi.japp.mes.auto.print.config.SilkPrintConfig;
+import com.hengyi.japp.mes.auto.print.config.ZxingConfig;
 import lombok.SneakyThrows;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+import javax.validation.constraints.NotNull;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
@@ -106,7 +108,8 @@ public class SilkPrintable implements Printable {
         // 容错级别 这里选择最高H级别
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         MultiFormatWriter writer = new MultiFormatWriter();
-        final BitMatrix bitMatrix = writer.encode(content, BarcodeFormat.CODE_128, 500, 300, hints);
+        @NotNull final ZxingConfig zxingConfig = config.getZxingConfig();
+        final BitMatrix bitMatrix = writer.encode(content, BarcodeFormat.CODE_128, zxingConfig.getWidth(), zxingConfig.getHeight(), hints);
         return MatrixToImageWriter.toBufferedImage(bitMatrix);
     }
 
