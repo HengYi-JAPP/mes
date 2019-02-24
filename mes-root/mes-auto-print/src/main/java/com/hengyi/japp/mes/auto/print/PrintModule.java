@@ -28,7 +28,7 @@ public class PrintModule extends AbstractModule {
     @Singleton
     @Named("rootPath")
     private Path rootPath() {
-        return Paths.get(System.getProperty("japp.mes.auto.print.path", "/home/mes/auto-print"));
+        return Paths.get(System.getProperty("mes.auto.print.path", "/home/mes/auto-print"));
     }
 
     @Provides
