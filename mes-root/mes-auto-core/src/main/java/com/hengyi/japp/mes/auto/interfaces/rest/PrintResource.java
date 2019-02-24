@@ -64,4 +64,5 @@ public class PrintResource {
     public Completable print(Principal principal, PrintCommand.SilkPrintCommand command) {
         return silkBarcodeService.print(principal, command);
     }
+
 }

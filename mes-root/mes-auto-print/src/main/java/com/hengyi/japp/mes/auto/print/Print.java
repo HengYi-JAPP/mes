@@ -20,4 +20,5 @@ public class Print {
             jedis.subscribe(silkPrintPubSub, silkPrintPubSub.getCHANNEL());
         }
     }
+
 }

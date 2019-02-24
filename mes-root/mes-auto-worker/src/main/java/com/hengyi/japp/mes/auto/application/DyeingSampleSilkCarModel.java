@@ -29,11 +29,11 @@ public class DyeingSampleSilkCarModel extends ManualSilkCarModel {
     @Override
     public Single<List<CheckSilkDTO>> checkSilks() {
         final Corporation corporation = workshop.getCorporation();
-        if (corporation.getCode().equals("3000") && workshop.getCode().equals("B")) {
+//        if (corporation.getCode().equals("3000") && workshop.getCode().equals("B")) {
             final ImmutableList.Builder<CheckSilkDTO> builder = ImmutableList.builder();
             builder.add(SilkCarModel.shuffle(silkCar.checkSilks(SilkCarSideType.A)));
             return Single.just(builder.build());
-        }
-        throw new RuntimeException();
+//        }
+//        throw new RuntimeException();
     }
 }
