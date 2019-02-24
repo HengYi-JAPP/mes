@@ -43,9 +43,7 @@ public class MongoEntityInterceptor<T extends MongoEntity> extends JsonEntityInt
     protected Single<String> handleCreate() {
         final MongoClient mongoClient = mongoEntiyManager.getMongoClient();
         final JsonObject document = collectFields().put("_id", _id);
-        return mongoClient.rxSave(collectionName, document)
-                .map(it -> _id)
-                .toSingle();
+        return mongoClient.rxSave(collectionName, document).defaultIfEmpty(_id).toSingle();
     }
 
     private JsonObject collectFields() {

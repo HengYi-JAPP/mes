@@ -56,11 +56,11 @@ public class Worker {
 //            tokenCommand.setLoginPassword("123456");
 //            authService.token(tokenCommand).subscribe(System.out::println);
 
-            return deployAgentWorker(vertx).ignoreElement();
+            return deployWorker(vertx).ignoreElement();
         }).subscribe();
     }
 
-    private static Single<String> deployAgentWorker(Vertx vertx) {
+    private static Single<String> deployWorker(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()
                 .setInstances(1000)
                 .setWorker(true);

@@ -27,7 +27,6 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.mongo.MongoClient;
 import io.vertx.reactivex.redis.RedisClient;
 import io.vertx.redis.RedisOptions;
@@ -143,15 +142,6 @@ public class WorkerModule extends AbstractModule {
     private Path eventSourceRootPath(MesAutoConfig config) {
         final Path path = Paths.get("db", "event-source");
         return config.getRootPath().resolve(path);
-    }
-
-    @SneakyThrows
-    @Provides
-    @Singleton
-    @Named("jikonDS")
-    private JDBCClient jikonDS(Vertx vertx, MesAutoConfig config) {
-        final JsonObject jikonDsOptions = config.getJikonDsOptions();
-        return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
     }
 
     @SneakyThrows

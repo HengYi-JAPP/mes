@@ -82,13 +82,14 @@ public class MongoEntiyManager implements CachedJsonEntityManager<MongoEntity> {
         final JsonObject query = new JsonObject().put("_id", id);
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                 // fixme maybe single
-                .flatMapSingle(it -> {
+                .flatMap(it -> {
                     if (it == null) {
                         log.error(entityClass + "[" + id + "]");
                         throw new JJsonEntityNotExsitException(entityClass, id);
                     }
-                    return rxCreateMongoEntiy(entityClass, it);
-                });
+                    return rxCreateMongoEntiy(entityClass, it).toMaybe();
+                })
+                .toSingle();
     }
 
     @Override

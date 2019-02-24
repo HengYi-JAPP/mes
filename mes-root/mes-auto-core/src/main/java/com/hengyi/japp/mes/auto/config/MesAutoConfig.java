@@ -48,6 +48,7 @@ public class MesAutoConfig {
         mongoOptions = rootConfig.getJsonObject("mongo");
         redisOptions = new RedisOptions(rootConfig.getJsonObject("redis"));
         rabbitMQOptions = new RabbitMQOptions(rootConfig.getJsonObject("rabbit"));
+
         final PubSecKeyOptions pubSecKey = new PubSecKeyOptions(rootConfig.getJsonObject("jwt"));
         jwtAuthOptions = new JWTAuthOptions().addPubSecKey(pubSecKey);
 
