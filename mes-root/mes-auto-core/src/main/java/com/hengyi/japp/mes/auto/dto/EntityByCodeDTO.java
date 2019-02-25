@@ -1,4 +1,4 @@
-package com.hengyi.japp.mes.auto.domain.dto;
+package com.hengyi.japp.mes.auto.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,8 +11,8 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class EntityDTO implements Serializable {
+public class EntityByCodeDTO implements Serializable {
     @EqualsAndHashCode.Include
     @NotBlank
-    private String id;
+    private String code;
 }

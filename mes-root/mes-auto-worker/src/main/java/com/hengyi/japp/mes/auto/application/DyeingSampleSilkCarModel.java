@@ -5,7 +5,7 @@ import com.hengyi.japp.mes.auto.domain.Corporation;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.Workshop;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import io.reactivex.Single;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

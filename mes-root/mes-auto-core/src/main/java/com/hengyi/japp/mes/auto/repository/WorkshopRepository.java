@@ -1,7 +1,7 @@
 package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.domain.Workshop;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 

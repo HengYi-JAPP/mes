@@ -2,8 +2,8 @@ package com.hengyi.japp.mes.auto.interfaces.riamb.dto;
 
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
 
 import java.io.Serializable;

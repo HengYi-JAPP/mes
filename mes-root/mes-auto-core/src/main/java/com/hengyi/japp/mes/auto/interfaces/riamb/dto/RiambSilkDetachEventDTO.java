@@ -1,6 +1,6 @@
 package com.hengyi.japp.mes.auto.interfaces.riamb.dto;
 
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;

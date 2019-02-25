@@ -1,7 +1,7 @@
 package com.hengyi.japp.mes.auto.application.persistence.proxy;
 
 import com.hengyi.japp.mes.auto.application.persistence.MongoEntity;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;

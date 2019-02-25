@@ -50,15 +50,15 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final LocalDate startLd = LocalDate.of(2019, 2, 23);
-        final LocalDate endLd = LocalDate.of(2019, 2, 23);
+        final LocalDate startLd = LocalDate.of(2019, 2, 18);
+        final LocalDate endLd = LocalDate.of(2019, 2, 24);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(AAReportDay::new).sorted()
                 .collect(Collectors.toList());
 
-        days.parallelStream().forEach(AAReport::toExcel);
-//        toExcel(new StatisticsReport(null, startLd, endLd, days));
+//        days.parallelStream().forEach(AAReport::toExcel);
+        toExcel(new StatisticsReport(null, startLd, endLd, days));
 
         final long endL = System.currentTimeMillis();
         System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());

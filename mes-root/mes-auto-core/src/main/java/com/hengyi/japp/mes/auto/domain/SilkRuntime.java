@@ -5,7 +5,7 @@ import com.github.ixtf.japp.core.J;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.Sets;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Single;
 import lombok.Data;

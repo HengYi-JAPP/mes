@@ -7,7 +7,7 @@ import com.hengyi.japp.mes.auto.application.command.ProductPlanNotifyUpdateComma
 import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.LineMachineProductPlan;
 import com.hengyi.japp.mes.auto.domain.ProductPlanNotify;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;

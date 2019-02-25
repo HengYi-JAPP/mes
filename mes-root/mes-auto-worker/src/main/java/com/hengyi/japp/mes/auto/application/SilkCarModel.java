@@ -6,7 +6,7 @@ import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.Workshop;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import io.reactivex.Single;
 
 import java.util.Collections;

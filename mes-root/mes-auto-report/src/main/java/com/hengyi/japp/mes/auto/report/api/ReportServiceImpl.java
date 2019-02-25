@@ -12,7 +12,7 @@ import com.hengyi.japp.mes.auto.application.report.*;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.Workshop;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Flowable;
 import io.reactivex.Single;

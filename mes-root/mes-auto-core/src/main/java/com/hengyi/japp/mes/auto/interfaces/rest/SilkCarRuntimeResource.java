@@ -9,7 +9,7 @@ import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeDeleteCommand;
 import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeFlipCommand;
 import com.hengyi.japp.mes.auto.application.event.*;
 import com.hengyi.japp.mes.auto.domain.*;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.exception.SilkCarStatusException;
 import com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository;
 import io.reactivex.Completable;

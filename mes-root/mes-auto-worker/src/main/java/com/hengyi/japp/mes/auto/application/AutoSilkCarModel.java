@@ -4,7 +4,7 @@ import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.ImmutableList;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Flowable;
 import io.reactivex.Single;

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.hengyi.japp.mes.auto.application.persistence.annotations.MongoCache;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

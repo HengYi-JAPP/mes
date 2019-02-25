@@ -1,4 +1,4 @@
-package com.hengyi.japp.mes.auto.domain.dto;
+package com.hengyi.japp.mes.auto.dto;
 
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import lombok.Data;
