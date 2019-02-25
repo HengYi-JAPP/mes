@@ -71,8 +71,8 @@ public class Worker {
     private static VertxOptions vertxOptions() {
         final VertxOptions vertxOptions = new VertxOptions()
                 .setWorkerPoolSize(1000)
-                .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(6))
-                .setMaxWorkerExecuteTime(TimeUnit.HOURS.toNanos(1));
+                .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(10))
+                .setMaxWorkerExecuteTime(TimeUnit.MINUTES.toNanos(5));
         Optional.ofNullable(System.getProperty("vertx.cluster.host"))
                 .filter(J::nonBlank)
                 .ifPresent(vertxOptions::setClusterHost);

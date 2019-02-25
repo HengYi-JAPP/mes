@@ -125,12 +125,12 @@ public class WorkerModule extends AbstractModule {
     @Provides
     @Singleton
     @Named("AutolSilkCarModel.Configs")
-    private Collection<AutolSilkCarModelConfigRegistry.Config> ConfigRegistry(MesAutoConfig config) {
+    private Collection<AutoSilkCarModelConfigRegistry.Config> ConfigRegistry(MesAutoConfig config) {
         final Path path = config.getRootPath().resolve("auto_doffing_config");
-        final ImmutableList.Builder<AutolSilkCarModelConfigRegistry.Config> builder = ImmutableList.builder();
+        final ImmutableList.Builder<AutoSilkCarModelConfigRegistry.Config> builder = ImmutableList.builder();
         final String[] extensions = {"yml"};
         for (File file : FileUtils.listFiles(path.toFile(), extensions, true)) {
-            final AutolSilkCarModelConfigRegistry.Config doffingConfig = YAML_MAPPER.readValue(file, AutolSilkCarModelConfigRegistry.Config.class);
+            final AutoSilkCarModelConfigRegistry.Config doffingConfig = YAML_MAPPER.readValue(file, AutoSilkCarModelConfigRegistry.Config.class);
             doffingConfig.selfCheck();
             builder.add(doffingConfig);
         }

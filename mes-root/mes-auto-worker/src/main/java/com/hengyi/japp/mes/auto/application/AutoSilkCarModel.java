@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-import static com.hengyi.japp.mes.auto.application.AutolSilkCarModelConfigRegistry.*;
+import static com.hengyi.japp.mes.auto.application.AutoSilkCarModelConfigRegistry.*;
 
 /**
  * todo 配置文件形式，自定义落筒顺序
@@ -30,7 +30,7 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
     public AutoSilkCarModel(SilkCar silkCar, Workshop workshop) {
         super(silkCar);
         this.workshop = workshop;
-        config = Jvertx.getProxy(AutolSilkCarModelConfigRegistry.class).find(silkCar, workshop);
+        config = Jvertx.getProxy(AutoSilkCarModelConfigRegistry.class).find(silkCar, workshop);
     }
 
     @Override

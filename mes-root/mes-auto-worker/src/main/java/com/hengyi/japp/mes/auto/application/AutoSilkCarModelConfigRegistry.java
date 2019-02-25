@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
  * @author jzb 2018-11-17
  */
 @Singleton
-public class AutolSilkCarModelConfigRegistry {
+public class AutoSilkCarModelConfigRegistry {
     private final Collection<Config> configs;
 
     @Inject
-    private AutolSilkCarModelConfigRegistry(@Named("AutolSilkCarModel.Configs") Collection<Config> configs) {
+    private AutoSilkCarModelConfigRegistry(@Named("AutolSilkCarModel.Configs") Collection<Config> configs) {
         this.configs = configs;
     }
 

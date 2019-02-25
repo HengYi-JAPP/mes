@@ -6,7 +6,7 @@ plugins {
 }
 allprojects {
     group 'com.hengyi.japp.mes'
-    version '1.0'
+    version '2.39'
 
     apply plugin: 'idea'
     apply plugin: 'maven'
