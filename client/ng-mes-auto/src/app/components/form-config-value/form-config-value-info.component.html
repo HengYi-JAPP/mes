@@ -1,0 +1,16 @@
+<mat-toolbar class="h40">
+  <h4 class="truncate" fxFlex style="font-size: 16px;">
+    {{formConfig?.name || ('FormConfig.template'|translate)}}
+  </h4>
+</mat-toolbar>
+
+<mat-list dense style="padding-top: 0">
+
+  <mat-list-item *ngFor="let fieldConfig of formConfig?.formFieldConfigs">
+    <p matLine fxLayout fxLayoutGap="16px">
+      <span>{{fieldConfig.name}}</span>
+      <span>{{formConfigValueData[fieldConfig.id]}}</span>
+    </p>
+  </mat-list-item>
+
+</mat-list>

@@ -1,0 +1,57 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="workshop" [placeholder]="'workshop'|translate" required [compareWith]="compareWithId">
+      <mat-option *ngFor="let it of workshops$|async" [value]="it">
+        {{it.name}}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="workshop.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always" *ngIf="!batchModel">
+    <input matInput [formControl]="name" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="name.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <div fxLayout style="flex-shrink: 0;margin-bottom: 16px">
+    <mat-button-toggle-group [formControl]="doffingType">
+      <mat-button-toggle value="AUTO">{{'DoffingType.AUTO'|translate}}</mat-button-toggle>
+      <mat-button-toggle value="MANUAL">{{'DoffingType.MANUAL'|translate}}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <mat-form-field floatLabel="always" *ngIf="batchModel">
+    <app-batch-range-input [formControl]="batchRange" required [placeholder]="'Common.batch'|translate"
+                           #abri></app-batch-range-input>
+    <mat-icon matSuffix (click)="abri.showBatchRangeValues()" *ngIf="!batchRange.disabled">visibility</mat-icon>
+    <mat-error *ngIf="batchRange.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="batchRange.hasError('batchRangeError')">
+      <span [translate]="batchRange.getError('batchRangeError')?.translate"
+            [translateParams]="batchRange.getError('batchRangeError')?.translateParams"></span>
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none" *ngIf="!batchModel">
+  {{'Common.finish'|translate}}
+</button>
+<button type="button" (click)="batchSubmit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none" *ngIf="batchModel">
+  {{'Common.finish'|translate}}
+</button>

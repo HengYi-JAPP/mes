@@ -1,0 +1,7 @@
+<p>{{data.textContent | translate}}</p>
+<button mat-button color="warn" type="button" [mat-dialog-close]>
+  {{data.cancelText | translate}}
+</button>
+<button mat-button color="primary" type="button" [mat-dialog-close]="true">
+  {{data.okText | translate}}
+</button>

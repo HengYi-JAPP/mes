@@ -41,31 +41,43 @@ services:
   #    - MONGO_INITDB_ROOT_PASSWORD=mes-auto-mongo@com.hengyi.japp
   ##    command: mongod --smallfiles --logpath=/dev/null # --quiet
 
-  mes-auto-worker:
-    image: hengyi/mes-auto-worker
+  mes-auto-mysql:
+    image: mysql:8
     restart: always
     volumes:
-      - type: bind
-        source: /home/mes
-        target: /home/mes
+      - "/tmp/mysql:/var/lib/mysql"
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
 
+#  mes-auto-worker:
+#    image: hengyi/mes-auto-worker
+#    restart: always
+#    volumes:
+#      - type: bind
+#        source: /home/mes
+#        target: /home/mes
+#
 #  mes-auto-agent:
 #    image: hengyi/mes-auto-agent
 #    restart: always
 #    volumes:
-#    - type: bind
-#      source: /home/mes
-#      target: /home/mes
+#      - type: bind
+#        source: /home/mes
+#        target: /home/mes
 #    expose:
-#    - "9999"
-#    - "9998"
-#    - "8080"
+#      - "9999"
+#      - "9998"
+#      - "8080"
 #    ports:
-#    - "9999:9999"
-#    - "9998:9998"
-#    - "8080:8080"
+#      - "9999:9999"
+#      - "9998:9998"
+#      - "8080:8080"
 #    depends_on:
-#    - mes-auto-worker
+#      - mes-auto-worker
 
 #volumes:
 #data:

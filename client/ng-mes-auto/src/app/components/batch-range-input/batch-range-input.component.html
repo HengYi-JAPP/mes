@@ -1,0 +1,5 @@
+<div [formGroup]="form" fxLayout fxLayoutAlign="space-around center" fxLayoutGap="16px">
+  <input [formControl]="start">
+  <span *ngIf="!disabled">—</span>
+  <input [formControl]="end">
+</div>

@@ -1,0 +1,24 @@
+<mat-nav-list dense fxFlex style="overflow-y: auto">
+  <mat-list-item *ngFor="let it of datas$|async;let first=first;let last=last;">
+    <div fxLayout fxLayoutGap="16px" matLine>
+      <ng-container *ngIf="displayKeys&&displayKeys.length>0">
+        <span *ngFor="let key of displayKeys" fxLayout="start center">
+          {{it[key]}}
+        </span>
+      </ng-container>
+      <ng-container *ngIf="!(displayKeys&&displayKeys.length>0)">
+        {{it}}
+      </ng-container>
+    </div>
+    <button (click)="up(it)" [disabled]="first" color="primary" mat-icon-button tabindex="-1" type="button">
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
+    <button (click)="down(it)" [disabled]="last" color="primary" mat-icon-button tabindex="-1" type="button">
+      <mat-icon>arrow_downward</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-nav-list>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="disabled$|async" fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

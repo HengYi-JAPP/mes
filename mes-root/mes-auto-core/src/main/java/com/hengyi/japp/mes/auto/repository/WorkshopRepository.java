@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.domain.Workshop;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
@@ -8,6 +9,8 @@ import io.reactivex.Single;
  * @author jzb 2018-06-24
  */
 public interface WorkshopRepository {
+
+    Single<Workshop> find(EntityDTO workshop);
 
     Single<Workshop> create();
 

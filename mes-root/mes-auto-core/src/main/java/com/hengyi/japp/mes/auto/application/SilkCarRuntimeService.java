@@ -7,9 +7,10 @@ import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeDeleteCommand;
 import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeFlipCommand;
 import com.hengyi.japp.mes.auto.application.event.*;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.domain.dto.SilkCarRecordDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.exception.MultiBatchException;
 import com.hengyi.japp.mes.auto.exception.SilkCarStatusException;
 import io.reactivex.Completable;
@@ -67,6 +68,8 @@ public interface SilkCarRuntimeService {
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command);
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommand command);
+
+    Single<SilkCarRuntime> doffing(SilkCarRuntimeInitEvent event, DoffingType doffingType);
 
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingAdaptCheckSilksCommand command);
 

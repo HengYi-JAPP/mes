@@ -1,10 +1,9 @@
 package com.hengyi.japp.mes.auto.search.lucene;
 
-import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,14 +13,10 @@ import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -32,8 +27,8 @@ import java.util.Optional;
 public class SilkLucene extends BaseLucene<Silk> {
 
     @Inject
-    private SilkLucene(@Named("luceneRootPath") Path luceneRootPath) throws IOException {
-        super(luceneRootPath);
+    private SilkLucene(MesAutoConfig config) throws IOException {
+        super(config);
     }
 
     @Override
@@ -111,13 +106,9 @@ public class SilkLucene extends BaseLucene<Silk> {
 
     public Query build(SilkQuery silkQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(booleanQuery("dyeingSample", silkQuery.isDyeingSample()), Occur.MUST);
-        if (J.nonBlank(silkQuery.getWorkshopId())) {
-            bqBuilder.add(new TermQuery(new Term("workshop", silkQuery.getWorkshopId())), Occur.MUST);
-        }
-        if (J.nonBlank(silkQuery.getBatchId())) {
-            bqBuilder.add(new TermQuery(new Term("batch", silkQuery.getBatchId())), Occur.MUST);
-        }
+        addQuery(bqBuilder, "dyeingSample", silkQuery.isDyeingSample());
+        addQuery(bqBuilder, "workshop", silkQuery.getWorkshopId());
+        addQuery(bqBuilder, "batch", silkQuery.getBatchId());
         return bqBuilder.build();
     }
 }

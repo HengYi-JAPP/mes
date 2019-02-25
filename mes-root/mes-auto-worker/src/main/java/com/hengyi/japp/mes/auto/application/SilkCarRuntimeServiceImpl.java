@@ -12,8 +12,8 @@ import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.RoleType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.domain.dto.SilkCarRecordDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.exception.*;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
@@ -148,11 +148,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                                 if (silk.getDoffingDateTime() == null) {
                                     silk.setDoffingDateTime(event.getFireDateTime());
                                     silk.setDoffingOperator(event.getOperator());
+                                    silk.setGrade(silkCarRecord.getGrade());
                                 }
                             });
                             event.setSilkRuntimes(silkRuntimes);
                             final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes);
-//                            return silkCarRuntime$;
                             return checkSilkDuplicate(silkRuntimes).andThen(silkCarRuntime$);
                         });
                 final Completable checkRole$ = authService.checkRole(event.getOperator(), RoleType.DOFFING);
@@ -171,6 +171,10 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                     .collect(Collectors.toList());
             if (J.nonEmpty(eventSourceList)) {
                 throw new RuntimeException("已经有其他人对丝车操作，无法删除");
+            }
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            if (silkCarRecord.getCarpoolDateTime() != null) {
+                throw new RuntimeException("拼车，无法删除");
             }
             return silkCarRuntimeRepository.delete(silkCarRuntime);
         });
@@ -234,7 +238,8 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         });
     }
 
-    private Single<SilkCarRuntime> doffing(SilkCarRuntimeInitEvent event, DoffingType doffingType) {
+    @Override
+    public Single<SilkCarRuntime> doffing(SilkCarRuntimeInitEvent event, DoffingType doffingType) {
         final SilkCar silkCar = event.getSilkCar();
         final Collection<SilkRuntime> silkRuntimes = event.getSilkRuntimes();
         final Grade grade = event.getGrade();

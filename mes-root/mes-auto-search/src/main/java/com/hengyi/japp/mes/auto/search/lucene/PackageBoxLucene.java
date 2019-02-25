@@ -3,23 +3,19 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
-import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -30,8 +26,8 @@ import java.util.Optional;
 public class PackageBoxLucene extends BaseLucene<PackageBox> {
 
     @Inject
-    private PackageBoxLucene(@Named("luceneRootPath") Path luceneRootPath) throws IOException {
-        super(luceneRootPath);
+    private PackageBoxLucene(MesAutoConfig config) throws IOException {
+        super(config);
     }
 
     @Override
@@ -97,70 +93,43 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
 
     public Query build(PackageBoxQuery packageBoxQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(booleanQuery("inWarehouse", true), BooleanClause.Occur.MUST);
+        addQuery(bqBuilder, "inWarehouse", true);
 
-        Optional.ofNullable(packageBoxQuery.getType())
-                .map(PackageBoxType::name)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("type", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getWorkshopId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("workshop", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getBatchId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("batch", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getGradeId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("grade", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getBudatClassId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("budatClass", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getPackageBoxCode())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("code", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getProductId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("product", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getCreatorId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("creator", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getBudatRange())
-                .ifPresent(it -> {
-                    final long startL = J.date(it.getStartLd()).getTime();
-                    final long endL = J.date(it.getEndLd()).getTime();
-                    bqBuilder.add(LongPoint.newRangeQuery("budat", startL, endL), BooleanClause.Occur.MUST);
-                });
+        addQuery(bqBuilder, "workshop", packageBoxQuery.getWorkshopId());
+        addQuery(bqBuilder, "batch", packageBoxQuery.getBatchId());
+        addQuery(bqBuilder, "grade", packageBoxQuery.getGradeId());
+        addQuery(bqBuilder, "product", packageBoxQuery.getProductId());
+        addQuery(bqBuilder, "creator", packageBoxQuery.getCreatorId());
+        addQuery(bqBuilder, "code", packageBoxQuery.getPackageBoxCode());
+        addQuery(bqBuilder, "budatClass", packageBoxQuery.getBudatClassIds());
+        addQuery(bqBuilder, "type", packageBoxQuery.getType());
+
+        Optional.ofNullable(packageBoxQuery.getBudatRange()).ifPresent(it -> {
+            final long startL = J.date(it.getStartLd()).getTime();
+//            final long endL = J.date(it.getEndLd()).getTime();
+            // 解决查询日期刚好前后日期时间相等
+            final long endL = J.date(it.getEndLd()).getTime() - 1;
+            bqBuilder.add(LongPoint.newRangeQuery("budat", startL, endL), BooleanClause.Occur.MUST);
+        });
 
         return bqBuilder.build();
     }
 
     public Query build(PackageBoxQueryForMeasure packageBoxQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(booleanQuery("inWarehouse", false), BooleanClause.Occur.MUST);
+        addQuery(bqBuilder, "inWarehouse", false);
 
-        Optional.ofNullable(packageBoxQuery.getWorkshopId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("workshop", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getBatchId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("batch", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getGradeId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("grade", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getType())
-                .map(PackageBoxType::name)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("type", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getPackageBoxCode())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("code", it)), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getProductId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("product", it)), BooleanClause.Occur.MUST));
+        addQuery(bqBuilder, "workshop", packageBoxQuery.getWorkshopId());
+        addQuery(bqBuilder, "batch", packageBoxQuery.getBatchId());
+        addQuery(bqBuilder, "grade", packageBoxQuery.getGradeId());
+        addQuery(bqBuilder, "product", packageBoxQuery.getProductId());
+        addQuery(bqBuilder, "creator", packageBoxQuery.getCreatorId());
+        addQuery(bqBuilder, "code", packageBoxQuery.getPackageBoxCode());
+        addQuery(bqBuilder, "type", packageBoxQuery.getType());
+
         Optional.ofNullable(packageBoxQuery.getNetWeight())
                 .filter(it -> it > 0)
                 .ifPresent(it -> bqBuilder.add(DoublePoint.newExactQuery("netWeight", it), BooleanClause.Occur.MUST));
-        Optional.ofNullable(packageBoxQuery.getCreatorId())
-                .filter(J::nonBlank)
-                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("creator", it)), BooleanClause.Occur.MUST));
         Optional.ofNullable(packageBoxQuery.getCreateDateTimeRange())
                 .ifPresent(it -> {
                     final long startL = J.date(it.getStartLd()).getTime();

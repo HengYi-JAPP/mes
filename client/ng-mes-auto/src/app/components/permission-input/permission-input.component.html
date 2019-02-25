@@ -1,0 +1,11 @@
+<mat-toolbar class="h40">
+  <button (click)="pick()" color="primary" mat-button type="button">
+    {{'Btn.addPermission'|translate}}
+  </button>
+</mat-toolbar>
+
+<mat-nav-list dense style="padding-top: 0">
+  <mat-list-item *ngFor="let it of dataSource.connect()|async" (click)="delete(it)">
+    {{it.name}}
+  </mat-list-item>
+</mat-nav-list>

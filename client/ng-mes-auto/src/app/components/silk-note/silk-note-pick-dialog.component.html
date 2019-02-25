@@ -1,0 +1,44 @@
+<div class="source" fxFlex="50" fxLayout="column">
+  <mat-toolbar class="title">
+    <input [formControl]="qCtrl" [placeholder]="'Tooltip.q'|translate" fxFlex matInput>
+    <button (click)="toDestAll()" [matTooltip]="'Common.selectAll'|translate" mat-icon-button tabindex="-1"
+            type="button">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-nav-list dense fxFlex style="overflow-y: auto;">
+    <mat-list-item (click)="toDest(it)" *ngFor="let it of source$|async">
+      {{it.name}}
+    </mat-list-item>
+  </mat-nav-list>
+
+  <mat-divider></mat-divider>
+  <button (click)="create()" color="primary" mat-button type="button">
+    {{'Common.new'|translate}}
+  </button>
+</div>
+
+<mat-divider [vertical]="true"></mat-divider>
+
+<div class="dest" fxFlex="50" fxLayout="column">
+  <mat-toolbar class="title">
+    <button mat-icon-button (click)="toSourceAll()" [matTooltip]="'Common.unSelectAll'|translate" tabindex="-1">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span fxFlex></span>
+    <button type="button" mat-icon-button matDialogClose color="accent">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-nav-list dense fxFlex style="overflow-y: auto;">
+    <mat-list-item *ngFor="let it of dest$|async" (click)="toSource(it)">
+      {{it.name}}
+    </mat-list-item>
+  </mat-nav-list>
+
+  <button type="button" (click)="submit()" mat-raised-button color="primary">
+    {{'Common.confirm'|translate}}
+  </button>
+</div>

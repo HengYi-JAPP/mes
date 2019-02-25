@@ -1,0 +1,38 @@
+<div fxFlex fxLayout>
+
+  <section class="leftSide" fxFlex="50" fxLayout="column">
+    <mat-toolbar class="h48" style="background-color: white">
+      <mat-form-field floatLabel="never" fxFlex style="padding: 0">
+        <input [formControl]="qCtrl" [matAutocomplete]="autoSilkCar" [placeholder]="'Tooltip.q'|translate" matInput
+               tabindex="-1">
+        <mat-autocomplete #autoSilkCar="matAutocomplete" (optionSelected)="onSilkCarSelected($event)"
+                          autoActiveFirstOption>
+          <mat-option *ngFor="let it of silkCars$|async" [value]="it">
+            {{it.code}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </mat-toolbar>
+    <mat-divider></mat-divider>
+
+    <app-silk-car-info [silkCarRuntime]="silkCarRuntime$|async" fxFlex></app-silk-car-info>
+  </section>
+
+  <mat-divider [vertical]="true"></mat-divider>
+
+  <section class="rightSide" fxFlex="50" fxLayout="column">
+    <mat-toolbar class="h48" style="background-color: white;padding-right: 0">
+      <h4 fxFlex></h4>
+
+      <mat-button-toggle-group (change)="onFireDateTimeSortChange($event)" [value]="fireDateTimeSortDirection$|async">
+        <mat-button-toggle value="desc">{{'Common.timeDesc'|translate}}</mat-button-toggle>
+        <mat-button-toggle value="asc">{{'Common.timeAsc'|translate}}</mat-button-toggle>
+      </mat-button-toggle-group>
+    </mat-toolbar>
+    <mat-divider></mat-divider>
+
+    <app-silk-car-event-list [eventSources]="eventSources$|async" fxFlex
+                             style="overflow-y: auto"></app-silk-car-event-list>
+  </section>
+
+</div>

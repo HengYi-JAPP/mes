@@ -3,11 +3,9 @@ package com.hengyi.japp.mes.auto.application.report;
 import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
-import com.hengyi.japp.mes.auto.domain.PackageClass;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +15,9 @@ import java.util.stream.Collectors;
  */
 @Data
 public class MeasurePackageBoxReport implements Serializable {
-    private final LocalDate budatLd;
-    private final PackageClass budatClass;
     private final Collection<Item> items;
 
-    public MeasurePackageBoxReport(LocalDate budatLd, PackageClass budatClass, Collection<PackageBox> packageBoxes) {
-        this.budatLd = budatLd;
-        this.budatClass = budatClass;
+    public MeasurePackageBoxReport(Collection<PackageBox> packageBoxes) {
         items = J.emptyIfNull(packageBoxes).parallelStream()
                 .collect(Collectors.groupingBy(PackageBox::getBatch))
                 .entrySet().parallelStream()

@@ -1,0 +1,36 @@
+<button (click)="create()" [matTooltip]="'Tooltip.createGrade'|translate" class="my-add" mat-mini-fab style="z-index: 1"
+        type="button">
+  <mat-icon>add</mat-icon>
+</button>
+
+<mat-table [dataSource]="grades$" fxFlex style="overflow-y: auto;z-index: 0">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>{{'grade'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="sortBy">
+    <mat-header-cell *matHeaderCellDef>{{'GradeInfo.sortBy'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.sortBy}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button (click)="update(row)" mat-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+      <!--<button (click)="delete(row)" mat-button color="warn">-->
+      <!--{{'Common.delete'|translate}}-->
+      <!--</button>-->
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

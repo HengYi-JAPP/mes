@@ -1,15 +1,17 @@
 plugins {
+    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'io.franzbecker.gradle-lombok' version '1.14'
     id 'com.palantir.docker' version "0.20.1"
     id 'com.github.johnrengelman.shadow' version '4.0.3'
 }
 allprojects {
     group 'com.hengyi.japp.mes'
-    version '1.0'
+    version '2.39'
 
     apply plugin: 'idea'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
+    apply plugin: "io.spring.dependency-management"
 
     repositories {
         mavenLocal()
@@ -17,35 +19,35 @@ allprojects {
         maven { url 'https://plugins.gradle.org/m2' }
         maven { url 'https://jitpack.io' }
     }
+
+    dependencyManagement {
+        imports {
+            mavenBom "com.github.ixtf:bom:${bomVersion}"
+        }
+    }
 }
 subprojects {
     apply plugin: 'java'
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
     apply plugin: 'application'
-    apply plugin: 'io.franzbecker.gradle-lombok'
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'com.palantir.docker'
-
-    dependencies {
-        compile "com.github.ixtf.japp:vertx:${jappVersion}",
-                "com.github.ixtf.japp:codec:${jappVersion}",
-                "io.vertx:vertx-rabbitmq-client:${vertxVersion}"
-
-        compileOnly "io.vertx:vertx-codegen:${vertxVersion}",
-                "org.projectlombok:lombok:${lombokVersion}"
-
-        testCompile "junit:junit:4.12",
-                "io.vertx:vertx-unit:${vertxVersion}",
-                "io.vertx:vertx-web-client:${vertxVersion}",
-                "org.apache.lucene:lucene-demo:${luceneVersion}",
-                "org.projectlombok:lombok:${lombokVersion}"
-    }
-
+    apply plugin: 'io.franzbecker.gradle-lombok'
     lombok {
         version = "${lombokVersion}"
         sha256 = ""
     }
+
+    dependencies {
+        compileOnly "io.vertx:vertx-codegen"
+
+        testCompile "junit:junit",
+                "io.vertx:vertx-unit",
+                "io.vertx:vertx-web-client",
+                "org.apache.lucene:lucene-demo"
+    }
+
     /**
      * 打包 docker 准备
      */
@@ -56,6 +58,7 @@ subprojects {
         files "build/libs/${project.name}-fat.jar"
     }
     shadowJar {
+//        baseName "${project.name}-fat.jar"
         archiveName "${project.name}-fat.jar"
     }
     jar.manifest {

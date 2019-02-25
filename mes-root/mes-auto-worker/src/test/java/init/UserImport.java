@@ -2,6 +2,7 @@ package init;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.hengyi.japp.mes.auto.GuiceModule;
 import com.hengyi.japp.mes.auto.worker.WorkerModule;
 import io.vertx.reactivex.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,8 @@ import okhttp3.OkHttpClient;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellUtil;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 
@@ -20,9 +23,9 @@ import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 public class UserImport {
     public static final String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJ1aWQiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJpc3MiOiJqYXBwLW1lcy1hdXRvIn0.h-CPVnDFw0YyCfm7MIAgXIqTlecAhT5VQe43i5aIUeE";
     public static final Vertx vertx = Vertx.vertx();
-    public static final Injector injector = Guice.createInjector(new WorkerModule(vertx));
+    public static final Injector injector = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final OkHttpClient client = new OkHttpClient();
+    public static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.DAYS).readTimeout(1, TimeUnit.DAYS).build();
 
     public static void main(String[] args) {
     }

@@ -1,0 +1,36 @@
+@import "../../../library";
+
+:host {
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+}
+
+.mat-toolbar {
+  .mat-toolbar-hF(@titleH);
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+div.source {
+  box-sizing: border-box;
+
+  & > .mat-toolbar {
+    padding-left: 2px;
+    padding-right: 0;
+
+    & > input {
+      font-size: 16px;
+    }
+  }
+}
+
+div.dest {
+  box-sizing: border-box;
+
+  & > .mat-toolbar {
+    padding-left: 0;
+    padding-right: 0px;
+  }
+}
+

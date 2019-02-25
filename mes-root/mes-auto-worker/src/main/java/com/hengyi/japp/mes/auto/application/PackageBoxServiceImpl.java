@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author jzb 2018-06-22
@@ -84,7 +85,7 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                     .toList().flatMap(silkCarRuntimes -> {
                         final Collection<SilkCarRecord> silkCarRecords = silkCarRuntimes.stream()
                                 .map(SilkCarRuntime::getSilkCarRecord)
-                                .collect(Collectors.toSet());
+                                .collect(toSet());
                         final Batch batch = checkAndGetBatch(silkCarRuntimes);
                         final Grade grade = checkAndGetGrade(silkCarRuntimes);
                         packageBox.setSilkCarRecords(silkCarRecords);
@@ -105,12 +106,18 @@ public class PackageBoxServiceImpl implements PackageBoxService {
     }
 
     private Batch checkAndGetBatch(Collection<SilkCarRuntime> silkCarRuntimes) throws Exception {
-        final Set<Batch> batchSet = silkCarRuntimes.stream()
-                .map(SilkCarRuntime::getSilkRuntimes)
-                .flatMap(Collection::stream)
-                .map(SilkRuntime::getSilk)
-                .map(Silk::getBatch)
-                .collect(Collectors.toSet());
+        final Set<Batch> batchSet = Stream.concat(
+                silkCarRuntimes.stream()
+                        .map(SilkCarRuntime::getSilkRuntimes)
+                        .flatMap(Collection::stream)
+                        .map(SilkRuntime::getSilk)
+                        .map(Silk::getBatch)
+                        .distinct(),
+                silkCarRuntimes.stream()
+                        .map(SilkCarRuntime::getSilkCarRecord)
+                        .map(SilkCarRecord::getBatch)
+                        .distinct()
+        ).collect(toSet());
         if (batchSet.size() == 1) {
             return IterableUtils.get(batchSet, 0);
         }
@@ -122,7 +129,7 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                 .map(SilkCarRuntime::getSilkRuntimes)
                 .flatMap(Collection::stream)
                 .map(SilkRuntime::getGrade)
-                .collect(Collectors.toSet());
+                .collect(toSet());
         if (gradeSet.size() == 1) {
             return IterableUtils.get(gradeSet, 0);
         }

@@ -1,0 +1,51 @@
+<section fxLayout fxLayoutAlign="start center" fxLayoutGap="16px" style="padding-right: 16px;flex-shrink: 0;">
+  <form fxFlex fxLayout fxLayoutGap="16px">
+    <mat-form-field floatLabel="never" fxFlexOffset="2px">
+      <mat-select (selectionChange)="workshopChange($event)" [placeholder]="'workshop'|translate"
+                  [value]="(workshop$|async)?.id">
+        <mat-option *ngFor="let it of workshops$|async" [value]="it.id">
+          {{it.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</section>
+
+<mat-table [dataSource]="items$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="line">
+    <mat-header-cell *matHeaderCellDef>{{'line'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.line.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="lineMachineSpecs">
+    <mat-header-cell *matHeaderCellDef>{{'LineMachine.item'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <div fxLayout="column" fxLayoutGap="8px">
+        <span *ngFor="let it of row.lineMachineSpecs">{{it}}</span>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="batchNo">
+    <mat-header-cell *matHeaderCellDef>{{'batchNo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.batch?.batchNo}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="batchSpec">
+    <mat-header-cell *matHeaderCellDef>{{'Batch.spec'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.batch?.spec}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="tubeColor">
+    <mat-header-cell *matHeaderCellDef>{{'tubeColor'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.batch?.tubeColor}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="lineMachineCount">
+    <mat-header-cell *matHeaderCellDef>{{'lineMachineCount'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.lineMachineCount}}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

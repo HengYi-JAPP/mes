@@ -10,15 +10,14 @@ import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.domain.data.MesAutoPrinter;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.LineMachineRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import io.vertx.reactivex.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
-import static com.hengyi.japp.mes.auto.Constant.AMQP.MES_AUTO_PRINT_EXCHANGE;
 
 /**
  * @author jzb 2018-06-22
@@ -38,15 +36,13 @@ import static com.hengyi.japp.mes.auto.Constant.AMQP.MES_AUTO_PRINT_EXCHANGE;
 @Slf4j
 @Singleton
 public class SilkBarcodeServiceImpl implements SilkBarcodeService {
-    private final RabbitMQClient rabbitClient;
     private final RedisClient redisClient;
     private final SilkBarcodeRepository silkBarcodeRepository;
     private final LineMachineRepository lineMachineRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private SilkBarcodeServiceImpl(RabbitMQClient rabbitClient, RedisClient redisClient, SilkBarcodeRepository silkBarcodeRepository, LineMachineRepository lineMachineRepository, OperatorRepository operatorRepository) {
-        this.rabbitClient = rabbitClient;
+    private SilkBarcodeServiceImpl(RedisClient redisClient, SilkBarcodeRepository silkBarcodeRepository, LineMachineRepository lineMachineRepository, OperatorRepository operatorRepository) {
         this.redisClient = redisClient;
         this.silkBarcodeRepository = silkBarcodeRepository;
         this.lineMachineRepository = lineMachineRepository;
@@ -134,12 +130,23 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
                     }
                     return result;
                 }).flatMap(Flowable::fromIterable).toList()
-                .flatMapCompletable(it -> print(command.getMesAutoPrinter().getId(), it));
+                .flatMapCompletable(it -> print(command.getMesAutoPrinter(), it));
+    }
+
+    private Completable print(MesAutoPrinter printer, Collection<PrintCommand.Item> silks) {
+        return Single.just(String.join("-", "SilkBarcodePrinter", printer.getId(), printer.getName()))
+                .flatMap(channel -> {
+                    final List<PrintCommand.Item> list = Lists.newArrayList(silks);
+                    Collections.sort(list);
+                    final String message = MAPPER.writeValueAsString(list);
+                    return redisClient.rxPublish(channel, message);
+                })
+                .ignoreElement();
     }
 
     @Override
     public Completable print(Principal principal, PrintCommand.SilkPrintCommand command) {
-        return print(command.getMesAutoPrinter().getId(), command.getSilks());
+        return print(command.getMesAutoPrinter(), command.getSilks());
     }
 
     @Override
@@ -162,18 +169,6 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
                     return silkBarcodeRepository.save(silkBarcode);
                 });
             });
-        });
-    }
-
-    private Completable print(String rk, Collection<PrintCommand.Item> silks) {
-        return Single.fromCallable(() -> {
-            final ArrayList<PrintCommand.Item> list = Lists.newArrayList(silks);
-            Collections.sort(list);
-            final String body = MAPPER.writeValueAsString(list);
-            return new JsonObject().put("body", body);
-        }).flatMapCompletable(it -> {
-            final Completable completable = rabbitClient.rxBasicPublish(MES_AUTO_PRINT_EXCHANGE, rk, it);
-            return rabbitClient.rxStart().andThen(completable);
         });
     }
 }

@@ -1,0 +1,146 @@
+<ng-container *ngIf="(silkCar$|async)">
+
+  <mat-card class="silkCarInfo">
+    <mat-card-header>
+      <mat-card-title fxLayoutGap="16px">
+        <span translate>SilkCar.code</span>
+        <span>{{(silkCar$|async)?.code}}</span>
+        <span>{{(batch$|async)?.batchNo}}</span>
+        <span>{{(batch$|async)?.spec}}</span>
+      </mat-card-title>
+      <mat-card-subtitle fxLayoutGap="16px">
+        <span translate>SilkCar.recordId</span>
+        <span>{{(silkCarRecord$|async)?.id}}</span>
+      </mat-card-subtitle>
+
+      <mat-chip-list fxFlex style="margin-left: 36px">
+        <mat-chip *ngIf="!(doffingType$|async)" color="accent" disabled selected>
+          {{'Common.carpool'|translate}}
+        </mat-chip>
+        <mat-chip *ngIf="doffingType$|async" disabled>
+          {{('DoffingType.' + (doffingType$|async))|translate}}
+        </mat-chip>
+      </mat-chip-list>
+
+      <!--<span fxFlex></span>-->
+      <button *ngIf="(productProcesses$|async)?.length>0" [matMenuTriggerFor]="mainMenu" mat-icon-button type="button">
+        <!--<mat-icon>playlist_add</mat-icon>-->
+        <!--<mat-icon>build</mat-icon>-->
+        <!--<mat-icon>add_to_photos</mat-icon>-->
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <!--<button type="button" mat-mini-fab [matMenuTriggerFor]="mainMenu">-->
+      <!--<mat-icon>add_box</mat-icon>-->
+      <!--</button>-->
+      <mat-menu #mainMenu="matMenu" xPosition="before" yPosition="below">
+        <ng-template matMenuContent>
+          <button (click)="productProcessSubmit(it)" *ngFor="let it of productProcesses$|async" mat-menu-item
+                  type="button">
+            {{it.name}}
+          </button>
+          <button (click)="dyeingSampleSilkSubmit()" mat-menu-item type="button">
+            {{'RoleType.SUBMIT_DYEING_SAMPLE'|translate}}
+          </button>
+          <!--<button mat-menu-item>-->
+          <!--<mat-icon>dialpad</mat-icon>-->
+          <!--<span>Redial</span>-->
+          <!--</button>-->
+        </ng-template>
+      </mat-menu>
+    </mat-card-header>
+
+    <!--<mat-card-content fxLayout="column" fxLayoutGap="16px">-->
+    <!--<div fxLayout>-->
+    <!--<span translate fxFlex="100px">Common.type</span>-->
+    <!--<span fxFlex>saflaksdfsa</span>-->
+    <!--<span translate fxFlex="100px">Common.type</span>-->
+    <!--<span fxFlex>saflaksdfsa</span>-->
+    <!--</div>-->
+    <!--<div fxLayout>-->
+    <!--<span translate fxFlex="100px">batchNo</span>-->
+    <!--<span fxFlex>sfdasdfsa</span>-->
+    <!--<span translate fxFlex="100px">batchNo</span>-->
+    <!--<span fxFlex>sfdasdfsa</span>-->
+    <!--</div>-->
+    <!--<div fxLayout>-->
+    <!--<span translate fxFlex="100px">Common.startDate</span>-->
+    <!--<span fxFlex>sfdasdfadfafdsa</span>-->
+    <!--<span translate fxFlex="100px">Common.startDate</span>-->
+    <!--<span fxFlex>sfdasdfadfafdsa</span>-->
+    <!--</div>-->
+    <!--</mat-card-content>-->
+
+  </mat-card>
+
+  <div fxFlex fxLayout="column" style="overflow-y: auto;box-sizing: border-box;">
+    <mat-toolbar class="h40">
+      <mat-checkbox (change)="$event ? aSideMasterToggle() : null"
+                    [checked]="aSideSelection.hasValue() && aSideAllSelected"
+                    [indeterminate]="aSideSelection.hasValue() && !aSideAllSelected">
+        {{'SilkCar.SideType.A'|translate}}
+      </mat-checkbox>
+    </mat-toolbar>
+
+    <mat-grid-list [cols]="col$|async" [style.max-height]="styleHeight$|async" [style.min-height]="styleHeight$|async"
+                   rowHeight="100px">
+      <mat-grid-tile *ngFor="let silkRuntime of (aSideSilkRuntimes$|async)" [style.border]="'1px red solid'"
+                     class="silk">
+
+        <ng-container *ngIf="silkRuntime.silk">
+          <mat-grid-tile-header (click)="aSideSelection.toggle(silkRuntime.silk.id)">
+            <mat-checkbox (change)="$event ? aSideSelection.toggle(silkRuntime.silk.id) : null"
+                          (click)="$event.stopPropagation()"
+                          [checked]="aSideSelection.isSelected(silkRuntime.silk.id)">
+              {{('SilkCar.SideType.' + silkRuntime.sideType)|translate}}—{{silkRuntime.row}}—{{silkRuntime.col}}
+            </mat-checkbox>
+          </mat-grid-tile-header>
+
+          <div fxLayout="column" fxLayoutGap="8px" style="margin-top:36px;">
+            <span>
+              {{silkRuntime.silk.lineMachine.line.name}}-{{silkRuntime.silk.spindle}}
+              /{{silkRuntime.silk.lineMachine.item}}
+            </span>
+            <span>
+              {{silkRuntime.silk.code}}
+            </span>
+          </div>
+        </ng-container>
+
+      </mat-grid-tile>
+    </mat-grid-list>
+
+    <mat-toolbar class="h40">
+      <mat-checkbox (change)="$event ? bSideMasterToggle() : null"
+                    [checked]="bSideSelection.hasValue() && bSideAllSelected"
+                    [indeterminate]="bSideSelection.hasValue() && !bSideAllSelected">
+        {{'SilkCar.SideType.B'|translate}}
+      </mat-checkbox>
+    </mat-toolbar>
+
+    <mat-grid-list [cols]="col$|async" [style.max-height]="styleHeight$|async" [style.min-height]="styleHeight$|async"
+                   rowHeight="100px">
+      <mat-grid-tile *ngFor="let silkRuntime of (bSideSilkRuntimes$|async)" [style.border]="'1px red solid'"
+                     class="silk">
+
+        <ng-container *ngIf="silkRuntime.silk">
+          <mat-grid-tile-header (click)="bSideSelection.toggle(silkRuntime.silk.id)">
+            <mat-checkbox (change)="$event ? bSideSelection.toggle(silkRuntime.silk.id) : null"
+                          (click)="$event.stopPropagation()"
+                          [checked]="bSideSelection.isSelected(silkRuntime.silk.id)">
+              {{('SilkCar.SideType.' + silkRuntime.sideType)|translate}}—{{silkRuntime.row}}—{{silkRuntime.col}}
+            </mat-checkbox>
+          </mat-grid-tile-header>
+
+          <div fxLayout="column" fxLayoutGap="8px" style="margin-top:36px;">
+            <span>
+              {{silkRuntime.silk.lineMachine.line.name}}-{{silkRuntime.silk.spindle}}
+              /{{silkRuntime.silk.lineMachine.item}}
+            </span>
+          </div>
+        </ng-container>
+
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+
+</ng-container>

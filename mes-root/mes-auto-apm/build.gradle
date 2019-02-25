@@ -1,10 +1,10 @@
 dependencies {
     compile project(':mes-auto-core'),
-            "org.apache.lucene:lucene-analyzers-smartcn:${luceneVersion}",
-            "org.apache.lucene:lucene-expressions:${luceneVersion}",
-            "org.apache.lucene:lucene-facet:${luceneVersion}",
-            "org.apache.lucene:lucene-queries:${luceneVersion}",
-            "org.apache.lucene:lucene-queryparser:${luceneVersion}"
+            "org.apache.lucene:lucene-analyzers-smartcn",
+            "org.apache.lucene:lucene-expressions",
+            "org.apache.lucene:lucene-facet",
+            "org.apache.lucene:lucene-queries",
+            "org.apache.lucene:lucene-queryparser"
 }
 
 apply plugin: 'com.palantir.docker'

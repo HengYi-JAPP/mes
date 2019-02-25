@@ -59,6 +59,9 @@ public class SilkCarRecordRepositoryMongo extends MongoEntityRepository<SilkCarR
 
     @Override
     public Completable delete(SilkCarRecord silkCarRecord) {
+        if (silkCarRecord.getCarpoolDateTime() != null) {
+            throw new RuntimeException("拼车,无法删除");
+        }
         final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
 
         final Completable delSilkCarRecord$ = silkCarRecord._delete().doOnComplete(() -> lucene.delete(silkCarRecord.getId()));

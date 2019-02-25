@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.PackageBoxService;
@@ -25,8 +26,10 @@ import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -61,13 +64,13 @@ public class PackageBoxResource {
     @Path("packageBoxes/{id}/silks")
     @GET
     public Flowable<Silk> silks(@PathParam("id") String id) {
-        return packageBoxRepository.find(id).flattenAsFlowable(PackageBox::getSilks);
+        return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilks()));
     }
 
     @Path("packageBoxes/{id}/silkCarRecords")
     @GET
     public Flowable<SilkCarRecord> silkCarRecords(@PathParam("id") String id) {
-        return packageBoxRepository.find(id).flattenAsFlowable(PackageBox::getSilkCarRecords);
+        return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecords()));
     }
 
     @Path("packageBoxes/{id}")
@@ -101,15 +104,16 @@ public class PackageBoxResource {
     @GET
     public Single<PackageBoxQuery.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
                                                 @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
+                                                @QueryParam("workshopId") @NotBlank String workshopId,
                                                 @QueryParam("startDate") @NotBlank String startDate,
                                                 @QueryParam("endDate") @NotBlank String endDate,
                                                 @QueryParam("packageBoxType") String typeString,
                                                 @QueryParam("packageBoxCode") String packageBoxCode,
                                                 @QueryParam("budatClassId") String budatClassId,
-                                                @QueryParam("workshopId") String workshopId,
                                                 @QueryParam("gradeId") String gradeId,
                                                 @QueryParam("batchId") String batchId,
                                                 @QueryParam("productId") String productId) {
+        final Set<String> budatClassIds = J.nonBlank(budatClassId) ? Sets.newHashSet(budatClassId) : Collections.EMPTY_SET;
         final LocalDate startLd = Optional.ofNullable(startDate)
                 .filter(J::nonBlank)
                 .map(LocalDate::parse)
@@ -132,7 +136,7 @@ public class PackageBoxResource {
                 .gradeId(gradeId)
                 .batchId(batchId)
                 .productId(productId)
-                .budatClassId(budatClassId)
+                .budatClassIds(budatClassIds)
                 .build();
         return packageBoxRepository.query(packageBoxQuery);
     }
@@ -144,12 +148,12 @@ public class PackageBoxResource {
     @GET
     public Single<PackageBoxQueryForMeasure.Result> queryPrepare(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
                                                                  @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
+                                                                 @QueryParam("workshopId") @NotBlank String workshopId,
                                                                  @QueryParam("startDate") @NotBlank String startDate,
                                                                  @QueryParam("endDate") @NotBlank String endDate,
                                                                  @QueryParam("packageBoxType") String typeString,
                                                                  @QueryParam("packageBoxCode") String packageBoxCode,
                                                                  @QueryParam("netWeight") double netWeight,
-                                                                 @QueryParam("workshopId") String workshopId,
                                                                  @QueryParam("gradeId") String gradeId,
                                                                  @QueryParam("batchId") String batchId,
                                                                  @QueryParam("productId") String productId,

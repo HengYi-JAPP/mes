@@ -3,15 +3,15 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ReportService;
+import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.report.MeasurePackageBoxReport;
+import com.hengyi.japp.mes.auto.application.report.MeasureReport;
+import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
 import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import java.time.LocalDate;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -38,10 +38,24 @@ public class ReportResource {
     }
 
     @Path("measurePackageBoxReport")
+    @POST
+    public Single<MeasurePackageBoxReport> measurePackageBoxReport(ReportCommand command) {
+
+        return reportService.measurePackageBoxReport(command);
+    }
+
+    @Path("measureReport")
+    @POST
+    public Single<MeasureReport> measureReport(ReportCommand command) {
+        return reportService.measureReport(command);
+    }
+
+    @Path("statisticsReport")
     @GET
-    public Single<MeasurePackageBoxReport> measurePackageBoxReport(@QueryParam("date") @NotBlank String dateString,
-                                                                   @QueryParam("budatClassId") @NotBlank String budatClassId) {
-        return reportService.measurePackageBoxReport(LocalDate.parse(dateString), budatClassId);
+    public Single<StatisticsReport> statisticsReport(@QueryParam("workshopId") String workshopId,
+                                                     @QueryParam("startDate") @NotBlank String startLdString,
+                                                     @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.statisticsReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
     }
 
 //    @Path("dailyDoffingReport")

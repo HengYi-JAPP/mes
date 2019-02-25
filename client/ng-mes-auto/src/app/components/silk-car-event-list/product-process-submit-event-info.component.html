@@ -1,0 +1,68 @@
+<mat-card class="event-source">
+  <mat-card-header>
+    <div class="avatar" mat-card-avatar></div>
+    <mat-card-title fxLayoutGap="8px">
+      <span>{{event?.operator?.name}}</span>
+      <span>{{event?.operator?.hrId}}</span>
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{event?.fireDateTime|date:'yyyy-MM-dd HH:mm:ss'}}
+    </mat-card-subtitle>
+
+    <span fxFlex></span>
+    <mat-chip-list>
+      <mat-chip disabled>{{event?.productProcess?.name}}</mat-chip>
+    </mat-chip-list>
+  </mat-card-header>
+  <mat-card-content>
+
+    <ng-container *ngIf="silkRuntimes&&silkRuntimes.length>0">
+      <mat-toolbar class="h40">
+        <h4 class="truncate" fxFlex style="font-size: 16px;">
+          {{'silk'|translate}}
+        </h4>
+      </mat-toolbar>
+      <mat-list dense style="padding-top: 0;">
+        <mat-list-item *ngFor="let it of silkRuntimes">
+          <p fxLayoutGap="16px" matLine>
+            <span>{{('SilkCar.SideType.' + it.sideType)|translate}}—{{it.row}}—{{it.col}}</span>
+            <!--<span>{{it.silk?.lineMachine?.line?.name}}-{{it.silk?.spindle}}/{{it.silk?.lineMachine?.item}}</span>-->
+          </p>
+        </mat-list-item>
+      </mat-list>
+    </ng-container>
+
+    <ng-container *ngIf="silkExceptions&&silkExceptions.length>0">
+      <mat-toolbar class="h40">
+        <h4 class="truncate" fxFlex style="font-size: 16px;">
+          {{'silkException'|translate}}
+        </h4>
+      </mat-toolbar>
+      <mat-list dense style="padding-top: 0;">
+        <mat-list-item *ngFor="let it of silkExceptions">
+          {{it.name}}
+        </mat-list-item>
+      </mat-list>
+    </ng-container>
+
+    <ng-container *ngIf="silkNotes&&silkNotes.length>0">
+      <mat-toolbar class="h40">
+        <h4 class="truncate" fxFlex style="font-size: 16px;">
+          {{'silkNote'|translate}}
+        </h4>
+      </mat-toolbar>
+      <mat-list dense style="padding-top: 0;">
+        <mat-list-item *ngFor="let it of silkNotes">
+          {{it.name}}
+        </mat-list-item>
+      </mat-list>
+    </ng-container>
+
+    <app-form-config-value-info *ngIf="formConfig" [formConfigValueData]="formConfigValueData"
+                                [formConfig]="formConfig"></app-form-config-value-info>
+
+  </mat-card-content>
+</mat-card>
+<mat-divider></mat-divider>
+
+<ng-container *ngIf="stateChange$|async"></ng-container>

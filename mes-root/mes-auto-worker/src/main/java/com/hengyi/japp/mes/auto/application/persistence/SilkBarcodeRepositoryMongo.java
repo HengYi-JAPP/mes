@@ -44,7 +44,8 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
         if (J.isBlank(silkBarcode.getCode())) {
             silkBarcode.setCode(silkBarcode.generateCode());
         }
-        return super.save(silkBarcode).doOnSuccess(silkBarcodeLucene::index);
+        return super.save(silkBarcode)
+                .doOnSuccess(silkBarcodeLucene::index);
     }
 
     @Override

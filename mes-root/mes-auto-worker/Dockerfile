@@ -1,10 +1,11 @@
-FROM java:8-jre-alpine
+FROM openjdk:11-jre-slim
 
 ENV TZ Asia/Shanghai
+ENV JAVA_OPTIONS ""
 ENV VERTICLE_HOME /usr/verticles
 ENV VERTICLE_FILE mes-auto-worker-fat.jar
 COPY $VERTICLE_FILE $VERTICLE_HOME/
 
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]
-CMD ["exec java -jar $VERTICLE_FILE"]
+CMD ["exec java $JAVA_OPTIONS -jar $VERTICLE_FILE"]

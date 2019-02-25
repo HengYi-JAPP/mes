@@ -1,7 +1,9 @@
 dependencies {
-    compile "io.vertx:vertx-jdbc-client:${vertxVersion}",
-            "io.vertx:vertx-hazelcast:${vertxVersion}",
-            "io.vertx:vertx-auth-jwt:${vertxVersion}",
-            "io.vertx:vertx-mongo-client:${vertxVersion}",
-            "io.vertx:vertx-redis-client:${vertxVersion}"
+    compile "com.github.ixtf.japp:vertx",
+            "io.vertx:vertx-jdbc-client",
+            "io.vertx:vertx-rabbitmq-client",
+            "io.vertx:vertx-hazelcast",
+            "io.vertx:vertx-auth-jwt",
+            "io.vertx:vertx-mongo-client",
+            "io.vertx:vertx-redis-client"
 }

@@ -1,0 +1,32 @@
+<button (click)="create()" [matTooltip]="'Tooltip.createProduct'|translate" class="my-add" mat-mini-fab type="button">
+  <mat-icon>add</mat-icon>
+</button>
+
+<mat-table [dataSource]="products$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>{{'Common.name'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <a mat-button color="primary" [routerLink]="[row.id,'config']" *ngIf="coreAuthAdmin$|async">
+        {{'Common.config'|translate}}
+      </a>
+      <button type="button" (click)="update(row)" mat-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+      <!--<button (click)="delete(row)" mat-button color="warn">-->
+      <!--{{'Common.delete'|translate}}-->
+      <!--</button>-->
+    </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

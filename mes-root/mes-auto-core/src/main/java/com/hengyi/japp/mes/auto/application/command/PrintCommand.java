@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.application.command;
 
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.domain.data.MesAutoPrinter;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,7 +19,7 @@ import java.util.Date;
 @Data
 public abstract class PrintCommand implements Serializable {
     @NotNull
-    private EntityDTO mesAutoPrinter;
+    private MesAutoPrinter mesAutoPrinter;
 
     /**
      * @author jzb 2018-08-24

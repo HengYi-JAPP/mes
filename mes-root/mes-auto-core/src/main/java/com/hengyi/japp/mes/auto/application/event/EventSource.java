@@ -5,7 +5,7 @@ import com.github.ixtf.japp.core.exception.JAuthorizationException;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import io.reactivex.Completable;
 import io.reactivex.Single;

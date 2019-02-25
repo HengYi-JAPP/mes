@@ -19,6 +19,8 @@ tags:
     description: 配置
   - name: admin
     description: 管理员
+  - name: riamb
+    description: 北自所接口
   - name: if
     description: 接口
 paths:
@@ -64,6 +66,83 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthInfo'
+        '400':
+          $ref: '#/components/responses/JException'
+  /riamb/silkCarRecords/codes/{code}:
+    get:
+      tags:
+        - riamb
+      summary: 获取丝车信息
+      parameters:
+        - in: path
+          name: code
+          required: true
+          description: 丝车条码
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiambFetchSilkCarRecordResultDTO'
+        '400':
+          $ref: '#/components/responses/JException'
+  /riamb/SilkDetachEvents:
+    post:
+      tags:
+        - riamb
+      summary: 丝锭解绑
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - silkCarCode
+                - silkCodes
+              properties:
+                silkCarCode:
+                  type: string
+                  description: 丝车条码
+                silkCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 丝锭条码
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-JAPP-MES-AUTO-IF-SIGN:
+              schema:
+                type: string
+                format: JWT
+              description: 接口调用日志，出错核对，请保存
+        '400':
+          $ref: '#/components/responses/JException'
+  /riamb/PackageBoxEvents:
+    post:
+      tags:
+        - riamb
+      summary: 丝锭打包
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiambPackageBoxCommand'
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-JAPP-MES-AUTO-IF-SIGN:
+              schema:
+                type: string
+                format: JWT
+              description: 接口调用日志，出错核对，请保存
         '400':
           $ref: '#/components/responses/JException'
 
@@ -364,16 +443,10 @@ paths:
       responses:
         '200':
           description: ok
-          headers:
-            X-JAPP-MES-IF-SIGN:
-              schema:
-                type: string
-                format: JWT
-              description: 接口调用日志，出错核对，请保存
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventHandleResultDTO'
+                $ref: '#/components/schemas/SilkCarRuntime'
         '400':
           $ref: '#/components/responses/JException'
   /api/ManualDoffingCheckSilks:
@@ -1932,6 +2005,79 @@ paths:
         '400':
           $ref: '#/components/responses/JException'
 
+  /api/AutoDoffingEvents:
+    post:
+      tags:
+        - if
+      summary: 自动落筒
+      description: 加密返回json的string，需要非对称加密，需要放入head头（X-JAPP-MES-AUTO-IF-SIGN），芮冠需要保存ifTransId，和返回的签名，用于后续核对日志。可以给永久token，但token里面必须包含落筒机信息字段
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ifTransId
+                - silkCar
+                - silks
+              properties:
+                ifTransId:
+                  type: string
+                  format: uuid
+                  description: 接口调用唯一流水号，成功后必须原样返回
+                silkCar:
+                  $ref: '#/components/schemas/EntityByCodeDTO'
+                silks:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - line
+                      - lineMachineItem
+                      - spindle
+                      - doffingDateTime
+                    properties:
+                      line:
+                        $ref: '#/components/schemas/EntityDTO'
+                      lineMachineItem:
+                        type: integer
+                        description: 机台
+                      spindle:
+                        type: integer
+                        description: 锭号
+                      sideType:
+                        type: string
+                        enum: [A, B]
+                        description: A,B面
+                      row:
+                        type: integer
+                        example: 1
+                        description: 第几行，从1开始
+                      col:
+                        type: integer
+                        example: 1
+                        description: 第几列，从1开始
+                      doffingDateTime:
+                        type: number
+                        description: 落筒时间
+                      grade:
+                        $ref: '#/components/schemas/EntityDTO'
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-JAPP-MES-AUTO-IF-SIGN:
+              schema:
+                type: string
+                format: JWT
+              description: 接口调用日志，出错核对，请保存
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventHandleResultDTO'
+        '400':
+          $ref: '#/components/responses/JException'
   /facevisa/autoVisualInspection/silkCodes/{code}:
     get:
       tags:
@@ -2287,10 +2433,19 @@ components:
           properties:
             code:
               type: string
+              description: 丝锭条码
     EventHandleResultDTO:
       type: object
       description: 事件源，可当接口日志
+      required:
+        - ifTransId
+        - silkCarRecordId
+        - eventId
       properties:
+        ifTransId:
+          type: string
+          format: uuid
+          description: 接口调用流水，原样返回
         silkCarRecordId:
           type: string
           description: 丝车车次ID
@@ -3267,6 +3422,183 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Silk'
+    RiambFetchSilkCarRecordResultDTO:
+      type: object
+      properties:
+        packeFlage:
+          type: string
+          example: "2"
+          description: 是否可以下自动包装线（1:不可以，2:可以）
+        silkCarInfo:
+          allOf:
+            - $ref: '#/components/schemas/EntityByCodeDTO'
+          type: object
+          description: 丝车信息
+          properties:
+            row:
+              type: integer
+              example: 3
+              description: 丝车有几行
+            col:
+              type: integer
+              example: 5
+              description: 丝车有几列
+        silkCount:
+          type: integer
+          example: 30
+          description: 丝锭数量，为还在丝车上的丝
+        silkInfos:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/CheckSilk'
+            type: object
+            properties:
+              grabFlage:
+                type: string
+                example: "1"
+                description: 抓取标识(1:抓取，2:不抓取)
+              eliminateFlage:
+                type: string
+                example: "2"
+                description: 剔除标识(1:不剔除，2:剔除)
+              spec:
+                type: string
+                example: A1-19/3
+                description: 纺位名称，如：A1-19/3，A1线3号机台19锭
+              batchNo:
+                type: string
+                description: 批号
+              doffingNum:
+                type: string
+                example: C9
+                description: 落次
+              doffingOperatorName:
+                type: string
+                description: 落筒人
+              doffingDateTime:
+                type: number
+                example: 1234567890
+                description: 落筒时间，一个Long，长整型的时间戳
+              gradeName:
+                type: string
+                example: AA
+                description: 等级名称
+              exceptions:
+                type: array
+                description: 异常信息
+                items:
+                  type: string
+              otherInfo:
+                type: string
+                description: 其他信息，预留备用，可能没有，也可能多，字段长度可以尽量长一些
+    RiambPackageBoxCommand:
+      type: object
+      required:
+        - code
+        - netWeight
+        - grossWeight
+        - silkCount
+        - createDateTime
+        - jobInfo
+        - silkInfos
+      properties:
+        code:
+          type: string
+          description: 唛头条码
+        netWeight:
+          type: string
+          description: 净重
+        grossWeight:
+          type: string
+          description: 毛重
+        silkCount:
+          type: integer
+          description: 丝锭颗数
+        createDateTime:
+          type: number
+          description: 创建时间戳
+        palletCode:
+          type: string
+          description: 塑托编号
+        otherInfo:
+          type: string
+        jobInfo:
+          $ref: '#/components/schemas/AutomaticPackeJobInfo'
+        silkInfos:
+          description: 丝锭信息
+          type: array
+          items:
+            type: object
+            required:
+              - code
+            properties:
+              code:
+                type: string
+                description: 丝锭条码
+              weight:
+                type: string
+                description: 丝锭重量
+    AutomaticPackeJobInfo:
+      type: object
+      required:
+        - id
+        - automaticPackeLine
+        - batchNo
+        - gradeName
+        - packageClassNo
+        - saleType
+        - palletType
+        - packageType
+        - budatDate
+        - foamType
+        - foamNum
+        - creatorHrId
+        - createDateTime
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 打包任务Id
+        automaticPackeLine:
+          type: string
+          description: 自动线名称
+        batchNo:
+          type: string
+          description: 批号
+        gradeName:
+          type: string
+          description: 等级名称
+        packageClassNo:
+          type: string
+          description: 打包班次
+        saleType:
+          type: string
+          description: 销售类型
+        budatDate:
+          type: number
+          description: 入库日期时间戳
+        palletType:
+          type: string
+          description: 托盘类型
+        packageType:
+          type: string
+          description: 打包类型
+        foamType:
+          type: string
+          description: 泡沫类型
+        foamNum:
+          type: integer
+          description: 泡沫数量
+        creatorHrId:
+          type: string
+          description: 员工号
+        createDateTime:
+          type: number
+          description: 任务创建时间戳
+        otherInfo:
+          type: string
+
     AutoVisualInspectionSilkInfoDTO:
       type: object
       properties:

@@ -1,0 +1,74 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput [value]="corporationCtrl.value?.name" disabled [placeholder]="'corporation'|translate">
+  </mat-form-field>
+
+  <div fxLayout style="flex-shrink: 0;" *ngIf="!batchModel">
+    <mat-form-field floatLabel="always" fxFlex="50">
+      <input matInput [formControl]="number" required [placeholder]="'SilkCar.number'|translate">
+      <mat-error *ngIf="number.hasError('required')||code.hasError('required')">
+        <span translate>Validator.required</span>
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field floatLabel="always" fxFlex="50">
+      <input matInput [value]="code.value" disabled [placeholder]="'SilkCar.code'|translate">
+    </mat-form-field>
+  </div>
+
+  <div fxLayout style="flex-shrink: 0;margin-bottom: 16px">
+    <mat-form-field floatLabel="always" fxFlex="50">
+      <input type="number" step="1" min="1" matInput [formControl]="row" required
+             [placeholder]="'Common.row'|translate">
+      <mat-error *ngIf="row.hasError('required')">
+        <span translate>Validator.required</span>
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field floatLabel="always" fxFlex="50">
+      <input type="number" step="1" min="1" matInput [formControl]="col" required
+             [placeholder]="'Common.col'|translate">
+      <mat-error *ngIf="col.hasError('required')">
+        <span translate>Validator.required</span>
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <div fxLayout style="flex-shrink: 0;margin-bottom: 16px">
+    <mat-button-toggle-group appearance="legacy" [formControl]="type" required>
+      <mat-button-toggle [value]="'DEFAULT'">{{'SilkCar.Type.DEFAULT'|translate}}</mat-button-toggle>
+      <mat-button-toggle [value]="'BIG_SILK_CAR'">{{'SilkCar.Type.BIG_SILK_CAR'|translate}}</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <mat-form-field floatLabel="always" *ngIf="batchModel">
+    <app-batch-range-input [formControl]="batchRange" required [placeholder]="'Common.batch'|translate"
+                           #abri></app-batch-range-input>
+    <mat-icon matSuffix (click)="abri.showBatchRangeValues()" *ngIf="!batchRange.disabled">visibility</mat-icon>
+    <mat-error *ngIf="batchRange.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="batchRange.hasError('batchRangeError')">
+      <span [translate]="batchRange.getError('batchRangeError')?.translate"
+            [translateParams]="batchRange.getError('batchRangeError')?.translateParams"></span>
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none" *ngIf="!batchModel">
+  {{'Common.finish'|translate}}
+</button>
+<button type="button" (click)="batchSubmit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none" *ngIf="batchModel">
+  {{'Common.finish'|translate}}
+</button>

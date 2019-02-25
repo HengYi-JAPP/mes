@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.ProductDyeingInfoUpdateCommand;
 import com.hengyi.japp.mes.auto.application.command.ProductUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.Product;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;

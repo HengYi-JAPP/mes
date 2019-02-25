@@ -1,0 +1,26 @@
+@titleH: 40px;
+@appToolbarH: 48px;
+
+.mat-toolbar-hF(@H) {
+  min-height: @H;
+  height: @H;
+  line-height: @H;
+
+  & > div.mat-toolbar-layout {
+    min-height: @H;
+    height: @H;
+
+    & > mat-toolbar-row {
+      min-height: @H;
+      height: @H;
+    }
+  }
+}
+
+.mat-tab-group-hF(@H) {
+  .mat-tab-label {
+    height: @H;
+    min-height: @H;
+    line-height: @H;
+  }
+}

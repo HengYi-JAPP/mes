@@ -1,0 +1,61 @@
+<div fxLayout fxLayoutAlign="start center" fxLayoutGap="16px" style="padding-right: 16px;flex-shrink: 0;">
+  <form [formGroup]="searchForm" fxFlex fxLayout>
+    <mat-form-field floatLabel="never" fxFlexOffset="2px">
+      <mat-select (selectionChange)="workshopChange($event)" [placeholder]="'workshop'|translate"
+                  [value]="(workshop$|async)?.id">
+        <mat-option *ngFor="let it of workshops$|async" [value]="it.id">
+          {{it.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!--<mat-form-field floatLabel="never" fxFlexOffset="2px">-->
+    <!--<input [formControl]="q" matInput [placeholder]="'Tooltip.q'|translate">-->
+    <!--</mat-form-field>-->
+  </form>
+
+  <button (click)="create()" [matTooltip]="'Tooltip.createLine'|translate" mat-mini-fab tabindex="-1" type="button">
+    <mat-icon>add</mat-icon>
+  </button>
+  <button (click)="batchCreate()" [matTooltip]="'Tooltip.batchCreateLine'|translate" mat-mini-fab tabindex="-1"
+          type="button">
+    <mat-icon>playlist_add</mat-icon>
+  </button>
+</div>
+<mat-divider></mat-divider>
+<mat-table [dataSource]="lines$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>{{'Common.name'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="workshop">
+    <mat-header-cell *matHeaderCellDef>{{'workshop'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.workshop.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="doffingType">
+    <mat-header-cell *matHeaderCellDef>{{'doffingType'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{('DoffingType.' + row.doffingType)|translate}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button (click)="update(row)" mat-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+      <!--<button (click)="delete(row)" mat-button color="warn">-->
+      <!--{{'Common.delete'|translate}}-->
+      <!--</button>-->
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

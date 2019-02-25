@@ -3,7 +3,7 @@ package init;
 import com.hengyi.japp.mes.auto.application.command.TemporaryBoxUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.Grade;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Cleanup;
 import lombok.Data;
 import lombok.SneakyThrows;

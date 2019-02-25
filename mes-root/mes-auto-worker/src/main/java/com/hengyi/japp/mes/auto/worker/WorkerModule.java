@@ -2,16 +2,15 @@ package com.hengyi.japp.mes.auto.worker;
 
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.hengyi.japp.mes.auto.GuiceModule;
-import com.hengyi.japp.mes.auto.Util;
 import com.hengyi.japp.mes.auto.application.*;
 import com.hengyi.japp.mes.auto.application.persistence.*;
 import com.hengyi.japp.mes.auto.application.persistence.disk.EventSourceRepositoryDisk;
 import com.hengyi.japp.mes.auto.application.persistence.redis.SilkCarRuntimeRepositoryRedis;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.interfaces.facevisa.FacevisaService;
 import com.hengyi.japp.mes.auto.interfaces.facevisa.internal.FacevisaServiceImpl;
 import com.hengyi.japp.mes.auto.interfaces.jikon.JikonAdapter;
@@ -20,13 +19,14 @@ import com.hengyi.japp.mes.auto.interfaces.riamb.RiambService;
 import com.hengyi.japp.mes.auto.interfaces.riamb.internal.RiambServiceImpl;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.internal.WarehouseServiceImpl;
+import com.hengyi.japp.mes.auto.report.api.ReportServiceImpl;
 import com.hengyi.japp.mes.auto.repository.*;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.mongo.MongoClient;
 import io.vertx.reactivex.redis.RedisClient;
 import io.vertx.redis.RedisOptions;
@@ -37,23 +37,20 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.List;
+import java.util.Optional;
 
 import static io.vertx.config.yaml.YamlProcessor.YAML_MAPPER;
 
 /**
  * @author jzb 2018-03-21
  */
-public class WorkerModule extends GuiceModule {
-
-    public WorkerModule(Vertx vertx) {
-        super(vertx);
-    }
+public class WorkerModule extends AbstractModule {
 
     @Override
     protected void configure() {
         bind(ApplicationEvents.class).to(ApplicationEventsRabbit.class);
         bind(AuthService.class).to(AuthServiceImpl.class);
+        bind(AdminService.class).to(AdminServiceImpl.class);
 
         bind(CorporationService.class).to(CorporationServiceImpl.class);
         bind(WorkshopService.class).to(WorkshopServiceImpl.class);
@@ -80,6 +77,7 @@ public class WorkerModule extends GuiceModule {
         bind(PackageClassService.class).to(PackageClassServiceImpl.class);
         bind(PackageBoxService.class).to(PackageBoxServiceImpl.class);
         bind(ReportService.class).to(ReportServiceImpl.class);
+        bind(DownloadService.class).to(DownloadServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
 
@@ -123,83 +121,62 @@ public class WorkerModule extends GuiceModule {
         bind(WarehouseService.class).to(WarehouseServiceImpl.class);
     }
 
-    @Provides
-    @Singleton
-    @Named("luceneRootPath")
-    private Path luceneRootPath(@Named("autoRootPath") Path autoRootPath) {
-        final Path path = Paths.get("db", "lucene");
-        return autoRootPath.resolve(path);
-    }
-
     @SneakyThrows
     @Provides
     @Singleton
     @Named("AutolSilkCarModel.Configs")
-    private Collection<AutolSilkCarModelConfigRegistry.Config> ConfigRegistry(@Named("autoRootPath") Path autoRootPath) {
-        final Path path = autoRootPath.resolve("auto_doffing_config");
-        final ImmutableList.Builder<AutolSilkCarModelConfigRegistry.Config> builder = ImmutableList.builder();
+    private Collection<AutoSilkCarModelConfigRegistry.Config> ConfigRegistry(MesAutoConfig config) {
+        final Path path = config.getRootPath().resolve("auto_doffing_config");
+        final ImmutableList.Builder<AutoSilkCarModelConfigRegistry.Config> builder = ImmutableList.builder();
         final String[] extensions = {"yml"};
         for (File file : FileUtils.listFiles(path.toFile(), extensions, true)) {
-            final AutolSilkCarModelConfigRegistry.Config config = YAML_MAPPER.readValue(file, AutolSilkCarModelConfigRegistry.Config.class);
-            config.selfCheck();
-            builder.add(config);
+            final AutoSilkCarModelConfigRegistry.Config doffingConfig = YAML_MAPPER.readValue(file, AutoSilkCarModelConfigRegistry.Config.class);
+            doffingConfig.selfCheck();
+            builder.add(doffingConfig);
         }
         return builder.build();
     }
 
     @Provides
     @Named("eventSourceRootPath")
-    private Path eventSourceRootPath(@Named("autoRootPath") Path autoRootPath) {
+    private Path eventSourceRootPath(MesAutoConfig config) {
         final Path path = Paths.get("db", "event-source");
-        return autoRootPath.resolve(path);
+        return config.getRootPath().resolve(path);
     }
 
     @SneakyThrows
     @Provides
     @Singleton
-    @Named("jikonDS")
-    private JDBCClient jikonDS(@Named("autoRootPath") Path autoRootPath) {
-        final Path configPath = autoRootPath.resolve("jikon_ds.config.yml");
-        final JsonObject config = Util.readJsonObject(configPath);
-        return JDBCClient.createShared(vertx, config, "jikonDS");
-    }
-
-    @SneakyThrows
-    @Provides
-    @Singleton
-    private RedisClient RedisClient(@Named("autoRootPath") Path autoRootPath) {
-        final Path configPath = autoRootPath.resolve("redis.config.yml");
-        final JsonObject config = Util.readJsonObject(configPath);
-        final RedisOptions options = new RedisOptions(config);
+    private RedisClient RedisClient(Vertx vertx, MesAutoConfig config) {
+        final RedisOptions options = config.getRedisOptions();
         return RedisClient.create(vertx, options);
     }
 
     @SneakyThrows
     @Provides
-    private MongoClient MongoClient(@Named("autoRootPath") Path autoRootPath) {
-        final Path configPath = autoRootPath.resolve("mongo.config.yml");
-        final JsonObject config = Util.readJsonObject(configPath);
-        return MongoClient.createShared(vertx, config);
+    private MongoClient MongoClient(Vertx vertx, MesAutoConfig config) {
+        final JsonObject mongoOptions = config.getMongoOptions();
+        return MongoClient.createShared(vertx, mongoOptions);
     }
 
     @SneakyThrows
     @Provides
     @Singleton
-    private MongoDatabase MongoDatabase(@Named("autoRootPath") Path autoRootPath) {
-        final Path configPath = autoRootPath.resolve("mongo.config.yml");
-        final JsonObject config = Util.readJsonObject(configPath);
-        final ServerAddress serverAddress = new ServerAddress(config.getString("host"), config.getInteger("port"));
-        final String db_name = config.getString("db_name", "DEFAULT_DB");
+    private MongoDatabase MongoDatabase(MesAutoConfig config) {
+        final JsonObject mongoOptions = config.getMongoOptions();
+        final ServerAddress serverAddress = new ServerAddress(mongoOptions.getString("host"), mongoOptions.getInteger("port"));
+        final String db_name = mongoOptions.getString("db_name", "DEFAULT_DB");
 
-        final String username = config.getString("username");
-        if (J.nonBlank(username)) {
-            final String authSource = config.getString("authSource");
-            final String password = config.getString("password");
-            final MongoCredential mongoCredential = MongoCredential.createCredential(username, authSource, password.toCharArray());
-            final List<MongoCredential> credentialsList = Lists.newArrayList(mongoCredential);
-            return new com.mongodb.MongoClient(serverAddress, credentialsList).getDatabase(db_name);
-        }
-        return new com.mongodb.MongoClient(serverAddress).getDatabase(db_name);
+        return Optional.ofNullable(mongoOptions.getString("username"))
+                .filter(J::nonBlank)
+                .map(username -> {
+                    final String authSource = mongoOptions.getString("authSource");
+                    final String password = mongoOptions.getString("password");
+                    final MongoCredential mongoCredential = MongoCredential.createCredential(username, authSource, password.toCharArray());
+                    return new com.mongodb.MongoClient(serverAddress, mongoCredential, MongoClientOptions.builder().build());
+                })
+                .orElseGet(() -> new com.mongodb.MongoClient(serverAddress))
+                .getDatabase(db_name);
     }
 
 }

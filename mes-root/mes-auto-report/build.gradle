@@ -1,0 +1,8 @@
+dependencies {
+    compile "com.github.ixtf.japp:poi",
+            project(':mes-auto-core')
+
+    testCompile "com.squareup.okhttp3:okhttp:3.11.0"
+}
+
+mainClassName = "com.hengyi.japp.mes.auto.report.Report"

@@ -1,0 +1,61 @@
+<mat-toolbar class="selection">
+  <h4 class="truncate" fxFlex>{{'productProcess'|translate}}</h4>
+  <button (click)="create()" [matTooltip]="'Tooltip.createProductProcess'|translate" mat-icon-button type="button">
+    <mat-icon>add</mat-icon>
+  </button>
+  <button (click)="sort()" *ngIf="(processForms$|async)?.length>1" [matTooltip]="'Common.sortBy'|translate"
+          mat-icon-button type="button">
+    <mat-icon>format_list_numbered</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-vertical-stepper>
+  <mat-step linear *ngFor="let form of processForms$|async" [stepControl]="form">
+    <ng-template matStepLabel>
+      [{{form.value.sortBy}}]{{form.value.name}}
+    </ng-template>
+
+    <form [formGroup]="form" fxLayout="column" fxFlex>
+      <mat-form-field floatLabel="always">
+        <input matInput [placeholder]="'Permission.code'|translate" value="ProductProcess:{{form.value.id}}" disabled>
+      </mat-form-field>
+
+      <mat-form-field floatLabel="always">
+        <input matInput [placeholder]="'Common.name'|translate" formControlName="name" required>
+        <mat-error *ngIf="form.get('name').hasError('required')">
+          <span translate>Validator.required</span>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field floatLabel="always">
+        <input matInput [placeholder]="'Common.sortBy'|translate" formControlName="sortBy" required>
+        <mat-error *ngIf="form.get('sortBy').hasError('required')">
+          <span translate>Validator.required</span>
+        </mat-error>
+        <mat-error *ngIf="form.get('sortBy').hasError('min')">
+          <span translate [translateParams]="form.get('sortBy').getError('min')">Validator.min</span>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field floatLabel="always">
+        <mat-select formControlName="relateRoles" multiple [placeholder]="'role'|translate">
+          <mat-option *ngFor="let it of ROLES" [value]="it">
+            {{('RoleType.' + it)|translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <app-silk-exception-input formControlName="exceptions" required min="1"
+                                fxFlex="noshrink"></app-silk-exception-input>
+
+      <app-silk-note-input formControlName="notes" fxFlex="noshrink"></app-silk-note-input>
+
+      <app-form-config-input formControlName="formConfig" fxFlex="noshrink"></app-form-config-input>
+
+      <button type="button" (click)="submitProcessForm(form)" mat-stroked-button color="primary"
+              [disabled]="form.pristine||form.invalid" *ngIf="!form.pristine">
+        {{'Common.save'|translate}}
+      </button>
+    </form>
+  </mat-step>
+</mat-vertical-stepper>
