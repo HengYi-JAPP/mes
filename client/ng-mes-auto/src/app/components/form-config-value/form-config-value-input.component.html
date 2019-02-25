@@ -1,0 +1,60 @@
+<mat-toolbar class="h40">
+  <h4 class="truncate" fxFlex style="font-size: 16px;">
+    {{formConfig?.name || ('FormConfig.template'|translate)}}
+  </h4>
+</mat-toolbar>
+
+<form [formGroup]="form" *ngIf="form" fxLayout="column">
+
+  <ng-container *ngFor="let fieldConfig of formConfig?.formFieldConfigs">
+
+    <ng-container *ngIf="fieldConfig.isInputString">
+      <mat-form-field floatLabel="always">
+        <input [formControl]="form.get(fieldConfig.id)" type="text" matInput [placeholder]="fieldConfig.name">
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isInputNumber">
+      <mat-form-field floatLabel="always">
+        <input [formControl]="form.get(fieldConfig.id)" type="number" matInput [placeholder]="fieldConfig.name">
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isInputBoolean">
+      <mat-form-field floatLabel="always">
+        <mat-select [formControl]="form.get(fieldConfig.id)" [placeholder]="fieldConfig.name">
+          <mat-option [value]="true">
+            {{'Common.yes'|translate}}
+          </mat-option>
+          <mat-option [value]="false">
+            {{'Common.false'|translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isSelectNumber">
+      <mat-form-field floatLabel="always">
+        <mat-select [formControl]="form.get(fieldConfig.id)" [multiple]="fieldConfig.multi"
+                    [placeholder]="fieldConfig.name">
+          <mat-option *ngFor="let it of fieldConfig.selectOptions" [value]="it">
+            {{it}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="fieldConfig.isSelectString">
+      <mat-form-field floatLabel="always">
+        <mat-select [formControl]="form.get(fieldConfig.id)" [multiple]="fieldConfig.multi"
+                    [placeholder]="fieldConfig.name">
+          <mat-option *ngFor="let it of fieldConfig.selectOptions" [value]="it">
+            {{it}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+  </ng-container>
+
+</form>

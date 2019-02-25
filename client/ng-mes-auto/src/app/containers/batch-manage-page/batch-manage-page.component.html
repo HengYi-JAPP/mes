@@ -1,0 +1,81 @@
+<section fxLayout fxLayoutAlign="start center" fxLayoutGap="16px" style="padding-right: 16px;flex-shrink: 0;">
+  <form [formGroup]="searchForm" fxFlex fxLayout fxLayoutGap="16px">
+    <mat-form-field floatLabel="never" fxFlexOffset="2px">
+      <input [placeholder]="'Tooltip.q'|translate" formControlName="q" matInput>
+    </mat-form-field>
+  </form>
+
+  <button (click)="create()" [matTooltip]="'Tooltip.createBatch'|translate" mat-mini-fab type="button">
+    <mat-icon>add</mat-icon>
+  </button>
+</section>
+
+<mat-table [dataSource]="batches$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="product">
+    <mat-header-cell *matHeaderCellDef>{{'product'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.product.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="workshop">
+    <mat-header-cell *matHeaderCellDef>{{'workshop'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.workshop.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="silkWeight">
+    <mat-header-cell *matHeaderCellDef>{{'silkWeight'|translate}}(KG)</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.silkWeight}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="batchNo">
+    <mat-header-cell *matHeaderCellDef>{{'batchNo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.batchNo}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="centralValue">
+    <mat-header-cell *matHeaderCellDef>{{'Batch.centralValue'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.centralValue}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="holeNum">
+    <th mat-header-cell *matHeaderCellDef>{{'Batch.holeNum'|translate}}</th>
+    <td mat-cell *matCellDef="let row"> {{row.holeNum}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="spec">
+    <mat-header-cell *matHeaderCellDef>{{'Batch.spec'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.spec}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="tubeColor">
+    <mat-header-cell *matHeaderCellDef>{{'tubeColor'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.tubeColor}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="note">
+    <mat-header-cell *matHeaderCellDef>{{'Common.note'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.note}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button (click)="update(row)" mat-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+      <button (click)="delete(row)" mat-button color="warn">
+        {{'Common.delete'|translate}}
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+
+<mat-paginator [length]="count$|async" [pageIndex]="pageIndex$|async" [pageSize]="pageSize$|async"
+               [pageSizeOptions]="pageSizeOptions" (page)="onPageEvent($event)" showFirstLastButtons></mat-paginator>

@@ -1,0 +1,18 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-selection-list dense fxFlex style="overflow-y: auto;">
+  <mat-list-option *ngFor="let it of allPermissions$|async" [value]="it" checkboxPosition="before">
+    {{it.name}}
+  </mat-list-option>
+</mat-selection-list>
+
+<button type="button" (click)="submit()" mat-button color="primary">
+  {{'Common.confirm'|translate}}
+</button>

@@ -3,8 +3,8 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
@@ -23,7 +23,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
@@ -38,8 +37,8 @@ import java.util.Optional;
 public class SilkCarRecordLucene extends BaseLucene<SilkCarRecord> {
 
     @Inject
-    private SilkCarRecordLucene(@Named("luceneRootPath") Path luceneRootPath) {
-        super(luceneRootPath);
+    private SilkCarRecordLucene(MesAutoConfig config) {
+        super(config);
     }
 
     @Override

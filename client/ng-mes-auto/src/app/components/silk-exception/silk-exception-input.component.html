@@ -1,0 +1,19 @@
+<mat-toolbar class="h40">
+  <h4 class="truncate" fxFlex style="font-size: 16px;">
+    {{'silkException'|translate}}
+  </h4>
+  <button (click)="pick()" mat-icon-button type="button">
+    <mat-icon>edit</mat-icon>
+  </button>
+  <button (click)="sort()" *ngIf="(silkExceptions$|async)?.length>1" [matTooltip]="'Common.sortBy'|translate"
+          mat-icon-button type="button">
+    <mat-icon>format_list_numbered</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-list dense style="padding-top: 0;">
+  <mat-list-item *ngFor="let it of (silkExceptions$|async)">
+    {{it.name}}
+    <mat-divider></mat-divider>
+  </mat-list-item>
+</mat-list>

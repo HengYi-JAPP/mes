@@ -1,0 +1,43 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput [formControl]="nameCtrl" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="nameCtrl.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-checkbox [formControl]="adminCtrl" style="margin-bottom: 16px">{{'Common.admin'|translate}}</mat-checkbox>
+
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="groupsCtrl" multiple [compareWith]="compareWithId"
+                [placeholder]="'operatorGroup'|translate">
+      <mat-option *ngFor="let it of operatorGroups$|async" [value]="it">
+        {{it.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="rolesCtrl" multiple [placeholder]="'role'|translate">
+      <mat-option *ngFor="let it of ROLES" [value]="it">
+        {{('RoleType.' + it)|translate}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <app-permission-input [formControl]="permissionsCtrl"></app-permission-input>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

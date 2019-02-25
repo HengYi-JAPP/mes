@@ -6,9 +6,10 @@ import com.hengyi.japp.mes.auto.domain.Grade;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.domain.dto.EntityByCodeDTO;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.GradeRepository;
 import com.hengyi.japp.mes.auto.repository.SilkCarRepository;
 import io.reactivex.Completable;
@@ -20,10 +21,12 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -98,6 +101,29 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
+    public static class AutoDoffingCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        @Size(min = 1)
+        private List<AutoDoffingCommandSilk> silks;
+
+        @Data
+        @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+        public static class AutoDoffingCommandSilk extends SilkCarPosition implements Serializable {
+            @NotBlank
+            private EntityDTO line;
+            @Min(1)
+            private int lineMachineItem;
+            @Min(1)
+            private int spindle;
+            @NotNull
+            private EntityDTO grade;
+            private Date doffingDateTime;
+        }
+    }
+
+    @Data
     public static class AutoDoffingAdaptCheckSilksCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
@@ -132,6 +158,17 @@ public class SilkCarRuntimeInitEvent extends EventSource {
         private EntityByCodeDTO silkCar;
         @Min(1)
         private float lineMachineCount;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
+        @NotNull
+        private EntityDTO grade;
+    }
+
+    @Data
+    public static class AdminManualDoffingCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
         @NotNull
         @Size(min = 1)
         private List<CheckSilkDTO> checkSilks;

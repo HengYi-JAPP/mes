@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author jzb 2018-07-01
@@ -25,7 +26,7 @@ public class PackageBoxQuery {
     @Getter
     private final String workshopId;
     @Getter
-    private final String budatClassId;
+    private final Set<String> budatClassIds;
     @Getter
     private final String batchId;
     @Getter

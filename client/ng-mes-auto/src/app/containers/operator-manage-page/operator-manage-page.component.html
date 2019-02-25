@@ -1,0 +1,49 @@
+<button (click)="create()" [matTooltip]="'Tooltip.importOperator'|translate" class="my-add" mat-mini-fab type="button">
+  <mat-icon>add</mat-icon>
+</button>
+
+<form [formGroup]="searchForm" fxLayout>
+  <mat-form-field floatLabel="never" fxFlexOffset="2px">
+    <input [formControl]="q" matInput [placeholder]="'Tooltip.q'|translate">
+  </mat-form-field>
+</form>
+
+<mat-table [dataSource]="operators$" fxFlex style="overflow-y: auto;">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>{{'Common.name'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="hrId">
+    <mat-header-cell *matHeaderCellDef>{{'hrId'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.hrId}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="oaId">
+    <mat-header-cell *matHeaderCellDef>{{'oaId'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.oaId}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button type="button" (click)="update(row)" mat-button color="primary">
+        {{'permission'|translate}}
+      </button>
+      <button type="button" (click)="delete(row)" mat-button color="warn">
+        {{'Common.delete'|translate}}
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+
+<mat-paginator [length]="count$|async" [pageIndex]="pageIndex$|async" [pageSize]="pageSize$|async"
+               [pageSizeOptions]="pageSizeOptions" (page)="onPageEvent($event)" showFirstLastButtons></mat-paginator>

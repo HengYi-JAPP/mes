@@ -1,0 +1,86 @@
+<mat-toolbar>
+  <h4 fxFlex>
+    {{(productPlanNotify$|async)?.name}} | {{('ProductPlanType.' + (productPlanNotify$|async)?.type)|translate}}
+    | {{(productPlanNotify$|async)?.batch.batchNo}} | {{(productPlanNotify$|async)?.startDate|date:'yyyy-MM-dd'}}
+  </h4>
+  <button (click)="exeBatch()" *ngIf="dataSource.selection.selected.length>1" color="primary" mat-button type="button">
+    {{'Btn.productPlanNotifyExeBatch'|translate}}
+  </button>
+  <button (click)="finish()" color="warn" mat-button type="button">
+    {{'Common.end'|translate}}
+  </button>
+</mat-toolbar>
+
+<mat-table [dataSource]="dataSource" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="select">
+    <mat-header-cell *matHeaderCellDef>
+      <mat-checkbox (change)="$event ? dataSource.masterToggle() : null"
+                    [checked]="dataSource.selection.hasValue() && dataSource.isAllSelected"
+                    [indeterminate]="dataSource.selection.hasValue() && !dataSource.isAllSelected">
+      </mat-checkbox>
+    </mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <ng-container *ngIf="row.extra.canExe">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? dataSource.selection.toggle(row) : null"
+                      [checked]="dataSource.selection.isSelected(row)">
+        </mat-checkbox>
+      </ng-container>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="workshop">
+    <mat-header-cell *matHeaderCellDef>{{'workshop'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.line.workshop.name}}</mat-cell>
+    <!--<mat-cell *matCellDef="let row" [style.color]="'red'">{{row.line.workshop.name}}</mat-cell>-->
+  </ng-container>
+
+  <ng-container matColumnDef="line">
+    <mat-header-cell *matHeaderCellDef>{{'line'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.line.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="lineMachine">
+    <mat-header-cell *matHeaderCellDef>{{'lineMachine'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{row.item}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="exePlan">
+    <mat-header-cell *matHeaderCellDef>{{'ProductPlanNotify.current'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <ng-container *ngIf="row.productPlan">
+        <ng-container *ngIf="(productPlanNotify$|async).id!==row.productPlan.productPlanNotify?.id">
+          <span style="cursor: pointer" fxFlex>
+            {{row.productPlan?.productPlanNotify?.name}}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="(productPlanNotify$|async).id===row.productPlan.productPlanNotify?.id">
+          <span fxFlex>
+            {{row.productPlan?.productPlanNotify?.name}}
+          </span>
+        </ng-container>
+      </ng-container>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="exePlanStartDate">
+    <mat-header-cell *matHeaderCellDef>{{'LineMachine.exeStartDateTime'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      {{row.productPlan?.startDate|date:'yyyy-MM-dd HH:mm'}}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <ng-container *ngIf="row.extra.canExe">
+        <button type="button" (click)="exe(row)" mat-button color="primary">
+          {{'Btn.productPlanNotifyExe'|translate}}
+        </button>
+      </ng-container>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

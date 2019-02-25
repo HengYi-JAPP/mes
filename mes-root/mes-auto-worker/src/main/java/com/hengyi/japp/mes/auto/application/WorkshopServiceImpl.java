@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.WorkshopUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.Workshop;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.CorporationRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SapT001lRepository;

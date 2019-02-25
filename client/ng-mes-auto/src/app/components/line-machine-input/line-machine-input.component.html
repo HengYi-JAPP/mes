@@ -1,0 +1,20 @@
+<mat-toolbar class="h40">
+  <span class="truncate" fxFlex style="font-size: 16px">
+    {{'lineMachine'|translate}}
+    <ng-container *ngIf="required">*</ng-container>
+  </span>
+  <button (click)="pick()" mat-icon-button type="button">
+    <mat-icon>edit</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-list role="list" dense style="padding-top: 0;">
+  <mat-list-item role="listitem" *ngFor="let it of (values$|async)">
+    <p matLine fxLayout fxLayoutGap="16px">
+      <span>{{it.line.workshop.name}}</span>
+      <span>{{it.line.name}}</span>
+      <span>{{it.item}}</span>
+    </p>
+    <mat-divider></mat-divider>
+  </mat-list-item>
+</mat-list>

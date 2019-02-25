@@ -1,0 +1,13 @@
+<mat-progress-bar *ngIf="coreLoading$|async" color="accent" mode="indeterminate" style="height: 2px"></mat-progress-bar>
+<nav class="navbar-header">
+  <a mat-button routerLink="/silkCar/runtime">{{'Nav.silkRuntime'|translate}}</a>
+  <a mat-button routerLink="/silkCar/history">{{'Nav.silkHistory'|translate}}</a>
+  <a mat-button routerLink="/productPlan">{{'Nav.productPlan'|translate}}</a>
+  <a mat-button routerLink="/report">{{'Nav.report'|translate}}</a>
+  <span fxFlex></span>
+  <a mat-button routerLink="/config">{{'Nav.config'|translate}}</a>
+  <a mat-button routerLink="/admin" *ngIf="admin$|async">{{'Nav.admin'|translate}}</a>
+  <a mat-icon-button href="/intro.html" target="_blank" [matTooltip]="'Common.help'|translate">
+    <mat-icon>help</mat-icon>
+  </a>
+</nav>

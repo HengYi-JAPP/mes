@@ -4,7 +4,7 @@ import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.ImmutableList;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-import static com.hengyi.japp.mes.auto.application.AutolSilkCarModelConfigRegistry.*;
+import static com.hengyi.japp.mes.auto.application.AutoSilkCarModelConfigRegistry.*;
 
 /**
  * todo 配置文件形式，自定义落筒顺序
@@ -30,7 +30,7 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
     public AutoSilkCarModel(SilkCar silkCar, Workshop workshop) {
         super(silkCar);
         this.workshop = workshop;
-        config = Jvertx.getProxy(AutolSilkCarModelConfigRegistry.class).find(silkCar, workshop);
+        config = Jvertx.getProxy(AutoSilkCarModelConfigRegistry.class).find(silkCar, workshop);
     }
 
     @Override

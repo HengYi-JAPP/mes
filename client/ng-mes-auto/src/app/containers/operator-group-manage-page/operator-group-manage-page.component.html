@@ -1,0 +1,35 @@
+<button (click)="create()" [matTooltip]="'Tooltip.createOperatorGroup'|translate" class="my-add" mat-mini-fab
+        type="button">
+  <mat-icon>add</mat-icon>
+</button>
+
+<form [formGroup]="searchForm" fxLayout>
+  <mat-form-field floatLabel="never" fxFlexOffset="2px">
+    <input [formControl]="q" matInput [placeholder]="'Tooltip.q'|translate">
+  </mat-form-field>
+</form>
+
+<mat-table [dataSource]="operatorGroups$" fxFlex style="overflow-y: auto;">
+
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>{{'Common.name'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button type="button" (click)="update(row)" mat-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

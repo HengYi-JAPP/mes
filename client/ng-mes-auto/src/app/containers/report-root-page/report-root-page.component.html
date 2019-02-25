@@ -1,0 +1,16 @@
+<mat-sidenav-container fxFlex>
+  <mat-sidenav class="mat-elevation-z3" mode="side" opened>
+    <mat-nav-list>
+      <a [routerLink]="['measureReport']" mat-list-item routerLinkActive="active">
+        {{'Nav.measureReport'|translate}}
+      </a>
+      <a [routerLink]="['statisticsReport']" mat-list-item routerLinkActive="active">
+        {{'Nav.statisticsReport'|translate}}
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content fxLayout="column">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

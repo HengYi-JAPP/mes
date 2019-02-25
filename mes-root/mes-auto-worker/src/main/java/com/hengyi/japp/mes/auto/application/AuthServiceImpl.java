@@ -21,7 +21,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.security.*;
-import java.util.concurrent.TimeUnit;
 
 import static com.hengyi.japp.mes.auto.Constant.IF_SIGN_HEADER;
 import static com.hengyi.japp.mes.auto.Constant.JWT_ALGORITHM;
@@ -57,8 +56,8 @@ public class AuthServiceImpl implements AuthService {
             final JWTOptions options = new JWTOptions()
                     .setSubject(operator.getId())
                     .setAlgorithm(JWT_ALGORITHM)
-                    .setIssuer("japp-mes-auto")
-                    .setExpiresInMinutes((int) TimeUnit.HOURS.toMinutes(12));
+                    .setIssuer("japp-mes-auto");
+//                    .setExpiresInMinutes((int) TimeUnit.HOURS.toMinutes(12));
             final JsonObject claims = new JsonObject().put("uid", operator.getId());
             return jwtAuth.generateToken(claims, options);
         }).toSingle();

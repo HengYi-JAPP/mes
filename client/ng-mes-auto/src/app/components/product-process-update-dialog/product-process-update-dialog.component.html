@@ -1,0 +1,52 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput [value]="productCtrl?.value?.name" [placeholder]="'product'|translate" disabled>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <input matInput [formControl]="nameCtrl" required [placeholder]="'Common.name'|translate">
+    <mat-error *ngIf="nameCtrl.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <input type="number" step="1000" min="0" matInput [formControl]="sortByCtrl" required
+           [placeholder]="'Common.sortBy'|translate">
+    <mat-error *ngIf="sortByCtrl.hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="sortByCtrl.hasError('min')">
+      <span translate [translateParams]="sortByCtrl.getError('min')">Validator.min</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always">
+    <mat-select [formControl]="relateRolesCtrl" multiple [placeholder]="'role'|translate">
+      <mat-option *ngFor="let it of ROLES" [value]="it">
+        {{('RoleType.' + it)|translate}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <app-silk-exception-input [formControl]="exceptionsCtrl" style="margin-bottom: 16px;"
+                            fxFlex="noshrink"></app-silk-exception-input>
+
+  <app-silk-note-input [formControl]="notesCtrl" style="margin-bottom: 16px;" fxFlex="noshrink"></app-silk-note-input>
+
+  <app-form-config-input [formControl]="formConfigCtrl" fxFlex="noshrink"></app-form-config-input>
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid"
+        fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

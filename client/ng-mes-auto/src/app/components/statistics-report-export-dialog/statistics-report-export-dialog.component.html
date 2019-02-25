@@ -1,0 +1,45 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{'Common.export'|translate}}—{{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always" fxFlexOffset="2px">
+    <mat-select formControlName="workshopId" required [placeholder]="'workshop'|translate">
+      <mat-option *ngFor="let it of workshops$|async" [value]="it.id">
+        {{it.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always" *ngIf="mode==='exportDay'">
+    <input formControlName="date" matInput required [matDatepicker]="datePicker" [placeholder]="'Common.date'|translate">
+    <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+    <mat-datepicker #datePicker color="primary"></mat-datepicker>
+    <mat-error *ngIf="form.get('date').hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field floatLabel="always" *ngIf="mode==='exportWeek'">
+    <input formControlName="date" [matDatepickerFilter]="dateFilter" matInput required [matDatepicker]="datePicker" [placeholder]="'Common.monday'|translate">
+    <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+    <mat-datepicker #datePicker color="primary"></mat-datepicker>
+    <mat-error *ngIf="form.get('date').hasError('required')">
+      <span translate>Validator.required</span>
+    </mat-error>
+    <mat-error *ngIf="form.get('date').hasError('monday')">
+      <span translate>Validator.monday</span>
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<button type="button" (click)="exportDay()" mat-raised-button color="primary" [disabled]="form.pristine||form.invalid" fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>
+

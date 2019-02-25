@@ -11,7 +11,7 @@ import com.hengyi.japp.mes.auto.application.command.PasswordChangeCommand;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.OperatorGroup;
 import com.hengyi.japp.mes.auto.domain.Permission;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.LoginRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorGroupRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;

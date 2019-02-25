@@ -9,7 +9,7 @@ import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Single;
 import lombok.Data;
@@ -90,7 +90,8 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
                     silk.setDoffingNum(silkBarcode.getDoffingNum());
                     silk.setSpindle(spindle);
                     silk.setLineMachine(lineMachine);
-                    silk.setBatch(lineMachine.getProductPlan().getBatch());
+//                    silk.setBatch(lineMachine.getProductPlan().getBatch());
+                    silk.setBatch(silkBarcode.getBatch());
                     return silkRuntime;
                 });
                 builder.add(silkRuntime$);
@@ -155,6 +156,5 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         }
         throw new RuntimeException();
     }
-
 
 }

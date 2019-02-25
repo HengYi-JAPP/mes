@@ -7,7 +7,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
 import io.reactivex.Completable;
 import io.reactivex.Single;

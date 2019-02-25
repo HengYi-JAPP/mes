@@ -11,10 +11,7 @@ import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.application.persistence.MongoEntity;
 import com.hengyi.japp.mes.auto.application.persistence.annotations.JsonEntityProperty;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.SneakyThrows;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +27,7 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
  * @author jzb 2018-06-20
  */
 @Data
+@NoArgsConstructor
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class SilkCarRecord extends MongoEntity {
@@ -54,10 +52,6 @@ public class SilkCarRecord extends MongoEntity {
     private String eventsJsonString;
 
     private Date endDateTime;
-
-
-//    @Transient
-//    private SilkCarRuntimeInitEvent initEvent;
 
     public Date getStartDateTime() {
         return Optional.ofNullable(getDoffingDateTime()).orElse(getCarpoolDateTime());

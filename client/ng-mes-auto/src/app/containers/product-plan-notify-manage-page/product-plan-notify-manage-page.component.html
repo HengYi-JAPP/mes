@@ -1,0 +1,70 @@
+<div fxLayout fxLayoutAlign="start center" fxLayoutGap="16px" style="padding-right: 16px;flex-shrink: 0;">
+  <form [formGroup]="searchForm" fxFlex fxLayout>
+    <mat-form-field floatLabel="never" fxFlexOffset="2px">
+      <input [placeholder]="'Tooltip.q'|translate" formControlName="q" matInput>
+    </mat-form-field>
+  </form>
+
+  <button (click)="create()" mat-mini-fab tabindex="-1" type="button">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+<mat-table [dataSource]="productPlanNotifies$" fxFlex style="overflow-y: auto">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.id}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="type">
+    <mat-header-cell *matHeaderCellDef>{{'Common.type'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{('ProductPlanType.' + row.type)|translate}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>{{'Common.name'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.name}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="batch">
+    <mat-header-cell *matHeaderCellDef>{{'batchNo'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.batch.batchNo}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="startDate">
+    <mat-header-cell *matHeaderCellDef>{{'Common.startDate'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.startDate|date:'yyyy-MM-dd'}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="endDate">
+    <mat-header-cell *matHeaderCellDef>{{'Common.endDate'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <ng-container *ngIf="row.endDate">
+        {{row.endDate|date:'yyyy-MM-dd'}}
+      </ng-container>
+      <ng-container *ngIf="!row.endDate">
+        <button type="button" (click)="delete(row)" mat-stroked-button color="warn">
+          {{'Common.end'|translate}}
+        </button>
+      </ng-container>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="btns">
+    <mat-header-cell *matHeaderCellDef>{{'Common.operation'|translate}}</mat-header-cell>
+    <mat-cell *matCellDef="let row" fxLayoutGap="8px">
+      <button type="button" (click)="update(row)" mat-stroked-button color="primary">
+        {{'Common.edit'|translate}}
+      </button>
+      <a mat-stroked-button color="primary" [routerLink]="[row.id,'exeInfo']">
+        {{'ProductPlanNotify.exeInfo'|translate}}
+      </a>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+
+<mat-paginator [length]="count$|async" [pageIndex]="pageIndex$|async" [pageSize]="pageSize$|async"
+               [pageSizeOptions]="pageSizeOptions" (page)="onPageEvent($event)" showFirstLastButtons></mat-paginator>

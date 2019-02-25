@@ -1,0 +1,23 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-form-field floatLabel="never">
+  <input [formControl]="qCtrl" matInput [placeholder]="'Tooltip.q'|translate">
+</mat-form-field>
+<mat-divider></mat-divider>
+
+<mat-nav-list dense fxFlex style="overflow-y: auto;">
+  <mat-list-item *ngFor="let it of suggestOperators$|async" (click)="import(it)">
+    <div matLine fxLayout="row" fxLayoutAlign="space-around center">
+      <span fxFlex="33">{{it.name}}</span>
+      <span fxFlex="33">{{it.hrId}}</span>
+      <span fxFlex="33">{{it.oaId}}</span>
+    </div>
+  </mat-list-item>
+</mat-nav-list>

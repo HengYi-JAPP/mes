@@ -6,7 +6,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.ExceptionCleanEvent;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.Data;

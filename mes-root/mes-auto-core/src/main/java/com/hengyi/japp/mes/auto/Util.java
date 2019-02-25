@@ -47,6 +47,7 @@ public class Util {
                 final Map map = MAPPER.readValue(path.toFile(), Map.class);
                 return new JsonObject(map);
             }
+            case "yaml":
             case "yml": {
                 final Map map = YAML_MAPPER.readValue(path.toFile(), Map.class);
                 return new JsonObject(map);

@@ -1,6 +1,6 @@
 package com.hengyi.japp.mes.auto.application.command;
 
-import com.hengyi.japp.mes.auto.domain.dto.SilkCarRecordDTO;
+import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

@@ -1,0 +1,13 @@
+<nav mat-tab-nav-bar>
+  <a #rla="routerLinkActive" *ngFor="let product of products$|async" [active]="rla.isActive"
+     [routerLink]="['../../',product.id,'config']" mat-tab-link routerLinkActive>
+    {{product.name}}
+  </a>
+</nav>
+<button type="button" (click)="create()" mat-mini-fab class="my-add" [matTooltip]="'Tooltip.createProduct'|translate">
+  <mat-icon>add</mat-icon>
+</button>
+
+<div fxFlex style="overflow-y: auto;">
+  <app-product-process-list [product]="product$|async"></app-product-process-list>
+</div>

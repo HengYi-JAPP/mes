@@ -1,0 +1,34 @@
+<mat-toolbar class="title">
+  <div class="dialog-title truncate" fxFlex>
+    {{dialogTitle|translate}}
+  </div>
+  <button color="accent" mat-icon-button matDialogClose tabindex="-1" type="button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<form [formGroup]="form" fxLayout="column" fxFlex>
+  <mat-form-field floatLabel="always">
+    <input matInput [value]="silkCar.code" disabled>
+    <mat-hint align="end">{{silkCarRecord.id}}</mat-hint>
+  </mat-form-field>
+
+  <mat-toolbar class="h40">
+    <h4 style="font-size: 16px;" class="truncate" fxFlex>
+      {{'silk'|translate}}
+    </h4>
+  </mat-toolbar>
+  <mat-list dense style="padding-top: 0;">
+    <mat-list-item *ngFor="let it of silkRuntimes">
+      <p matLine fxLayoutGap="16px">
+        <span>{{('SilkCar.SideType.' + it.sideType)|translate}}—{{it.row}}—{{it.col}}</span>
+        <span>{{it.silk.lineMachine.line.name}}-{{it.silk.spindle}}/{{it.silk.lineMachine.item}}</span>
+      </p>
+    </mat-list-item>
+  </mat-list>
+
+</form>
+
+<button type="button" (click)="submit()" mat-raised-button color="primary" [disabled]="form.invalid" fxFlex="none">
+  {{'Common.finish'|translate}}
+</button>

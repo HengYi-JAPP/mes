@@ -6,6 +6,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
 
 import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.persistence.JsonEntity;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.LoggableMongoEntity;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import lombok.Cleanup;
@@ -34,11 +35,11 @@ public abstract class BaseLucene<T extends JsonEntity> {
     protected final FacetsConfig facetsConfig;
 
     @SneakyThrows
-    protected BaseLucene(Path luceneRootPath) {
+    protected BaseLucene(MesAutoConfig config) {
         entityClass = entityClass();
-        final Path indexPath = luceneRootPath.resolve(entityClass.getSimpleName());
+        final Path indexPath = config.luceneIndexPath(entityClass);
         indexWriter = new IndexWriter(FSDirectory.open(indexPath), new IndexWriterConfig(new SmartChineseAnalyzer()));
-        final Path taxoPath = luceneRootPath.resolve(entityClass.getSimpleName() + "_Taxonomy");
+        final Path taxoPath = config.luceneTaxoPath(entityClass);
         taxoWriter = new DirectoryTaxonomyWriter(FSDirectory.open(taxoPath));
         facetsConfig = facetsConfig();
     }
@@ -73,8 +74,30 @@ public abstract class BaseLucene<T extends JsonEntity> {
         doc.add(new IntPoint(fieldName, b ? 1 : 0));
     }
 
-    protected Query booleanQuery(String fieldName, boolean b) {
-        return IntPoint.newExactQuery(fieldName, b ? 1 : 0);
+    protected void addQuery(BooleanQuery.Builder bqBuilder, String fieldName, boolean b) {
+        bqBuilder.add(IntPoint.newExactQuery(fieldName, b ? 1 : 0), BooleanClause.Occur.MUST);
+    }
+
+    protected void addQuery(BooleanQuery.Builder bqBuilder, String fieldName, Enum e) {
+        Optional.ofNullable(e).map(Enum::name)
+                .map(it -> new TermQuery(new Term(fieldName, it)))
+                .ifPresent(it -> bqBuilder.add(it, BooleanClause.Occur.MUST));
+    }
+
+    protected void addQuery(BooleanQuery.Builder bqBuilder, String fieldName, String s) {
+        Optional.ofNullable(s).filter(J::nonBlank)
+                .map(it -> new TermQuery(new Term(fieldName, s)))
+                .ifPresent(it -> bqBuilder.add(it, BooleanClause.Occur.MUST));
+    }
+
+    protected void addQuery(BooleanQuery.Builder bqBuilder, String fieldName, Collection<String> ss) {
+        if (J.nonEmpty(ss)) {
+            final BooleanQuery.Builder subBqBuilder = new BooleanQuery.Builder();
+            ss.stream().filter(J::nonBlank).forEach(it ->
+                    subBqBuilder.add(new TermQuery(new Term(fieldName, it)), BooleanClause.Occur.SHOULD)
+            );
+            bqBuilder.add(subBqBuilder.build(), BooleanClause.Occur.MUST);
+        }
     }
 
     protected void addOperator(Document doc, String fieldName, Operator operator) {

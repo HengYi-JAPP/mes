@@ -1,0 +1,28 @@
+<mat-toolbar class="h40">
+  <h4 fxFlex style="font-size: 16px;">
+    {{('FormConfig.fieldConfig'|translate)}}
+  </h4>
+  <button (click)="create()" mat-icon-button type="button">
+    <mat-icon>add</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-list dense>
+  <mat-list-item *ngFor="let it of formFieldConfigs$|async">
+    <!--<div matLine fxLayout fxLayoutGap="16px">-->
+    <!--<span>{{it.name}}</span>-->
+    <!--<span>{{('FormFieldConfig.ValueType.'+it.valueType)|translate}}</span>-->
+    <!--<span>{{('FormFieldConfig.InputType.'+it.inputType)|translate}}</span>-->
+    <!--</div>-->
+    <div matLine>
+      {{it.name}}
+    </div>
+    <button type="button" (click)="update(it)" mat-icon-button color="primary">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button type="button" (click)="delete(it)" mat-icon-button color="warn">
+      <mat-icon>delete</mat-icon>
+    </button>
+    <mat-divider></mat-divider>
+  </mat-list-item>
+</mat-list>

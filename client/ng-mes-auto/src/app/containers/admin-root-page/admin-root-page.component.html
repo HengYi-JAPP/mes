@@ -1,0 +1,19 @@
+<mat-sidenav-container autosize class="viewer-sidenav-container" fxFlex>
+  <mat-sidenav class="viewer-sidenav mat-elevation-z3" mode="side" opened>
+    <mat-nav-list>
+      <a [routerLink]="['operators']" mat-list-item routerLinkActive="active">
+        {{'Nav.operators'|translate}}
+      </a>
+      <a [routerLink]="['operatorGroups']" mat-list-item routerLinkActive="active">
+        {{'Nav.operatorGroups'|translate}}
+      </a>
+      <a [routerLink]="['permissions']" mat-list-item routerLinkActive="active">
+        {{'Nav.permissions'|translate}}
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="viewer-sidenav-content" fxLayout="column">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,7 +1,7 @@
 package com.hengyi.japp.mes.auto.application.command;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.hengyi.japp.mes.auto.domain.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

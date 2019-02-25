@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static com.hengyi.japp.mes.auto.application.AutolSilkCarModelConfigRegistry.*;
+import static com.hengyi.japp.mes.auto.application.AutoSilkCarModelConfigRegistry.*;
 import static io.vertx.config.yaml.YamlProcessor.YAML_MAPPER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 

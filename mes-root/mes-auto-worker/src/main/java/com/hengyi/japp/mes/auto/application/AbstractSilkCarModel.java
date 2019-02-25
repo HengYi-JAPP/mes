@@ -9,7 +9,7 @@ import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarType;
-import com.hengyi.japp.mes.auto.domain.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.exception.BatchChangedException;
 import com.hengyi.japp.mes.auto.exception.DoffingCapacityException;
 import com.hengyi.japp.mes.auto.exception.DoffingTagException;
@@ -99,9 +99,9 @@ public abstract class AbstractSilkCarModel implements SilkCarModel {
     }
 
     public List<SilkBarcode> checkBatchChange(List<SilkBarcode> silkBarcodes) throws BatchChangedException {
-        final boolean present = silkBarcodes.stream().filter(it -> {
-            final Batch printBatch = it.getBatch();
-            final Batch batch = it.getLineMachine().getProductPlan().getBatch();
+        final boolean present = silkBarcodes.stream().filter(silkBarcode -> {
+            final Batch printBatch = silkBarcode.getBatch();
+            final Batch batch = silkBarcode.getLineMachine().getProductPlan().getBatch();
             return !Objects.equals(printBatch, batch);
         }).findFirst().isPresent();
         if (present) {

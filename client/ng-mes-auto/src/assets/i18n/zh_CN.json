@@ -1,0 +1,242 @@
+{
+  "title": "生产自动化",
+  "corporation": "公司",
+  "product": "产品",
+  "operatorGroup": "用户组",
+  "workshop": "车间",
+  "line": "线别",
+  "lineMachine": "机台",
+  "batchNo": "批号",
+  "grade": "等级",
+  "packageClass": "班次",
+  "productPlan": "生产计划",
+  "productProcess": "生产工艺",
+  "silkException": "丝锭异常",
+  "silkNote": "丝锭备注",
+  "permission": "权限",
+  "silkWeight": "锭重",
+  "silk": "丝锭",
+  "weight": "锭重",
+  "doffingType": "落筒方式",
+  "brand": "品牌",
+  "supplier": "厂商",
+  "tubeColor": "纸管颜色",
+  "silkDetach": "丝锭解绑",
+  "lineMachineCount": "机台数",
+  "packageBoxCount": "包数",
+  "silkCount": "颗数",
+  "weightCount": "重量",
+  "foamCount": "泡沫数",
+  "MeasureReport": {
+    "sumInfo": "(总/内/外)",
+    "total": "总计"
+  },
+  "StatisticsReport": {
+    "exportDay": "日报表",
+    "exportWeek": "周报表",
+    "exportMonth": "月报表",
+    "exportYear": "年报表"
+  },
+  "foamCount": "泡沫数",
+  "RoleType": {
+    "DOFFING": "落丝",
+    "SUBMIT_GRADE": "等级确认",
+    "SUBMIT_DYEING_PREPARE": "待染判",
+    "SUBMIT_DYEING_SAMPLE": "标样丝",
+    "SUBMIT_DYEING_RESULT": "染判"
+  },
+  "ProductPlanNotify": {
+    "current": "当前生产通知单",
+    "history": "历史生产通知单",
+    "exeInfo": "执行情况"
+  },
+  "LineMachine": {
+    "name": "设备名称",
+    "item": "位号",
+    "partNum": "卷绕头数",
+    "spindleNum": "锭数",
+    "spindleSeq": "人工落筒锭位顺序",
+    "number": "设备编号",
+    "exeStartDateTime": "开始执行时间"
+  },
+  "Permission": {
+    "code": "权限CODE"
+  },
+  "DoffingType": {
+    "AUTO": "自动落筒",
+    "MANUAL": "手动落筒"
+  },
+  "ProductPlanType": {
+    "CHANGE_BATCH": "改批",
+    "SAMPLE": "样品"
+  },
+  "SilkCar": {
+    "recordId": "丝车车次",
+    "number": "丝车编号",
+    "code": "丝车条码",
+    "type": "丝车类型",
+    "Type": {
+      "DEFAULT": "普通丝车",
+      "BIG_SILK_CAR": "大丝车"
+    },
+    "SideType": {
+      "A": "A面",
+      "B": "B面"
+    }
+  },
+  "Batch": {
+    "centralValue": "中间值",
+    "holeNum": "孔数",
+    "spec": "规格"
+  },
+  "GradeInfo": {
+    "sortBy": "分数"
+  },
+  "Nav": {
+    "silkRuntime": "当前",
+    "silkHistory": "历史",
+    "workshopProductPlanReport": "车间生产计划",
+    "corporations": "公司",
+    "productPlan": "生产计划",
+    "factories": "工厂",
+    "productPlanNotifies": "通知单",
+    "workshops": "车间管理",
+    "lines": "线别管理",
+    "lineMachines": "机台管理",
+    "products": "产品管理",
+    "productProcesses": "生产工艺管理",
+    "silkCars": "丝车管理",
+    "silkWeights": "锭重管理",
+    "batches": "批号管理",
+    "grades": "等级管理",
+    "silkExceptions": "丝锭异常管理",
+    "operatorGroups": "用户组",
+    "permissions": "权限",
+    "config": "配置",
+    "operators": "用户",
+    "report": "报表中心",
+    "measureReport": "计量报表",
+    "statisticsReport": "统计报表",
+    "admin": "管理员"
+  },
+  "Btn": {
+    "productPlanNotifyExe": "执行",
+    "productPlanNotifyExeBatch": "批量执行",
+    "createSilkException": "新增丝锭异常",
+    "addPermission": "添加权限"
+  },
+  "Tooltip": {
+    "q": "搜索",
+    "codeQ": "搜索编号",
+    "singleCreateLineMachine": "新增机台",
+    "batchCreateLineMachine": "批量新增机台",
+    "createBatch": "新增批号",
+    "importOperator": "导入用户",
+    "createOperatorGroup": "新增用户组",
+    "createWorkshop": "新增车间",
+    "createProduct": "新增产品",
+    "createSilkCar": "新增丝车",
+    "createGrade": "新增等级",
+    "createProductProcess": "新增生产工艺",
+    "createPermission": "新增权限",
+    "updateProductProcess": "修改生产工艺",
+    "createLine": "新增线别",
+    "batchCreateLine": "批量新增线别"
+  },
+  "Validator": {
+    "required": "必输项",
+    "requiredPickEntity": "输入错误，必须通过选择，然后回车输入",
+    "number": "输入必须为数字",
+    "min": "最小值：{{min}}",
+    "max": "最大值：{{max}}",
+    "minLength": "至少{{requiredLength}}个字符；当前{{actualLength}}个字符",
+    "maxLength": "最大值为 {{MAXLENGTH}}",
+    "BatchRange": {
+      "noNumberFind": "没有数字可以进行批量",
+      "prefix": "前缀不同",
+      "numberStringLength": "数字位数不同",
+      "startLargeThanEnd": "数字开始大于结束"
+    }
+  },
+  "Toast": {
+    "success": "操作成功"
+  },
+  "Common": {
+    "carpool": "拼车",
+    "selectAll": "全选",
+    "unSelectAll": "全不选",
+    "timeDesc": "时间倒序",
+    "timeAsc": "时间升序",
+    "export": "导出",
+    "end": "结束",
+    "type": "类型",
+    "batch": "批量",
+    "date": "日期",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "batchStart": "批量开始",
+    "batchEnd": "批量结束",
+    "config": "配置",
+    "note": "备注",
+    "new": "新建",
+    "save": "保存",
+    "confirm": "确认",
+    "sortBy": "排序",
+    "help": "帮助",
+    "import": "导入",
+    "admin": "管理员",
+    "name": "名称",
+    "operation": "操作",
+    "yes": "是",
+    "false": "否",
+    "row": "行",
+    "col": "列",
+    "delete": "删除",
+    "edit": "修改",
+    "create": "新增",
+    "deleteConfirm": "确认删除吗？",
+    "ok": "确定？",
+    "cancel": "取消？",
+    "finish": "完成",
+    "canComponentDeactivate": "当前页面数据可能没保存，确定离开？"
+  },
+  "FormConfig": {
+    "template": "表单模板",
+    "pick": "表单模板选择",
+    "new": "新建表单",
+    "edit": "修改表单",
+    "fieldConfig": "表单字段",
+    "FieldConfig": {
+      "new": "新建表单字段",
+      "edit": "新建表单字段",
+      "required": "必输项",
+      "multi": "多个值",
+      "valueType": "值类型",
+      "ValueType": {
+        "STRING": "文本",
+        "NUMBER": "数值",
+        "BOOLEAN": "布尔"
+      },
+      "inputType": "输入类型",
+      "InputType": {
+        "DEFAULT": "默认",
+        "SELECTION": "下拉列表"
+      },
+      "selectOption": "选项值",
+      "SelectOption": {
+        "new": "新建选项值",
+        "edit": "修改选项值"
+      }
+    }
+  },
+  "Error": {
+    "E00000": "系统内部错误！"
+  },
+  "PaginatorIntl": {
+    "itemsPerPageLabel": "每页数量",
+    "nextPageLabel": "下一页",
+    "previousPageLabel": "上一页",
+    "firstPageLabel": "第一页",
+    "lastPageLabel": "最后一页"
+  }
+}
