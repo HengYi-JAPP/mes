@@ -420,7 +420,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         final String code = silkCar.getCode();
         return silkCarRuntimeRepository.findByCode(code).flatMapCompletable(silkCarRuntime -> {
             if (J.nonEmpty(silkCarRuntime.getSilkRuntimes()) && !silkCarRuntime.hasPackageBoxEvent()) {
-                throw new SilkCarNonEmptyException();
+                throw new SilkCarNonEmptyException(silkCar);
             }
             final Completable clearSilkCar$ = silkCarRuntimeRepository.clearSilkCarRuntime(code);
             return silkCarRecordService.save(silkCarRuntime).flatMapCompletable(it -> clearSilkCar$);
