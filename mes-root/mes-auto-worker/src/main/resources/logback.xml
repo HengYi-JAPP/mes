@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<configuration>
+<configuration scan="true" scanPeriod="300 seconds" debug="false">
     <jmxConfigurator/>
     <property name="LOG_HOME" value="/home/mes/auto/log/worker"/>
-    <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{35} - %msg%n"/>
+    <property name="PATTERN" value="%d{yyyy-MM-dd/HH:mm:ss} [%thread] %-5level %logger{35} - %msg%n"/>
     <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
     <!-- 控制台输出日志 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
+        <encoder charset="UTF-8">
             <pattern>${PATTERN}</pattern>
         </encoder>
     </appender>
     <!-- 文件输出日志 (文件大小策略进行文件输出，超过指定大小对文件备份)-->
-    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>error</level>
         </filter>
-        <File>${LOG_HOME}/error/log.txt</File>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <FileNamePattern>${LOG_HOME}/error/log-%d{yyyy-MM-dd}.%i.txt</FileNamePattern>
-            <maxFileSize>10MB</maxFileSize>
-            <maxHistory>200</maxHistory>
-            <totalSizeCap>2GB</totalSizeCap>
-        </rollingPolicy>
-        <encoder>
+        <encoder charset="UTF-8">
             <pattern>${PATTERN}</pattern>
         </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/error/log-%d{yyyy-MM-dd}.%i.txt</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>100</maxHistory>
+        </rollingPolicy>
     </appender>
 
     <!--<appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
@@ -46,18 +46,16 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>info</level>
         </filter>
-        <File>${LOG_HOME}/interfaces/log.txt</File>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <FileNamePattern>${LOG_HOME}/interfaces/log-%d{yyyy-MM-dd}.%i.txt</FileNamePattern>
-            <MinIndex>1</MinIndex>
-            <MaxIndex>3</MaxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>100MB</MaxFileSize>
-        </triggeringPolicy>
-        <encoder>
+        <encoder charset="UTF-8">
             <pattern>${PATTERN}</pattern>
         </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/interfaces/log-%d{yyyy-MM-dd}.%i.txt</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>100</maxHistory>
+        </rollingPolicy>
     </appender>
 
     <logger name="com.hengyi.japp.mes.auto.interfaces" level="info">
