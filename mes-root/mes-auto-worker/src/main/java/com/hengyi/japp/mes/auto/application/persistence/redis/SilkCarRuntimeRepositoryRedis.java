@@ -99,15 +99,21 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
                     .flatMap(eventSources -> {
                         silkCarRuntime.setEventSources(eventSources);
                         Collection<SilkRuntime> silkRuntimes = silkCarRecord.initSilks();
-
                         J.emptyIfNull(silkRuntimes).forEach(silkRuntime -> {
                             final Grade grade = silkCarRecord.getGrade();
                             silkRuntime.setGrade(grade);
                         });
-
                         for (EventSource eventSource : eventSources) {
                             silkRuntimes = eventSource.calcSilkRuntimes(silkRuntimes);
                         }
+                        J.emptyIfNull(silkRuntimes).forEach(silkRuntime -> {
+                            if (silkRuntime.getGrade() == null) {
+                                // 拼车没有预设等级，沿用丝车的等级
+                                final Grade grade = silkCarRecord.getGrade();
+                                silkRuntime.setGrade(grade);
+                            }
+                        });
+
                         final Batch batch = silkCarRecord.getBatch();
                         final Product product = batch.getProduct();
                         if (product.getDyeingFormConfig() == null) {
@@ -121,7 +127,12 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
                         } else {
                             silkRuntimeFlowable = Flowable.fromIterable(silkRuntimes);
                         }
-                        return silkRuntimeFlowable.toList().map(it -> {
+                        return silkRuntimeFlowable.doOnNext(silkRuntime -> {
+                            if (silkRuntime.getGrade() == null) {
+                                // 拼车没有预设等级，沿用丝车的等级
+                                silkRuntime.setGrade(silkCarRecord.getGrade());
+                            }
+                        }).toList().map(it -> {
                             it.forEach(SilkRuntime::calcDyeing);
                             silkCarRuntime.setSilkRuntimes(it);
                             return silkCarRuntime;

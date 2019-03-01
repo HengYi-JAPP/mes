@@ -50,8 +50,8 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final LocalDate startLd = LocalDate.of(2019, 2, 25);
-        final LocalDate endLd = LocalDate.of(2019, 2, 25);
+        final LocalDate startLd = LocalDate.of(2019, 3, 1);
+        final LocalDate endLd = LocalDate.of(2019, 3, 1);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(AAReportDay::new).sorted()
