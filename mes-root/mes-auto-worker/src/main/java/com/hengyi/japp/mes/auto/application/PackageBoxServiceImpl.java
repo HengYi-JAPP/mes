@@ -186,6 +186,7 @@ public class PackageBoxServiceImpl implements PackageBoxService {
             return packageBoxRepository.create();
         }).flatMap(packageBox -> {
             packageBox.log(event.getOperator(), event.getFireDateTime());
+            packageBox.setPrintDate(event.getFireDateTime());
             packageBox.setType(PackageBoxType.MANUAL);
             packageBox.command(event.getCommand());
             return temporaryBoxRepository.find(command.getTemporaryBox().getId()).flatMap(temporaryBox -> {
