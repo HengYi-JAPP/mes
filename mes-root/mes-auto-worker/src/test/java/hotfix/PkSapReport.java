@@ -1,9 +1,7 @@
 package hotfix;
 
 import com.google.common.collect.ComparisonChain;
-import com.hengyi.japp.mes.auto.domain.Batch;
-import com.hengyi.japp.mes.auto.domain.Grade;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
+import com.hengyi.japp.mes.auto.domain.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigDecimal;
@@ -16,11 +14,22 @@ import java.util.stream.Collectors;
  */
 public class PkSapReport {
     public static void main(String[] args) {
+        final Workshop workshop = AAReport.Workshops.A;
+        AAReport.packageBoxes(workshop, LocalDate.of(2019, 3, 1)).forEach(packageBox -> {
+            final String code = packageBox.getCode();
+            final Batch batch = packageBox.getBatch();
+            final Product product = batch.getProduct();
+            final String productName = product.getName();
+            final String batchNo = batch.getBatchNo();
+            final Grade grade = packageBox.getGrade();
+            final String gradeName = grade.getName();
+            final int silkCount = packageBox.getSilkCount();
+            final double netWeight = packageBox.getNetWeight();
+            final String join = String.join("\t", code, productName, batchNo, gradeName, "" + silkCount, "" + netWeight);
+            System.out.println(join);
+        });
 
-        System.out.println(AAReport.packageBoxes(LocalDate.of(2019, 2, 13))
-                .size());
-
-        AAReport.packageBoxes(LocalDate.of(2019, 2, 13)).parallelStream()
+        AAReport.packageBoxes(workshop, LocalDate.of(2019, 2, 13)).parallelStream()
                 .collect(Collectors.groupingBy(it -> Pair.of(it.getBatch(), it.getGrade())))
                 .entrySet().stream()
                 .sorted((o1, o2) -> {

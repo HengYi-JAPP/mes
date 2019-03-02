@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.report;
 
+import com.github.ixtf.japp.core.J;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -8,87 +9,32 @@ import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.Grade;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.Product;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellUtil;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.*;
+import static org.apache.poi.ss.usermodel.CellType.BLANK;
+import static org.apache.poi.ss.usermodel.CellType.FORMULA;
+import static org.apache.poi.ss.util.CellUtil.getCell;
+import static org.apache.poi.ss.util.CellUtil.getRow;
 
 /**
  * @author jzb 2019-01-21
  */
 public class PoiUtil {
+
     public static void fillData(Workbook wb, Sheet sheet, Collection<StatisticsReport.Item> items) {
-        final Font defaultFont = wb.createFont();
-        defaultFont.setFontName("宋体");
-        defaultFont.setFontHeightInPoints((short) 14);
-        defaultFont.setBold(false);
-        final Function<Font, CellStyle> cellStyleFun = font -> {
-            final CellStyle cellStyle = wb.createCellStyle();
-            cellStyle.setFont(font);
-            cellStyle.setAlignment(HorizontalAlignment.CENTER);
-            cellStyle.setBorderTop(BorderStyle.THIN);
-            cellStyle.setBorderRight(BorderStyle.THIN);
-            cellStyle.setBorderBottom(BorderStyle.THIN);
-            cellStyle.setBorderLeft(BorderStyle.THIN);
-            return cellStyle;
-        };
-        final CellStyle defaultCellStyle = cellStyleFun.apply(defaultFont);
-        final BiFunction<Row, Integer, Cell> cellFun = (row, col) -> {
-            final Cell cell = CellUtil.getCell(row, col);
-            cell.setCellStyle(defaultCellStyle);
-            return cell;
-        };
-        // 小计 合计 字体
-        final Font boldFont = wb.createFont();
-        boldFont.setFontName("宋体");
-        boldFont.setFontHeightInPoints((short) 14);
-        boldFont.setBold(true);
-        final CellStyle boldCellStyle = cellStyleFun.apply(boldFont);
-        final BiFunction<Row, Integer, Cell> boldCellFun = (row, col) -> {
-            final Cell cell = CellUtil.getCell(row, col);
-            cell.setCellStyle(boldCellStyle);
-            return cell;
-        };
-        // 机台合计行
-        final Collection<Row> lineSumRows = Sets.newHashSet();
-        final Collection<Row> boldRows = Sets.newHashSet();
-
-        Row row = CellUtil.getRow(0, sheet);
-        Cell cell = boldCellFun.apply(row, 0);
-        cell.setCellValue("机台");
-        cell = boldCellFun.apply(row, 1);
-        cell.setCellValue("品名");
-        cell = boldCellFun.apply(row, 2);
-        cell.setCellValue("规格");
-        cell = boldCellFun.apply(row, 3);
-        cell.setCellValue("批号");
-        cell = boldCellFun.apply(row, 4);
-        cell.setCellValue("AA");
-        cell = boldCellFun.apply(row, 5);
-        cell.setCellValue("A");
-        cell = boldCellFun.apply(row, 6);
-        cell.setCellValue("B");
-        cell = boldCellFun.apply(row, 7);
-        cell.setCellValue("C");
-        cell = boldCellFun.apply(row, 8);
-        cell.setCellValue("合计");
-        cell = boldCellFun.apply(row, 9);
-        cell.setCellValue("筒管数");
-        cell = boldCellFun.apply(row, 10);
-        cell.setCellValue("优等率");
-        cell = boldCellFun.apply(row, 11);
-        cell.setCellValue("壹等率");
-
-        final List<StatisticsReport.XlsxItem> xlsxItems = items.parallelStream()
-                .collect(Collectors.groupingBy(StatisticsReport.Item::getLine))
+        final List<StatisticsReport.XlsxItem> xlsxItems = aaCollect(items).parallelStream()
+                .collect(groupingBy(StatisticsReport.Item::getLine))
                 .entrySet().parallelStream()
                 .map(entry -> {
                     final Line line = entry.getKey();
@@ -101,101 +47,187 @@ public class PoiUtil {
                         batchMultimap.put(batch, Triple.of(grade, silkCount, silkWeight));
                     });
                     return new StatisticsReport.XlsxItem(line, batchMultimap);
-                }).sorted()
-                .collect(Collectors.toList());
+                }).collect(toList());
+        Collections.sort(xlsxItems);
+
+        // 机台合计行
+        final Collection<Row> lineSumRows = Sets.newHashSet();
+        // 粗体行
+        final Collection<Row> boldRows = Sets.newHashSet();
+
+        Row row = getRow(0, sheet);
+        Cell cell = null;
+
+        boldRows.add(row);
+        final String[] heads = {"机台", "品名", "规格", "批号", "AA", "A", "B", "C", "合计", "筒管数", "优等率", "壹等率", "", "AA筒管数", "A筒管数", "B筒管数", "C筒管数"};
+        for (int i = 0, l = heads.length; i < l; i++) {
+            final String head = heads[i];
+            if (J.isBlank(head)) {
+                continue;
+            }
+            cell = getCell(row, i);
+            cell.setCellValue(head);
+        }
 
         int rowIndex = 1;
         for (StatisticsReport.XlsxItem item : xlsxItems) {
-            row = CellUtil.getRow(rowIndex, sheet);
+            row = getRow(rowIndex, sheet);
+            // 线别统计开始行
             final int lineStartRowIndex = rowIndex;
             final Line line = item.getLine();
             final Multimap<Batch, Triple<Grade, Integer, BigDecimal>> batchMultimap = item.getBatchMultimap();
             for (Batch batch : Sets.newTreeSet(batchMultimap.keySet())) {
                 final Product product = batch.getProduct();
-                cell = cellFun.apply(row, 0);
-                cell.setCellValue(line.getName());
-                cell = cellFun.apply(row, 1);
-                cell.setCellValue(product.getName());
-                cell = cellFun.apply(row, 2);
-                cell.setCellValue(batch.getSpec());
-                cell = cellFun.apply(row, 3);
-                cell.setCellValue(batch.getBatchNo());
-                int sumSilkCount = 0;
-                for (Triple<Grade, Integer, BigDecimal> triple : batchMultimap.get(batch)) {
+                final String[] strings = {line.getName(), product.getName(), batch.getSpec(), batch.getBatchNo()};
+                for (int i = 0, l = strings.length; i < l; i++) {
+                    cell = getCell(row, i);
+                    cell.setCellValue(strings[i]);
+                }
+                final int aaSilkWeightCol = 'E' - 'A';
+                for (var triple : batchMultimap.get(batch)) {
                     final Grade grade = triple.getLeft();
                     final Integer silkCount = triple.getMiddle();
-                    sumSilkCount += silkCount;
                     final BigDecimal silkWeight = triple.getRight();
                     switch (grade.getName()) {
                         case "AA": {
-                            cell = cellFun.apply(row, 4);
+                            cell = getCell(row, aaSilkWeightCol);
                             break;
                         }
                         case "A": {
-                            cell = cellFun.apply(row, 5);
+                            cell = getCell(row, aaSilkWeightCol + 1);
                             break;
                         }
                         case "B": {
-                            cell = cellFun.apply(row, 6);
+                            cell = getCell(row, aaSilkWeightCol + 2);
                             break;
                         }
                         case "C": {
-                            cell = cellFun.apply(row, 7);
+                            cell = getCell(row, aaSilkWeightCol + 3);
                             break;
                         }
                     }
                     cell.setCellValue(silkWeight.doubleValue());
+                    getCell(row, cell.getColumnIndex() + 9).setCellValue(silkCount);
                 }
-                cell = cellFun.apply(row, 9);
-                cell.setCellValue(sumSilkCount);
-                row = CellUtil.getRow(++rowIndex, sheet);
+                row = getRow(++rowIndex, sheet);
             }
             final int lineEndRowIndex = rowIndex - 1;
-            cell = boldCellFun.apply(row, 0);
+            cell = getCell(row, 0);
             cell.setCellValue(line.getName());
-            cell = boldCellFun.apply(row, 2);
+            cell = getCell(row, 2);
             cell.setCellValue("机台小计");
             lineSumRows.add(row);
 
             final Row formulaRow = row;
-            Stream.of("E", "F", "G", "H", "I", "J").forEach(it -> {
-                // E = 69
-                final int colIndex = it.charAt(0) - 65;
-                final Cell formulaCell = boldCellFun.apply(formulaRow, colIndex);
+            Stream.of('E', 'F', 'G', 'H', 'I', 'J', 'N', 'O', 'P', 'Q').forEach(it -> {
+                final Cell formulaCell = getCell(formulaRow, it - 'A');
                 formulaCell.setCellFormula("SUM(" + it + (lineStartRowIndex + 1) + ":" + it + (lineEndRowIndex + 1) + ")");
             });
-            row = CellUtil.getRow(++rowIndex, sheet);
+            row = getRow(++rowIndex, sheet);
         }
+        boldRows.addAll(lineSumRows);
         boldRows.add(row);
-        cell = boldCellFun.apply(row, 2);
+        cell = getCell(row, 'C' - 'A');
         cell.setCellValue("合计");
         final Row totalFormulaRow = row;
-        Stream.of("E", "F", "G", "H", "I", "J").forEach(it -> {
-            // E = 69
-            final int colIndex = it.charAt(0) - 65;
-            final Cell formulaCell = boldCellFun.apply(totalFormulaRow, colIndex);
+        Stream.of('E', 'F', 'G', 'H', 'I', 'J', 'N', 'O', 'P', 'Q').forEach(it -> {
+            final Cell formulaCell = getCell(totalFormulaRow, it - 'A');
             final String sumFormula = lineSumRows.stream().map(lineSumRow -> {
                 final int formulaRowIndex = lineSumRow.getRowNum() + 1;
-                return it + formulaRowIndex;
-            }).collect(Collectors.joining("+"));
+                return "" + it + formulaRowIndex;
+            }).collect(joining("+"));
             formulaCell.setCellFormula(sumFormula);
         });
-
+        // 全局公式
         IntStream.rangeClosed(1, rowIndex).forEach(i -> {
-            final Row formulaRow = CellUtil.getRow(i, sheet);
-            final BiFunction<Row, Integer, Cell> cFun = lineSumRows.contains(formulaRow) ? boldCellFun : cellFun;
+            final Row formulaRow = getRow(i, sheet);
             final int formulaRowIndex = i + 1;
-            Cell formulaCell = cFun.apply(formulaRow, 8);
-            final String sumFormula = Stream.of("E", "F", "G", "H")
+
+            Cell formulaCell = getCell(formulaRow, 'I' - 'A');
+            String sumFormula = Stream.of("E", "F", "G", "H")
                     .map(it -> it + formulaRowIndex)
-                    .collect(Collectors.joining("+"));
+                    .collect(joining("+"));
             formulaCell.setCellFormula(sumFormula);
-            formulaCell = cFun.apply(formulaRow, 10);
+
+            formulaCell = getCell(formulaRow, 'J' - 'A');
+            sumFormula = Stream.of("N", "O", "P", "Q")
+                    .map(it -> it + formulaRowIndex)
+                    .collect(joining("+"));
+            formulaCell.setCellFormula(sumFormula);
+
+            formulaCell = getCell(formulaRow, 'K' - 'A');
             formulaCell.setCellFormula("E" + formulaRowIndex + "/I" + formulaRowIndex + "*100");
-            formulaCell = cFun.apply(formulaRow, 11);
+            formulaCell = getCell(formulaRow, 'L' - 'A');
             formulaCell.setCellFormula("(E" + formulaRowIndex + "+F" + formulaRowIndex + ")/I" + formulaRowIndex + "*100");
         });
         wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
-//        IntStream.rangeClosed(0,11).forEach(sheet::autoSizeColumn);
+
+        // 美化
+        IntStream.rangeClosed(0, rowIndex).forEach(i -> {
+            final Row cssRow = getRow(i, sheet);
+            if (i == 0) {
+                cssRow.setHeight((short) 500);
+            }
+            final Font font = wb.createFont();
+            font.setFontName("宋体");
+            font.setFontHeightInPoints((short) 14);
+            font.setBold(boldRows.contains(cssRow));
+            final CellStyle cellStyle = wb.createCellStyle();
+            cellStyle.setFont(font);
+            cellStyle.setAlignment(HorizontalAlignment.CENTER);
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            cellStyle.setBorderTop(BorderStyle.THIN);
+            cellStyle.setBorderRight(BorderStyle.THIN);
+            cellStyle.setBorderBottom(BorderStyle.THIN);
+            cellStyle.setBorderLeft(BorderStyle.THIN);
+            IntStream.rangeClosed('A', 'Q').filter(it -> it != 'M')
+                    .mapToObj(it -> getCell(cssRow, it - 'A'))
+                    .forEach(it -> {
+                        it.setCellStyle(cellStyle);
+                        if (FORMULA == it.getCellType()) {
+                            double d = it.getNumericCellValue();
+                            if (d == 0) {
+                                it.setCellType(BLANK);
+                            }
+                        }
+                    });
+        });
+        Stream.of('C', 'D', 'I', 'N', 'O', 'P', 'Q').mapToInt(it -> it - 'A').forEach(sheet::autoSizeColumn);
+        sheet.addMergedRegion(new CellRangeAddress(0, rowIndex, 'M' - 'A', 'M' - 'A'));
+        sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 'A' - 'A', 'B' - 'A'));
     }
+
+    // 报表体现需要把 AAA 加到 AA 中
+    private static Collection<StatisticsReport.Item> aaCollect(Collection<StatisticsReport.Item> originalItems) {
+        final var aaCollect = originalItems.parallelStream().filter(it -> {
+            final Grade grade = it.getGrade();
+            return grade.getSortBy() >= 100;
+        }).collect(groupingBy(it -> Pair.of(it.getLine(), it.getBatch())));
+        final Grade aaGrade = aaCollect.values().parallelStream()
+                .flatMap(Collection::parallelStream)
+                .map(StatisticsReport.Item::getGrade)
+                .filter(it -> "AA".equals(it.getName()))
+                .findAny()
+                .orElse(null);
+        if (aaGrade == null) {
+            return originalItems;
+        }
+        final var aaStream = aaCollect.entrySet().parallelStream().map(entry -> {
+            final Pair<Line, Batch> pair = entry.getKey();
+            final Line line = pair.getLeft();
+            final Batch batch = pair.getRight();
+            final StatisticsReport.Item item = new StatisticsReport.Item(line, batch, aaGrade);
+            final int silkCount = entry.getValue().parallelStream().mapToInt(StatisticsReport.Item::getSilkCount).sum();
+            item.setSilkCount(silkCount);
+            final BigDecimal silkWeight = entry.getValue().parallelStream().map(StatisticsReport.Item::getSilkWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+            item.setSilkWeight(silkWeight);
+            return item;
+        });
+        final var abcStream = originalItems.parallelStream().filter(it -> {
+            final Grade grade = it.getGrade();
+            return grade.getSortBy() < 100;
+        });
+        return Stream.concat(abcStream, aaStream).parallel().collect(toList());
+    }
+
 }
