@@ -32,6 +32,10 @@ import static org.apache.poi.ss.util.CellUtil.getRow;
  */
 public class PoiUtil {
 
+    private static final Cell cell(Row row, char c) {
+        return getCell(row, c - 'A');
+    }
+
     public static void fillData(Workbook wb, Sheet sheet, Collection<StatisticsReport.Item> items) {
         final List<StatisticsReport.XlsxItem> xlsxItems = aaCollect(items).parallelStream()
                 .collect(groupingBy(StatisticsReport.Item::getLine))
@@ -83,26 +87,25 @@ public class PoiUtil {
                     cell = getCell(row, i);
                     cell.setCellValue(strings[i]);
                 }
-                final int aaSilkWeightCol = 'E' - 'A';
                 for (var triple : batchMultimap.get(batch)) {
                     final Grade grade = triple.getLeft();
                     final Integer silkCount = triple.getMiddle();
                     final BigDecimal silkWeight = triple.getRight();
                     switch (grade.getName()) {
                         case "AA": {
-                            cell = getCell(row, aaSilkWeightCol);
+                            cell = cell(row, 'E');
                             break;
                         }
                         case "A": {
-                            cell = getCell(row, aaSilkWeightCol + 1);
+                            cell = cell(row, 'F');
                             break;
                         }
                         case "B": {
-                            cell = getCell(row, aaSilkWeightCol + 2);
+                            cell = cell(row, 'G');
                             break;
                         }
                         case "C": {
-                            cell = getCell(row, aaSilkWeightCol + 3);
+                            cell = cell(row, 'H');
                             break;
                         }
                     }
@@ -112,26 +115,26 @@ public class PoiUtil {
                 row = getRow(++rowIndex, sheet);
             }
             final int lineEndRowIndex = rowIndex - 1;
-            cell = getCell(row, 0);
+            cell = cell(row, 'A');
             cell.setCellValue(line.getName());
-            cell = getCell(row, 2);
+            cell = cell(row, 'C');
             cell.setCellValue("机台小计");
             lineSumRows.add(row);
 
             final Row formulaRow = row;
             Stream.of('E', 'F', 'G', 'H', 'I', 'J', 'N', 'O', 'P', 'Q').forEach(it -> {
-                final Cell formulaCell = getCell(formulaRow, it - 'A');
+                final Cell formulaCell = cell(formulaRow, it);
                 formulaCell.setCellFormula("SUM(" + it + (lineStartRowIndex + 1) + ":" + it + (lineEndRowIndex + 1) + ")");
             });
             row = getRow(++rowIndex, sheet);
         }
         boldRows.addAll(lineSumRows);
         boldRows.add(row);
-        cell = getCell(row, 'C' - 'A');
+        cell = cell(row, 'C');
         cell.setCellValue("合计");
         final Row totalFormulaRow = row;
         Stream.of('E', 'F', 'G', 'H', 'I', 'J', 'N', 'O', 'P', 'Q').forEach(it -> {
-            final Cell formulaCell = getCell(totalFormulaRow, it - 'A');
+            final Cell formulaCell = cell(totalFormulaRow, it);
             final String sumFormula = lineSumRows.stream().map(lineSumRow -> {
                 final int formulaRowIndex = lineSumRow.getRowNum() + 1;
                 return "" + it + formulaRowIndex;
@@ -143,21 +146,21 @@ public class PoiUtil {
             final Row formulaRow = getRow(i, sheet);
             final int formulaRowIndex = i + 1;
 
-            Cell formulaCell = getCell(formulaRow, 'I' - 'A');
+            Cell formulaCell = cell(formulaRow, 'I');
             String sumFormula = Stream.of("E", "F", "G", "H")
                     .map(it -> it + formulaRowIndex)
                     .collect(joining("+"));
             formulaCell.setCellFormula(sumFormula);
 
-            formulaCell = getCell(formulaRow, 'J' - 'A');
+            formulaCell = cell(formulaRow, 'J');
             sumFormula = Stream.of("N", "O", "P", "Q")
                     .map(it -> it + formulaRowIndex)
                     .collect(joining("+"));
             formulaCell.setCellFormula(sumFormula);
 
-            formulaCell = getCell(formulaRow, 'K' - 'A');
+            formulaCell = cell(formulaRow, 'K');
             formulaCell.setCellFormula("E" + formulaRowIndex + "/I" + formulaRowIndex + "*100");
-            formulaCell = getCell(formulaRow, 'L' - 'A');
+            formulaCell = cell(formulaRow, 'L');
             formulaCell.setCellFormula("(E" + formulaRowIndex + "+F" + formulaRowIndex + ")/I" + formulaRowIndex + "*100");
         });
         wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
@@ -181,18 +184,17 @@ public class PoiUtil {
             cellStyle.setBorderBottom(BorderStyle.THIN);
             cellStyle.setBorderLeft(BorderStyle.THIN);
             IntStream.rangeClosed('A', 'Q').filter(it -> it != 'M')
-                    .mapToObj(it -> getCell(cssRow, it - 'A'))
+                    .mapToObj(it -> cell(cssRow, (char) it))
+                    .peek(it -> it.setCellStyle(cellStyle))
+                    .filter(it -> FORMULA == it.getCellType())
                     .forEach(it -> {
-                        it.setCellStyle(cellStyle);
-                        if (FORMULA == it.getCellType()) {
-                            double d = it.getNumericCellValue();
-                            if (d == 0) {
-                                it.setCellType(BLANK);
-                            }
+                        double d = it.getNumericCellValue();
+                        if (d == 0) {
+                            it.setCellType(BLANK);
                         }
                     });
         });
-        Stream.of('C', 'D', 'I', 'N', 'O', 'P', 'Q').mapToInt(it -> it - 'A').forEach(sheet::autoSizeColumn);
+        Stream.of('C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'N', 'O', 'P', 'Q').mapToInt(it -> it - 'A').forEach(sheet::autoSizeColumn);
         sheet.addMergedRegion(new CellRangeAddress(0, rowIndex, 'M' - 'A', 'M' - 'A'));
         sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 'A' - 'A', 'B' - 'A'));
     }
