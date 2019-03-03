@@ -24,6 +24,7 @@ import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author jzb 2018-06-24
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 @Singleton
 public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcode> implements SilkBarcodeRepository {
     private final SilkBarcodeLucene silkBarcodeLucene;
+    public static final Semaphore semaphore = new Semaphore(1);
 
     @Inject
     private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene) {
@@ -39,13 +41,22 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
         this.silkBarcodeLucene = silkBarcodeLucene;
     }
 
+    @SneakyThrows
     @Override
     public Single<SilkBarcode> save(SilkBarcode silkBarcode) {
         if (J.isBlank(silkBarcode.getCode())) {
             silkBarcode.setCode(silkBarcode.generateCode());
         }
-        return super.save(silkBarcode)
+
+        semaphore.acquire();
+        LineMachine lineMachine = silkBarcode.getLineMachine();
+        String doffingNum = silkBarcode.getDoffingNum();
+        Batch batch = silkBarcode.getBatch();
+        LocalDate codeLd = J.localDate(silkBarcode.getCodeDate());
+        Single<SilkBarcode> create$ = super.save(silkBarcode)
                 .doOnSuccess(silkBarcodeLucene::index);
+        return find(codeLd, lineMachine, doffingNum, batch).switchIfEmpty(create$)
+                .doAfterTerminate(semaphore::release);
     }
 
     @Override

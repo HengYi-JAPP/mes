@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
+import com.hengyi.japp.mes.auto.application.persistence.SilkBarcodeRepositoryMongo;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
@@ -90,8 +90,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Single<PackageBox> lucencePackageBox(Principal principal, String id) {
-        final Single<PackageBox> result$ = packageBoxRepository.find(id).flatMap(packageBoxRepository::save);
-        return rxCheckAdmin(principal).andThen(result$);
+    public Completable unlockSilkBarcodeRepositoryMongo(Principal principal) {
+        SilkBarcodeRepositoryMongo.semaphore.release();
+        return Completable.complete();
     }
 }

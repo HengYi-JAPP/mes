@@ -4,12 +4,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.AdminService;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
-import javax.validation.constraints.NotBlank;
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import java.security.Principal;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -34,9 +36,10 @@ public class AdminResource {
         return adminService.handle(principal, command);
     }
 
-    @Path("lucences/PackageBoxes/{id}")
-    @GET
-    public Single<PackageBox> handle(Principal principal, @PathParam("id") @NotBlank String id) {
-        return adminService.lucencePackageBox(principal, id);
+    @Path("SilkBarcodeRepositoryMongo/lock")
+    @DELETE
+    public Completable handle(Principal principal) {
+        return adminService.unlockSilkBarcodeRepositoryMongo(principal);
     }
+
 }
