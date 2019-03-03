@@ -26,6 +26,11 @@ public class Worker {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
+//            SilkCarRecordRepository silkCarRecordRepository = INJECTOR.getInstance(SilkCarRecordRepository.class);
+//            silkCarRecordRepository.find("5c7ad6afb8244000016eaf7a").subscribe(silkCarRecord -> {
+//                System.out.println(silkCarRecord);
+//            });
+
 //            final ReportService reportService = Jvertx.getProxy(ReportService.class);
 //            final LocalDate startLd = LocalDate.of(2019, 1, 14);
 //            final LocalDate endLd = LocalDate.of(2019, 1, 14);
