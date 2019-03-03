@@ -17,7 +17,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -37,7 +36,7 @@ public class PoiUtil {
     }
 
     public static void fillData(Workbook wb, Sheet sheet, Collection<StatisticsReport.Item> items) {
-        final List<StatisticsReport.XlsxItem> xlsxItems = aaCollect(items).parallelStream()
+        final var xlsxItems = aaCollect(items).parallelStream()
                 .collect(groupingBy(StatisticsReport.Item::getLine))
                 .entrySet().parallelStream()
                 .map(entry -> {
@@ -61,7 +60,6 @@ public class PoiUtil {
 
         Row row = getRow(0, sheet);
         Cell cell = null;
-
         boldRows.add(row);
         final String[] heads = {"机台", "品名", "规格", "批号", "AA", "A", "B", "C", "合计", "筒管数", "优等率", "壹等率", "", "AA筒管数", "A筒管数", "B筒管数", "C筒管数"};
         for (int i = 0, l = heads.length; i < l; i++) {
