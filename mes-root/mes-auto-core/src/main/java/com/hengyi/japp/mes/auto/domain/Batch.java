@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ComparisonChain;
 import com.hengyi.japp.mes.auto.application.persistence.annotations.MongoCache;
 import com.hengyi.japp.mes.auto.interfaces.jackson.ProductEmbedSerializer;
-import com.hengyi.japp.mes.auto.interfaces.jackson.WorkshopEmbedSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -21,7 +20,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @MongoCache
 public class Batch extends LoggableMongoEntity implements Comparable<Batch> {
-    @JsonSerialize(using = WorkshopEmbedSerializer.class)
+    //    @JsonSerialize(using = WorkshopEmbedSerializer.class)
     private Workshop workshop;
     @JsonSerialize(using = ProductEmbedSerializer.class)
     @ToString.Include
