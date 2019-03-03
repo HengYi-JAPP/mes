@@ -4,6 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
+import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
 import io.reactivex.Single;
 import io.vertx.core.DeploymentOptions;
@@ -25,6 +26,11 @@ public class Worker {
     public static void main(String[] args) {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
+
+            SilkCarRecordRepository silkCarRecordRepository = INJECTOR.getInstance(SilkCarRecordRepository.class);
+            silkCarRecordRepository.find("5c7ad6afb8244000016eaf7a").subscribe(silkCarRecord -> {
+                System.out.println(silkCarRecord);
+            });
 
 //            final ReportService reportService = Jvertx.getProxy(ReportService.class);
 //            final LocalDate startLd = LocalDate.of(2019, 1, 14);
