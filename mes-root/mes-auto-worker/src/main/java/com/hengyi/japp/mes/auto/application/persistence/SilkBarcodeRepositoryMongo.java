@@ -130,6 +130,6 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
         return find(id).flatMap(silkBarcode -> {
             silkBarcode.setDeleted(true);
             return super.save(silkBarcode);
-        }).ignoreElement();
+        }).doOnSuccess(silkBarcodeLucene::index).ignoreElement();
     }
 }
