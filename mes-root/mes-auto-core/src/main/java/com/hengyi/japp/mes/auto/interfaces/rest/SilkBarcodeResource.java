@@ -65,17 +65,10 @@ public class SilkBarcodeResource {
         return silkBarcodeRepository.delete(id);
     }
 
-
     @Path("silkBarcodes/{id}/silkInfo")
     @GET
     public Single<Collection<SilkBarcode.SilkInfo>> silkInfo(@PathParam("id") @NotBlank String id) {
         return silkBarcodeRepository.find(id).map(SilkBarcode::listSilkInfo);
-    }
-
-    @Path("silkBarcodes/{id}")
-    @DELETE
-    public Single<SilkBarcode> get(Principal principal, @PathParam("id") @NotBlank String id) {
-        return silkBarcodeService.changeBatch(principal, id);
     }
 
     @Path("silkBarcodes")

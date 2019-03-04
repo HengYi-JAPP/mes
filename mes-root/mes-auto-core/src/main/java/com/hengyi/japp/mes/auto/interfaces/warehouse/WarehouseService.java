@@ -5,6 +5,7 @@ import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.PackageBoxFlip;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent;
 import com.sun.security.auth.UserPrincipal;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import java.security.Principal;
@@ -18,6 +19,8 @@ public interface WarehouseService {
     Principal PRINCIPAL = new UserPrincipal("if_warehouse");
 
     Single<PackageBox> handle(Principal principal, WarehousePackageBoxFetchEvent.Command command);
+
+    Completable unFetch(Principal principal, String code);
 
     Single<PackageBoxFlip> handle(Principal principal, PackageBoxFlipEvent.WarehouseCommand command);
 }

@@ -129,7 +129,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
     public Completable delete(String id) {
         return find(id).flatMap(silkBarcode -> {
             silkBarcode.setDeleted(true);
-            return save(silkBarcode);
+            return super.save(silkBarcode);
         }).ignoreElement();
     }
 }
