@@ -13,6 +13,10 @@ public enum PackageBoxType {
      */
     MANUAL,
     /**
+     * 人工打包，小包装
+     */
+    SMALL,
+    /**
      * 人工补充唛头
      */
     MANUAL_APPEND,

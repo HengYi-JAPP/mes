@@ -3,12 +3,15 @@ package com.hengyi.japp.mes.auto.application;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.github.ixtf.japp.vertx.Jvertx;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxAppendCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxBatchPrintUpdateCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxMeasureInfoUpdateCommand;
+import com.hengyi.japp.mes.auto.application.command.SmallPackageBoxCreateCommand;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
@@ -20,16 +23,20 @@ import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import io.vertx.reactivex.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -38,6 +45,7 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 @Singleton
 public class PackageBoxServiceImpl implements PackageBoxService {
+    private final RedisClient redisClient;
     private final AuthService authService;
     private final PackageBoxRepository packageBoxRepository;
     private final OperatorRepository operatorRepository;
@@ -51,7 +59,8 @@ public class PackageBoxServiceImpl implements PackageBoxService {
     private final GradeRepository gradeRepository;
 
     @Inject
-    private PackageBoxServiceImpl(AuthService authService, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository, PackageClassRepository packageClassRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, SapT001lRepository sapT001lRepository, TemporaryBoxRepository temporaryBoxRepository, TemporaryBoxRecordRepository temporaryBoxRecordRepository, BatchRepository batchRepository, GradeRepository gradeRepository) {
+    private PackageBoxServiceImpl(RedisClient redisClient, AuthService authService, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository, PackageClassRepository packageClassRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, SapT001lRepository sapT001lRepository, TemporaryBoxRepository temporaryBoxRepository, TemporaryBoxRecordRepository temporaryBoxRecordRepository, BatchRepository batchRepository, GradeRepository gradeRepository) {
+        this.redisClient = redisClient;
         this.authService = authService;
         this.packageBoxRepository = packageBoxRepository;
         this.operatorRepository = operatorRepository;
@@ -92,17 +101,88 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                         packageBox.setBatch(batch);
                         packageBox.setGrade(grade);
 
-                        return packageBoxRepository.save(packageBox)
-                                .doOnSuccess(it -> {
-                                    event.setPackageBox(it);
-                                    Flowable.fromIterable(silkCarRecords)
-                                            .flatMapCompletable(silkCarRecord -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event))
-                                            .subscribe();
-                                });
+                        return packageBoxRepository.save(packageBox).doOnSuccess(it -> {
+                            event.setPackageBox(it);
+                            Flowable.fromIterable(silkCarRecords)
+                                    .flatMapCompletable(silkCarRecord -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event))
+                                    .subscribe();
+                        });
                     });
         });
         final Completable auth$ = authService.checkRole(principal, RoleType.PACKAGE_BOX);
         return auth$.andThen(result$);
+    }
+
+    @Override
+    public Flowable<PackageBox> handle(Principal principal, SmallPackageBoxCreateCommand command) {
+        final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
+        final Date currentDateTime = new Date();
+        final JsonNode commandJsonNode = MAPPER.convertValue(command, JsonNode.class);
+        final var silkCount = command.getConfig().getSilkCount();
+        final var operator$ = operatorRepository.find(principal);
+        final var silkCarRuntime$ = silkCarRuntimeService.find(command.getSilkCarRecord());
+        final Flowable<PackageBox> result$ = operator$.flatMapPublisher(operator -> silkCarRuntime$.flatMapPublisher(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            final Collection<SilkRuntime> silkRuntimes = silkCarRuntime.getSilkRuntimes();
+            final int silkRuntimeSize = silkRuntimes.size();
+            if (silkRuntimeSize % silkCount != 0) {
+                throw new RuntimeException("不是[" + silkCount + "]的倍数！");
+            }
+            final int packageBoxCount = silkRuntimeSize / silkCount;
+            final Batch batch = checkAndGetBatch(Lists.newArrayList(silkCarRuntime));
+            final Grade grade = checkAndGetGrade(Lists.newArrayList(silkCarRuntime));
+            return generateCodes(J.localDate(currentDateTime), batch, grade, packageBoxCount).flatMapSingle(code -> {
+                final PackageBoxEvent event = new PackageBoxEvent();
+                event.setCommand(commandJsonNode);
+                event.fire(operator, currentDateTime);
+                return packageBoxRepository.create().flatMap(packageBox -> {
+                    packageBox.setCode(code);
+                    packageBox.log(operator, currentDateTime);
+                    packageBox.setPrintDate(currentDateTime);
+                    packageBox.setType(PackageBoxType.SMALL);
+                    packageBox.setSilkCount(silkCount);
+                    packageBox.setSilkCarRecords(Lists.newArrayList(silkCarRecord));
+                    packageBox.setBatch(batch);
+                    packageBox.setGrade(grade);
+                    packageBox.command(event.getCommand());
+                    return packageBoxRepository.save(packageBox);
+                }).map(packageBox -> {
+                    event.setPackageBox(packageBox);
+                    silkCarRuntimeRepository.addEventSource(silkCarRecord, event);
+                    return packageBox;
+                });
+            });
+        }));
+        final Completable auth$ = authService.checkRole(principal, RoleType.PACKAGE_BOX);
+        return auth$.andThen(result$);
+    }
+
+    private Single<String> generateCodes(LocalDate ld, Batch batch, Grade grade) {
+        return generateCodes(ld, batch, grade, 1).singleOrError();
+    }
+
+    private Flowable<String> generateCodes(LocalDate ld, Batch batch, Grade grade, int count) {
+        final long between = ChronoUnit.DAYS.between(LocalDate.now(), ld);
+        if (Math.abs(between) >= 365) {
+            throw new RuntimeException("时间超出");
+        }
+        final String incrKey = PackageBoxService.key(ld);
+        return redisClient.rxIncrby(incrKey, count).flatMapPublisher(end -> {
+            final Collection<String> codes = Lists.newArrayListWithExpectedSize(count);
+            for (long i = end - count + 1; i <= end; i++) {
+                final String serialCode = Strings.padStart("" + i, 5, '0');
+                final Workshop workshop = batch.getWorkshop();
+                final Corporation corporation = workshop.getCorporation();
+                final Product product = batch.getProduct();
+                final String corporationPackageCode = corporation.getPackageCode();
+                final String productCode = product.getCode();
+                final String gradeCode = grade.getCode();
+                final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+                final String code = corporationPackageCode + productCode + ld.format(dtf) + batch.getBatchNo() + gradeCode + serialCode;
+                codes.add(code);
+            }
+            return Flowable.fromIterable(codes);
+        });
     }
 
     private Batch checkAndGetBatch(Collection<SilkCarRuntime> silkCarRuntimes) throws Exception {
@@ -149,8 +229,8 @@ public class PackageBoxServiceImpl implements PackageBoxService {
             packageBox.setType(PackageBoxType.MANUAL);
             packageBox.command(event.getCommand());
             return command.checkAndGetData().flatMap(pairs -> {
-                final List<SilkRuntime> silkRuntimes = pairs.stream().map(Pair::getRight).flatMap(Collection::stream).collect(Collectors.toList());
-                final List<Silk> silks = silkRuntimes.stream().map(SilkRuntime::getSilk).collect(Collectors.toList());
+                final List<SilkRuntime> silkRuntimes = pairs.stream().map(Pair::getRight).flatMap(Collection::stream).collect(toList());
+                final List<Silk> silks = silkRuntimes.stream().map(SilkRuntime::getSilk).collect(toList());
                 packageBox.setSilks(silks);
                 packageBox.setSilkCount(silks.size());
                 packageBox.setGrade(silkRuntimes.get(0).getGrade());
@@ -168,7 +248,7 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                                 final SilkCar silkCar = silkCarRecord.getSilkCar();
                                 return silkCarRuntimeRepository.addEventSource(silkCar.getCode(), event);
                             })
-                    ).collect(Collectors.toList());
+                    ).collect(toList());
                     return Completable.merge(completables).andThen(Single.fromCallable(() -> it));
                 });
             });

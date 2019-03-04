@@ -9,6 +9,7 @@ import com.hengyi.japp.mes.auto.application.PackageBoxService;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxAppendCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxBatchPrintUpdateCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxMeasureInfoUpdateCommand;
+import com.hengyi.japp.mes.auto.application.command.SmallPackageBoxCreateCommand;
 import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
@@ -47,6 +48,12 @@ public class PackageBoxResource {
     private PackageBoxResource(PackageBoxService packageBoxService, PackageBoxRepository packageBoxRepository) {
         this.packageBoxService = packageBoxService;
         this.packageBoxRepository = packageBoxRepository;
+    }
+
+    @Path("smallPackageBoxes")
+    @POST
+    public Flowable<PackageBox> handle(Principal principal, SmallPackageBoxCreateCommand command) {
+        return packageBoxService.handle(principal, command);
     }
 
     @Path("packageBoxAppend")
