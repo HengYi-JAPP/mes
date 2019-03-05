@@ -128,6 +128,23 @@ public class PackageBoxServiceImpl implements PackageBoxService {
             if (silkRuntimeSize % silkCount != 0) {
                 throw new RuntimeException("不是[" + silkCount + "]的倍数！");
             }
+            final boolean hasSmallPackageBox = J.emptyIfNull(silkCarRuntime.getEventSources())
+                    .parallelStream()
+                    .filter(it -> it instanceof PackageBoxEvent)
+//                    .filter(eventSource -> {
+//                        if (eventSource instanceof PackageBoxEvent) {
+//                            final PackageBoxEvent packageBoxEvent = (PackageBoxEvent) eventSource;
+//                            final PackageBox packageBox = packageBoxEvent.getPackageBox();
+//                            if (PackageBoxType.SMALL == packageBox.getType()) {
+//                                return true;
+//                            }
+//                        }
+//                        return false;
+//                    })
+                    .findAny().isPresent();
+            if (hasSmallPackageBox) {
+                throw new RuntimeException("小包装无法重复打包！");
+            }
             final int packageBoxCount = silkRuntimeSize / silkCount;
             final Batch batch = checkAndGetBatch(Lists.newArrayList(silkCarRuntime));
             final Grade grade = checkAndGetGrade(Lists.newArrayList(silkCarRuntime));
