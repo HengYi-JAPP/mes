@@ -4,7 +4,6 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
-import com.hengyi.japp.mes.auto.interfaces.rest.SilkBarcodeResource;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
 import io.reactivex.Single;
 import io.vertx.core.DeploymentOptions;
@@ -27,10 +26,10 @@ public class Worker {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
-            final SilkBarcodeResource instance = INJECTOR.getInstance(SilkBarcodeResource.class);
-            instance.delete("5bfddf72d939c4000193408a").subscribe(() -> {
-                System.out.println("test");
-            });
+//            final SilkBarcodeResource instance = INJECTOR.getInstance(SilkBarcodeResource.class);
+//            instance.delete("5bfddf72d939c4000193408a").subscribe(() -> {
+//                System.out.println("test");
+//            });
 
 //            final ReportService reportService = Jvertx.getProxy(ReportService.class);
 //            final LocalDate startLd = LocalDate.of(2019, 1, 14);

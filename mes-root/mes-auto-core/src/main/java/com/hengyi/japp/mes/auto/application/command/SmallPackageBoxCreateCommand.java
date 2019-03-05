@@ -5,7 +5,6 @@ import lombok.Data;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 
@@ -14,7 +13,6 @@ import java.io.Serializable;
  */
 @Data
 public class SmallPackageBoxCreateCommand implements Serializable {
-    @Size(min = 1)
     @NotNull
     private SilkCarRecordDTO silkCarRecord;
     @NotNull

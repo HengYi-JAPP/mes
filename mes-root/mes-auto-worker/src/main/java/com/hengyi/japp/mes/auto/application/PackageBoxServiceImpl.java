@@ -146,10 +146,10 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                     packageBox.setGrade(grade);
                     packageBox.command(event.getCommand());
                     return packageBoxRepository.save(packageBox);
-                }).map(packageBox -> {
+                }).flatMap(packageBox -> {
                     event.setPackageBox(packageBox);
-                    silkCarRuntimeRepository.addEventSource(silkCarRecord, event);
-                    return packageBox;
+                    return silkCarRuntimeRepository.addEventSource(silkCarRecord, event)
+                            .andThen(Single.fromCallable(() -> packageBox));
                 });
             });
         }));
