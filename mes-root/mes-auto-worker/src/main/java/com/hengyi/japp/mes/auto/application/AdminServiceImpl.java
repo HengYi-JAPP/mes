@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
-import com.hengyi.japp.mes.auto.application.persistence.SilkBarcodeRepositoryMongo;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
@@ -91,7 +90,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Completable unlockSilkBarcodeRepositoryMongo(Principal principal) {
-        SilkBarcodeRepositoryMongo.semaphore.release();
+//        SilkBarcodeRepositoryMongo.semaphore.release();
         return Completable.complete();
     }
 }
