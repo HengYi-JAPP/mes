@@ -75,6 +75,16 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
             doc.add(new StringField("silkCarRecord", silkCarRecord.getId(), Field.Store.NO));
             doc.add(new StringField("silkCarRecord.silkCar", silkCarRecord.getSilkCar().getId(), Field.Store.NO));
         });
+        Optional.ofNullable(packageBox.getSmallBatchId())
+                .filter(J::nonBlank)
+                .ifPresent(it -> {
+                    doc.add(new StringField("smallBatchId", it, Field.Store.NO));
+                    doc.add(new IntPoint("smallPacageBoxCount", packageBox.getSmallPacageBoxCount()));
+                });
+        J.emptyIfNull(packageBox.getSilkCarRecordsSmall()).stream().forEach(silkCarRecord -> {
+            doc.add(new StringField("silkCarRecordsSmall", silkCarRecord.getId(), Field.Store.NO));
+            doc.add(new StringField("silkCarRecordsSmall.silkCar", silkCarRecord.getSilkCar().getId(), Field.Store.NO));
+        });
 
         addDateTime(doc, "printDate", packageBox.getPrintDate());
         Optional.ofNullable(packageBox.getPrintClass()).map(PackageClass::getId)
