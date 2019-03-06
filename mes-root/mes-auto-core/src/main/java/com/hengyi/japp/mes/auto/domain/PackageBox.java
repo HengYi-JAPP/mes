@@ -59,6 +59,10 @@ public class PackageBox extends LoggableMongoEntity {
     private Collection<Silk> silks;
     @JsonIgnore
     private Collection<SilkCarRecord> silkCarRecords;
+    @JsonIgnore
+    private Collection<SilkCarRecord> silkCarRecordsSmall;
+    private String smallBatchId;
+    private int smallPacageBoxCount;
 
     @JsonIgnore
     @JsonEntityProperty("command")

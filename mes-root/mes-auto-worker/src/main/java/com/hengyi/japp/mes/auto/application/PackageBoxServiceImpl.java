@@ -11,8 +11,8 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxAppendCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxBatchPrintUpdateCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxMeasureInfoUpdateCommand;
-import com.hengyi.japp.mes.auto.application.command.SmallPackageBoxCreateCommand;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
+import com.hengyi.japp.mes.auto.application.event.SmallPackageBoxEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import com.hengyi.japp.mes.auto.domain.data.RoleType;
@@ -27,7 +27,9 @@ import io.vertx.reactivex.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bson.types.ObjectId;
 
+import javax.validation.constraints.Min;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -114,64 +116,65 @@ public class PackageBoxServiceImpl implements PackageBoxService {
     }
 
     @Override
-    public Flowable<PackageBox> handle(Principal principal, SmallPackageBoxCreateCommand command) {
+    public Flowable<PackageBox> handle(Principal principal, SmallPackageBoxEvent.BatchCommand command) {
         final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
-        final Date currentDateTime = new Date();
-        final JsonNode commandJsonNode = MAPPER.convertValue(command, JsonNode.class);
-        final var silkCount = command.getConfig().getSilkCount();
-        final var operator$ = operatorRepository.find(principal);
-        final var silkCarRuntime$ = silkCarRuntimeService.find(command.getSilkCarRecord());
-        final Flowable<PackageBox> result$ = operator$.flatMapPublisher(operator -> silkCarRuntime$.flatMapPublisher(silkCarRuntime -> {
-            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
-            final Collection<SilkRuntime> silkRuntimes = silkCarRuntime.getSilkRuntimes();
-            final int silkRuntimeSize = silkRuntimes.size();
-            if (silkRuntimeSize % silkCount != 0) {
-                throw new RuntimeException("不是[" + silkCount + "]的倍数！");
-            }
-            final boolean hasSmallPackageBox = J.emptyIfNull(silkCarRuntime.getEventSources())
-                    .parallelStream()
-                    .filter(it -> it instanceof PackageBoxEvent)
-//                    .filter(eventSource -> {
-//                        if (eventSource instanceof PackageBoxEvent) {
-//                            final PackageBoxEvent packageBoxEvent = (PackageBoxEvent) eventSource;
-//                            final PackageBox packageBox = packageBoxEvent.getPackageBox();
-//                            if (PackageBoxType.SMALL == packageBox.getType()) {
-//                                return true;
-//                            }
-//                        }
-//                        return false;
-//                    })
-                    .findAny().isPresent();
-            if (hasSmallPackageBox) {
-                throw new RuntimeException("小包装无法重复打包！");
-            }
-            final int packageBoxCount = silkRuntimeSize / silkCount;
-            final Batch batch = checkAndGetBatch(Lists.newArrayList(silkCarRuntime));
-            final Grade grade = checkAndGetGrade(Lists.newArrayList(silkCarRuntime));
-            return generateCodes(J.localDate(currentDateTime), batch, grade, packageBoxCount).flatMapSingle(code -> {
-                final PackageBoxEvent event = new PackageBoxEvent();
-                event.setCommand(commandJsonNode);
-                event.fire(operator, currentDateTime);
-                return packageBoxRepository.create().flatMap(packageBox -> {
-                    packageBox.setCode(code);
-                    packageBox.log(operator, currentDateTime);
-                    packageBox.setPrintDate(currentDateTime);
-                    packageBox.setType(PackageBoxType.SMALL);
-                    packageBox.setSilkCount(silkCount);
-                    packageBox.setSilkCarRecords(Lists.newArrayList(silkCarRecord));
-                    packageBox.setBatch(batch);
-                    packageBox.setGrade(grade);
-                    packageBox.command(event.getCommand());
-                    return packageBoxRepository.save(packageBox);
-                }).flatMap(packageBox -> {
-                    event.setPackageBox(packageBox);
-                    return silkCarRuntimeRepository.addEventSource(silkCarRecord, event)
-                            .andThen(Single.fromCallable(() -> packageBox));
-                });
-            });
+        final var config = command.getConfig();
+        final var silkCount = config.getSilkCount();
+        final var event$ = operatorRepository.find(principal).map(it -> {
+            final var event = new SmallPackageBoxEvent();
+            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+            event.setSmallBatchId(new ObjectId().toHexString());
+            event.fire(it);
+            return event;
+        });
+        final var silkCarRuntimes$ = Flowable.fromIterable(command.getSilkCarRecords()).flatMapSingle(silkCarRuntimeService::find).toList();
+        final var result$ = event$.flatMapPublisher(event -> silkCarRuntimes$.flatMapPublisher(list -> {
+            final var silkCarRuntimes = ImmutableSet.copyOf(list);
+            final int pacageBoxCount = silkCarRuntimes.parallelStream().mapToInt(it -> checkAndGetPackageBoxCount(it, config)).sum();
+            final var silkCarRecords = silkCarRuntimes.parallelStream().map(SilkCarRuntime::getSilkCarRecord).collect(toSet());
+            final Batch batch = checkAndGetBatch(silkCarRuntimes);
+            final Grade grade = checkAndGetGrade(silkCarRuntimes);
+            event.setSmallPacageBoxCount(pacageBoxCount);
+            final var addEvents$ = silkCarRecords.parallelStream()
+                    .map(it -> silkCarRuntimeRepository.addEventSource(it, event))
+                    .collect(toList());
+            final var codes$ = generateCodes(J.localDate(event.getFireDateTime()), batch, grade, pacageBoxCount);
+            final var packageBoxes$ = codes$.flatMapSingle(code -> packageBoxRepository.create().flatMap(packageBox -> {
+                packageBox.setCode(code);
+                packageBox.log(event.getOperator(), event.getFireDateTime());
+                packageBox.setPrintDate(event.getFireDateTime());
+                packageBox.setType(PackageBoxType.SMALL);
+                packageBox.setSilkCount(silkCount);
+                packageBox.setSilkCarRecordsSmall(silkCarRecords);
+                packageBox.setSmallBatchId(event.getSmallBatchId());
+                packageBox.setSmallPacageBoxCount(event.getSmallPacageBoxCount());
+                packageBox.setBatch(batch);
+                packageBox.setGrade(grade);
+                packageBox.command(event.getCommand());
+                return packageBoxRepository.save(packageBox);
+            }));
+            return Completable.merge(addEvents$).andThen(packageBoxes$);
         }));
         final Completable auth$ = authService.checkRole(principal, RoleType.PACKAGE_BOX);
         return auth$.andThen(result$);
+    }
+
+    private int checkAndGetPackageBoxCount(SilkCarRuntime silkCarRuntime, SmallPackageBoxEvent.CommandConfig config) {
+        final @Min(1) int silkCount = config.getSilkCount();
+        final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+        final SilkCar silkCar = silkCarRecord.getSilkCar();
+        final var silkRuntimes = silkCarRuntime.getSilkRuntimes();
+        final int silkRuntimeSize = silkRuntimes.size();
+        if (silkRuntimeSize < 1) {
+            throw new RuntimeException("丝车[" + silkCar.getCode() + "]，为空");
+        }
+        if (silkRuntimeSize % silkCount != 0) {
+            throw new RuntimeException("丝车[" + silkCar.getCode() + "]，不是[" + silkCount + "]的倍数");
+        }
+        if (silkCarRuntime.hasPackageBoxEvent()) {
+            throw new RuntimeException("丝车[" + silkCar.getCode() + "]，小包装无法重复打包");
+        }
+        return silkRuntimeSize / silkCount;
     }
 
     private Single<String> generateCodes(LocalDate ld, Batch batch, Grade grade) {
