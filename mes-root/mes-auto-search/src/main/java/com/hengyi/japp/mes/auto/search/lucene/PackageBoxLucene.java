@@ -113,6 +113,7 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
         addQuery(bqBuilder, "code", packageBoxQuery.getPackageBoxCode());
         addQuery(bqBuilder, "budatClass", packageBoxQuery.getBudatClassIds());
         addQuery(bqBuilder, "type", packageBoxQuery.getType());
+        addQuery(bqBuilder, "smallBatchId", packageBoxQuery.getSmallBatchId());
 
         Optional.ofNullable(packageBoxQuery.getBudatRange()).ifPresent(it -> {
             final long startL = J.date(it.getStartLd()).getTime();

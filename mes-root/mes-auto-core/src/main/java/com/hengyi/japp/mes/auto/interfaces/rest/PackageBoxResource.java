@@ -56,6 +56,13 @@ public class PackageBoxResource {
         return packageBoxService.handle(principal, command);
     }
 
+    @Path("smallPackageBoxes/batchIds/{batchId}")
+    @GET
+    public Flowable<PackageBox> handle(Principal principal, @PathParam("batchId") String smallBatchId) {
+        final PackageBoxQuery query = PackageBoxQuery.builder().smallBatchId(smallBatchId).pageSize(Integer.MAX_VALUE).build();
+        return packageBoxRepository.query(query).flattenAsFlowable(it -> it.getPackageBoxes());
+    }
+
     @Path("packageBoxAppend")
     @POST
     public Single<PackageBox> handle(Principal principal, PackageBoxAppendCommand command) {
