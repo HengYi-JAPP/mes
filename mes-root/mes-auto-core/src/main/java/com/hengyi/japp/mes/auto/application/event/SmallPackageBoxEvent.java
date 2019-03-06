@@ -25,8 +25,9 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class SmallPackageBoxEvent extends EventSource {
-    private String smallBatchId;
-    private int smallPacageBoxCount;
+    private String batchId;
+    private int pacageBoxCount;
+    private int silkCount;
     private JsonNode command;
 
     @Override
@@ -55,7 +56,9 @@ public class SmallPackageBoxEvent extends EventSource {
     @ToString(onlyExplicitlyIncluded = true)
     @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
     public static class DTO extends EventSource.DTO {
-        private String smallBatchId;
+        private String batchId;
+        private int pacageBoxCount;
+        private int silkCount;
         private JsonNode command;
 
         public static DTO from(JsonNode jsonNode) {
@@ -65,7 +68,9 @@ public class SmallPackageBoxEvent extends EventSource {
         public Single<SmallPackageBoxEvent> toEvent() {
             final SmallPackageBoxEvent event = new SmallPackageBoxEvent();
             event.setCommand(command);
-            event.setSmallBatchId(smallBatchId);
+            event.setBatchId(batchId);
+            event.setPacageBoxCount(pacageBoxCount);
+            event.setSilkCount(silkCount);
             return toEvent(event);
         }
     }
@@ -74,14 +79,12 @@ public class SmallPackageBoxEvent extends EventSource {
     public static class CommandConfig implements Serializable {
         @Min(1)
         private int silkCount;
-    }
+        @Min(1)
+        private int packageBoxCount;
 
-    @Data
-    public class Command implements Serializable {
-        @NotNull
-        private SilkCarRecordDTO silkCarRecord;
-        @NotNull
-        private CommandConfig config;
+        public int silkCountSum() {
+            return silkCount * packageBoxCount;
+        }
     }
 
     @Data
@@ -89,6 +92,14 @@ public class SmallPackageBoxEvent extends EventSource {
         @Size(min = 1)
         @NotNull
         private List<SilkCarRecordDTO> silkCarRecords;
+        @NotNull
+        private CommandConfig config;
+    }
+
+    @Data
+    public class Command implements Serializable {
+        @NotNull
+        private SilkCarRecordDTO silkCarRecord;
         @NotNull
         private CommandConfig config;
     }
