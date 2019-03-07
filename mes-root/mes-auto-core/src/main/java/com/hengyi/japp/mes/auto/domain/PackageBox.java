@@ -3,7 +3,6 @@ package com.hengyi.japp.mes.auto.domain;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.persistence.annotations.JsonEntityProperty;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import com.hengyi.japp.mes.auto.domain.data.SaleType;
@@ -60,6 +59,11 @@ public class PackageBox extends LoggableMongoEntity {
     private Collection<Silk> silks;
     @JsonIgnore
     private Collection<SilkCarRecord> silkCarRecords;
+    @JsonIgnore
+    private Collection<SilkCarRecord> silkCarRecordsSmall;
+    private String smallBatchId;
+    private int smallPacageBoxCount;
+    private int smallSilkCount;
 
     @JsonIgnore
     @JsonEntityProperty("command")
@@ -80,12 +84,12 @@ public class PackageBox extends LoggableMongoEntity {
     private SapT001l sapT001l;
     private boolean inWarehouse;
 
-    @SneakyThrows
-    @JsonGetter("command")
-    public JsonNode command() {
-        final String commandJsonString = getCommandJsonString();
-        return J.isBlank(commandJsonString) ? null : MAPPER.readTree(commandJsonString);
-    }
+//    @SneakyThrows
+//    @JsonGetter("command")
+//    public JsonNode command() {
+//        final String commandJsonString = getCommandJsonString();
+//        return J.isBlank(commandJsonString) ? null : MAPPER.readTree(commandJsonString);
+//    }
 
     @SneakyThrows
     public void command(JsonNode jsonNode) {

@@ -1,7 +1,7 @@
 dependencies {
-    compile "com.github.ixtf.japp:poi",
-            project(':mes-auto-core')
-
+    compile project(':mes-auto-core'),
+            "com.github.ixtf.japp:poi"
+    
     testCompile "com.squareup.okhttp3:okhttp:3.11.0"
 }
 

@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.domain;
 import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
+import com.hengyi.japp.mes.auto.application.event.SmallPackageBoxEvent;
 import com.hengyi.japp.mes.auto.exception.SilkCarStatusException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +12,6 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -52,10 +52,9 @@ public class SilkCarRuntime implements Serializable {
     }
 
     public boolean hasPackageBoxEvent() {
-        final Set<EventSource> packageBoxEvents = getEventSources().stream()
-                .filter(it -> !it.isDeleted() && it instanceof PackageBoxEvent)
-                .collect(Collectors.toSet());
-        return packageBoxEvents.size() > 0;
+        return getEventSources().parallelStream()
+                .filter(it -> !it.isDeleted() && (it instanceof PackageBoxEvent || it instanceof SmallPackageBoxEvent))
+                .findAny().isPresent();
     }
 
 }

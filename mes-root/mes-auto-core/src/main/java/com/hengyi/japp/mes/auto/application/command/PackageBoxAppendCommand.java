@@ -24,9 +24,9 @@ public class PackageBoxAppendCommand implements Serializable {
     private int silkCount;
     @NotNull
     private SaleType saleType;
-    @Min(0)
+    @Min(1)
     private double grossWeight;
-    @Min(0)
+    @Min(1)
     private double netWeight;
     @NotNull
     private Date budat;
@@ -40,7 +40,7 @@ public class PackageBoxAppendCommand implements Serializable {
     private String packageType;
     @NotBlank
     private String foamType;
-    @Min(0)
+    @Min(1)
     private int foamNum;
     private String palletCode;
 

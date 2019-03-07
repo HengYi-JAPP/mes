@@ -20,6 +20,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @MongoCache
 public class Batch extends LoggableMongoEntity implements Comparable<Batch> {
+    //    @JsonSerialize(using = WorkshopEmbedSerializer.class)
     private Workshop workshop;
     @JsonSerialize(using = ProductEmbedSerializer.class)
     @ToString.Include

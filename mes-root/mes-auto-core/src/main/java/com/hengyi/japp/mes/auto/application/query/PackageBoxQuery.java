@@ -37,6 +37,8 @@ public class PackageBoxQuery {
     private final LocalDateRange budatRange;
     @Getter
     private final PackageBoxType type;
+    @Getter
+    private final String smallBatchId;
 
     @Builder
     public static class Result {
