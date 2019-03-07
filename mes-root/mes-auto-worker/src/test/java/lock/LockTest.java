@@ -1,6 +1,7 @@
 package lock;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -18,10 +19,12 @@ import okhttp3.ResponseBody;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -34,7 +37,21 @@ public class LockTest {
     private static final String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOiI1YzA0YTA0NGMzY2FlODEzYjUzMGNkZDEiLCJpYXQiOjE1NDcxMjk4MzEsImlzcyI6ImphcHAtbWVzLWF1dG8iLCJzdWIiOiI1YzA0YTA0NGMzY2FlODEzYjUzMGNkZDEifQ.gO_IM7drZHaEn00kJ2a0kne3B3QrR7bcHVA5fI6ReWElMm2bOjatKogDQfYBs6l31uGTQqSzvGegtmgRsW_BRggUIwRgUEJJ99w1arueAQ_2TJQsIgFnNUoQri3uxrqxv039rKthgmwRmRVMqteJO0k-jZj9RfLARXHzqMPtmlb1j8ZQokrsTGCgouYC0uN1pq2ZhN2MYC3kPty_Rpabgq8RWmLqGAIc6436Lg9d-yEAm_UCYZcuisbjbepCNAUD3frq6qrlhRU8o8vhzYZhxoue7TI4QS-PEk0_crEK_H-Sofc9yoQqUsy9jLp2y2yHQvgpTi5ykveu2jIlitA51g";
 
     public static void main(String[] args) {
-        prepareData();
+        final ObjectNode node = MAPPER.createObjectNode()
+                .put("line", "A2A")
+                .put("lineMachine", 48)
+                .put("spindle", 48)
+                .put("timestamp", new Date().getTime());
+        final String tpl = "alter table `mes-auto`.T_SilkCarRecord add silks_${side}_${row}_${col} varchar(100) null;";
+        Stream.of("A", "B").forEach(side -> IntStream.rangeClosed(1, 4).forEach(row -> IntStream.rangeClosed(1, 6).forEach(col -> {
+            final var map = ImmutableMap.of("side", side, "row", "" + row, "col", "" + col);
+            final String s = J.strTpl(tpl, map);
+            System.out.println(s);
+        })));
+
+        System.out.println(node.toString().length());
+
+//        prepareData();
 //        fillData1();
     }
 
