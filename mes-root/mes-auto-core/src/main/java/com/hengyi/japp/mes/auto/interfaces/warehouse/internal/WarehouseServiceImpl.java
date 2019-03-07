@@ -68,6 +68,20 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    public Completable unFetch(Principal principal, String code) {
+        return packageBoxRepository.findByCode(code).flatMap(packageBox -> {
+            if (!packageBox.isInWarehouse()) {
+                throw new RuntimeException("未入库");
+            }
+            packageBox.setInWarehouse(false);
+            return operatorRepository.find(principal).flatMap(operator -> {
+                packageBox.log(operator);
+                return packageBoxRepository.save(packageBox);
+            });
+        }).ignoreElement();
+    }
+
+    @Override
     public Single<PackageBoxFlip> handle(Principal principal, PackageBoxFlipEvent.WarehouseCommand command) {
         PackageBoxFlipEvent event = new PackageBoxFlipEvent();
         event.setCommand(MAPPER.convertValue(this, JsonNode.class));

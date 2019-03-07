@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
@@ -19,6 +20,7 @@ import java.io.Serializable;
 public abstract class JsonEntity implements Serializable {
     @ToString.Include
     @EqualsAndHashCode.Include
+    @Id
     @NotBlank
     protected String id;
     @ToString.Include

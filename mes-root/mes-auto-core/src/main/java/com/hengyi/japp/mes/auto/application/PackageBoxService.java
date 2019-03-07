@@ -5,8 +5,10 @@ import com.hengyi.japp.mes.auto.application.command.PackageBoxAppendCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxBatchPrintUpdateCommand;
 import com.hengyi.japp.mes.auto.application.command.PackageBoxMeasureInfoUpdateCommand;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
+import com.hengyi.japp.mes.auto.application.event.SmallPackageBoxEvent;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 import java.security.Principal;
@@ -45,4 +47,6 @@ public interface PackageBoxService {
     Completable delete(Principal principal, String id);
 
     Single<PackageBox> handle(Principal principal, PackageBoxAppendCommand command);
+
+    Flowable<PackageBox> handle(Principal principal, SmallPackageBoxEvent.BatchCommand command);
 }
