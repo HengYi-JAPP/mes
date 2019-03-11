@@ -102,7 +102,7 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
-    public static class AutoDoffingSilkCarRuntimeCreateCommand implements Serializable {
+    public static class RuiguanAutoDoffingCommand implements Serializable {
         private String id;
         private String principalName;
         private Date createDateTime;

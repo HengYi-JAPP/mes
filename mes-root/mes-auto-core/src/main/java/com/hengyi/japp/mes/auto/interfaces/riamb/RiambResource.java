@@ -7,19 +7,18 @@ import com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambPackageBoxEvent;
 import com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkDetachEvent;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static com.hengyi.japp.mes.auto.interfaces.riamb.RiambService.LOG;
 import static com.hengyi.japp.mes.auto.interfaces.riamb.RiambService.PRINCIPAL;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * @author jzb 2019-02-21
  */
-@Slf4j
 @Singleton
 @Path("riamb")
 @Produces(APPLICATION_JSON)
@@ -38,12 +37,12 @@ public class RiambResource {
                 .doOnSuccess(it -> {
                     final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code)
                             .append("\n").append(MAPPER.writeValueAsString(it)).append("成功!");
-                    log.info(sb.toString());
+                    LOG.info(sb.toString());
                 })
                 .doOnError(ex -> {
                     final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code)
                             .append("\n").append("失败!");
-                    log.error(sb.toString(), ex);
+                    LOG.error(sb.toString(), ex);
                 });
     }
 
@@ -55,13 +54,13 @@ public class RiambResource {
                     final StringBuilder sb = new StringBuilder("RiambResource.SilkDetachEvents: ")
                             .append(MAPPER.writeValueAsString(command))
                             .append("\n").append("成功!");
-                    log.info(sb.toString());
+                    LOG.info(sb.toString());
                 })
                 .doOnError(ex -> {
                     final StringBuilder sb = new StringBuilder("RiambResource.SilkDetachEvents: ")
                             .append(MAPPER.writeValueAsString(command))
                             .append("\n").append("失败!");
-                    log.error(sb.toString(), ex);
+                    LOG.error(sb.toString(), ex);
                 });
     }
 
@@ -73,13 +72,13 @@ public class RiambResource {
                     final StringBuilder sb = new StringBuilder("RiambResource.PackageBoxEvents: ")
                             .append(MAPPER.writeValueAsString(command))
                             .append("\n").append("成功!");
-                    log.info(sb.toString());
+                    LOG.info(sb.toString());
                 })
                 .doOnError(ex -> {
                     final StringBuilder sb = new StringBuilder("RiambResource.PackageBoxEvents: ")
                             .append(MAPPER.writeValueAsString(command))
                             .append("\n").append("失败!");
-                    log.error(sb.toString(), ex);
+                    LOG.error(sb.toString(), ex);
                 });
     }
 

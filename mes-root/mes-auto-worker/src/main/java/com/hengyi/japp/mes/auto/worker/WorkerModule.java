@@ -17,6 +17,8 @@ import com.hengyi.japp.mes.auto.interfaces.jikon.JikonAdapter;
 import com.hengyi.japp.mes.auto.interfaces.jikon.internal.JikonAdapterImpl;
 import com.hengyi.japp.mes.auto.interfaces.riamb.RiambService;
 import com.hengyi.japp.mes.auto.interfaces.riamb.internal.RiambServiceImpl;
+import com.hengyi.japp.mes.auto.interfaces.ruiguan.RuiguanService;
+import com.hengyi.japp.mes.auto.interfaces.ruiguan.internal.RuiguanServiceImpl;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.internal.WarehouseServiceImpl;
 import com.hengyi.japp.mes.auto.report.api.ReportServiceImpl;
@@ -115,6 +117,7 @@ public class WorkerModule extends AbstractModule {
         bind(TemporaryBoxRecordRepository.class).to(TemporaryBoxRecordRepositoryMongo.class);
         bind(LoginRepository.class).to(LoginRepositoryMongo.class);
 
+        bind(RuiguanService.class).to(RuiguanServiceImpl.class);
         bind(RiambService.class).to(RiambServiceImpl.class);
         bind(JikonAdapter.class).to(JikonAdapterImpl.class);
         bind(FacevisaService.class).to(FacevisaServiceImpl.class);

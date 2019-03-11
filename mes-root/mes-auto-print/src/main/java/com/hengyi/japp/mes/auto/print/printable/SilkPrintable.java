@@ -70,11 +70,10 @@ public class SilkPrintable implements Printable {
                 drawString(s2, g2d, font, mmToPix(x), mmToPix(y));
                 y += 3.5;
                 drawString(item.getBatchNo(), g2d, font, mmToPix(x), mmToPix(y));
-                final String prefix = "GXHY";
                 final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                 final String dateString = df.format(item.getCodeDate());
                 final String doffingNum = J.defaultString(item.getDoffingNum());
-                final String s4 = String.join("", prefix, dateString, doffingNum);
+                final String s4 = String.join("", config.getCorpPrefix(), dateString, doffingNum);
                 y += 3.5;
                 drawString(s4, g2d, font, mmToPix(x), mmToPix(y));
                 final String code = item.getCode();

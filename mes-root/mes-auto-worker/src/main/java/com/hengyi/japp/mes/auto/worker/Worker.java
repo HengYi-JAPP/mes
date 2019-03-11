@@ -4,7 +4,9 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
+import com.hengyi.japp.mes.auto.worker.verticle.RuiguanAutoDoffingVerticle;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
@@ -41,9 +43,17 @@ public class Worker {
 //                    }
 //                }
 //            });
-
-            return deployWorker(vertx).ignoreElement();
+            return Completable.mergeArray(
+                    deployWorker(vertx).ignoreElement(),
+                    deployRuiguan(vertx).ignoreElement()
+            );
         }).subscribe();
+    }
+
+    private static Single<String> deployRuiguan(Vertx vertx) {
+        final DeploymentOptions deploymentOptions = new DeploymentOptions()
+                .setWorker(true);
+        return vertx.rxDeployVerticle(RuiguanAutoDoffingVerticle.class.getName(), deploymentOptions);
     }
 
     private static Single<String> deployWorker(Vertx vertx) {

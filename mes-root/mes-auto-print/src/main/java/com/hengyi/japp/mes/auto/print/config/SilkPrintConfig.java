@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.print.config;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -10,6 +11,8 @@ import java.io.Serializable;
  */
 @Data
 public class SilkPrintConfig implements Serializable {
+    @NotBlank
+    private String corpPrefix;
     @NotNull
     private PaperConfig paperConfig;
     @NotNull
