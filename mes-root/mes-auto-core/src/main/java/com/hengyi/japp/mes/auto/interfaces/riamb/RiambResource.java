@@ -3,8 +3,8 @@ package com.hengyi.japp.mes.auto.interfaces.riamb;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.interfaces.riamb.dto.RiambFetchSilkCarRecordResultDTO;
-import com.hengyi.japp.mes.auto.interfaces.riamb.dto.RiambPackageBoxEventDTO;
-import com.hengyi.japp.mes.auto.interfaces.riamb.dto.RiambSilkDetachEventDTO;
+import com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambPackageBoxEvent;
+import com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkDetachEvent;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 
+import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.interfaces.riamb.RiambService.PRINCIPAL;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -33,19 +34,53 @@ public class RiambResource {
     @Path("silkCarRecords/codes/{code}")
     @GET
     public Single<RiambFetchSilkCarRecordResultDTO> fetchSilkCarRecord(@PathParam("code") @NotBlank String code) {
-        return riambService.fetchSilkCarRecord(PRINCIPAL, code);
+        return riambService.fetchSilkCarRecord(PRINCIPAL, code)
+                .doOnSuccess(it -> {
+                    final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code)
+                            .append("\n").append(MAPPER.writeValueAsString(it)).append("成功!");
+                    log.info(sb.toString());
+                })
+                .doOnError(ex -> {
+                    final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code)
+                            .append("\n").append("失败!");
+                    log.error(sb.toString(), ex);
+                });
     }
 
     @Path("SilkDetachEvents")
     @POST
-    public Completable fetchSilkCarRecord(RiambSilkDetachEventDTO command) {
-        return riambService.silkDetach(PRINCIPAL, command);
+    public Completable fetchSilkCarRecord(RiambSilkDetachEvent.Command command) {
+        return riambService.handle(PRINCIPAL, command)
+                .doOnComplete(() -> {
+                    final StringBuilder sb = new StringBuilder("RiambResource.SilkDetachEvents: ")
+                            .append(MAPPER.writeValueAsString(command))
+                            .append("\n").append("成功!");
+                    log.info(sb.toString());
+                })
+                .doOnError(ex -> {
+                    final StringBuilder sb = new StringBuilder("RiambResource.SilkDetachEvents: ")
+                            .append(MAPPER.writeValueAsString(command))
+                            .append("\n").append("失败!");
+                    log.error(sb.toString(), ex);
+                });
     }
 
     @Path("PackageBoxEvents")
     @POST
-    public Completable fetchSilkCarRecord(RiambPackageBoxEventDTO command) {
-        return riambService.packageBox(PRINCIPAL, command);
+    public Completable fetchSilkCarRecord(RiambPackageBoxEvent.Command command) {
+        return riambService.packageBox(PRINCIPAL, command)
+                .doOnComplete(() -> {
+                    final StringBuilder sb = new StringBuilder("RiambResource.PackageBoxEvents: ")
+                            .append(MAPPER.writeValueAsString(command))
+                            .append("\n").append("成功!");
+                    log.info(sb.toString());
+                })
+                .doOnError(ex -> {
+                    final StringBuilder sb = new StringBuilder("RiambResource.PackageBoxEvents: ")
+                            .append(MAPPER.writeValueAsString(command))
+                            .append("\n").append("失败!");
+                    log.error(sb.toString(), ex);
+                });
     }
 
 }

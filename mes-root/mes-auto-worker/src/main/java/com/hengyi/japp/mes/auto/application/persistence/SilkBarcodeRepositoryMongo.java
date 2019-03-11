@@ -5,14 +5,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
-import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkBarcodeLucene;
-import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
@@ -24,6 +22,9 @@ import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
+
+import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * @author jzb 2018-06-24
@@ -60,7 +61,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
 
     @Override
     public Single<SilkBarcode> findByCode(String code) {
-        final JsonObject query = MongoUtil.unDeletedQuery(Filters.eq("code", code));
+        final JsonObject query = unDeletedQuery(eq("code", code));
         return mongoClient.rxFind(collectionName, query)
                 .flatMapPublisher(Flowable::fromIterable)
                 .singleOrError()

@@ -126,6 +126,27 @@ public enum EventSourceType {
         }
     },
 
+    RiambSilkCarInfoFetchEvent {
+        @Override
+        public Single<com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkCarInfoFetchEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkCarInfoFetchEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
+    RiambSilkDetachEvent {
+        @Override
+        public Single<com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkDetachEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkDetachEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
+    RiambPackageBoxEvent {
+        @Override
+        public Single<com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambPackageBoxEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambPackageBoxEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
     WarehousePackageBoxFetchEvent {
         @Override
         public Single<com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent> from(JsonNode jsonNode) {

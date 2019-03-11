@@ -1,0 +1,12 @@
+dependencies {
+    compile "com.github.ixtf.japp:core",
+            "com.github.ixtf.vertx:jax-rs",
+            "io.vertx:vertx-rabbitmq-client",
+            'org.hibernate:hibernate-core:5.4.1.Final',
+            'mysql:mysql-connector-java:8.0.13',
+            'commons-beanutils:commons-beanutils'
+
+    testCompile "com.squareup.okhttp3:okhttp:3.11.0"
+}
+
+mainClassName = "com.hengyi.japp.mes.auto.doffing.Doffing"

@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.application;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
@@ -35,6 +36,11 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
         silkCarRecord.setEndDateTime(new Date());
         silkCarRecord.events(silkCarRuntime.getEventSources());
         return silkCarRecordRepository.save(silkCarRecord);
+    }
+
+    @Override
+    public void handle(SilkCarRuntimeInitEvent.AutoDoffingSilkCarRuntimeCreateCommand command) {
+
     }
 
 }

@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.repository;
 import com.hengyi.japp.mes.auto.application.query.BatchQuery;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 /**
@@ -20,4 +21,5 @@ public interface BatchRepository {
 
     Flowable<Batch> list();
 
+    Maybe<Batch> findByBatchNo(String batchNo);
 }

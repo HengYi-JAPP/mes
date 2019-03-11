@@ -1,0 +1,25 @@
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+    <persistence-unit name="auto-doffing-9200" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <class>com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdapt</class>
+        <class>com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdaptHistory</class>
+        <properties>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://10.61.0.17:3306/mes-auto"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value="mes-auto-doffing-db@com.hengyi.japp"/>
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="docker-unit" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <class>com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdapt</class>
+        <class>com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdaptHistory</class>
+        <properties>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://mes-auto-doffing-db:3306/mes-auto"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value="mes-auto-doffing-db@com.hengyi.japp"/>
+        </properties>
+    </persistence-unit>
+</persistence>
