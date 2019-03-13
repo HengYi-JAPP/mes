@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.print.Jprint.mmToPix;
+import static com.hengyi.japp.mes.auto.print.Print.INJECTOR;
 
 /**
  * @author jzb 2018-08-18
@@ -37,8 +38,8 @@ public class SilkPrintable implements Printable {
     private final SilkPrintCommand command;
     private final int numPages;
 
-    public SilkPrintable(SilkPrintConfig config, SilkPrintCommand command) {
-        this.config = config;
+    public SilkPrintable(SilkPrintCommand command) {
+        this.config = INJECTOR.getInstance(SilkPrintConfig.class);
         this.command = command;
 
         final double size = command.getSilks().size();

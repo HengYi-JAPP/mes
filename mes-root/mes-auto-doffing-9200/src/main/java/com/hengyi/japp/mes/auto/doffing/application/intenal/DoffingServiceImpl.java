@@ -67,6 +67,7 @@ public class DoffingServiceImpl implements DoffingService {
             final int colNum = data.getColNum();
             final MessageBoy messageBoy = new MessageBoy();
             messageBoy.setId(data.getId());
+            messageBoy.setLine(data.getLine());
             messageBoy.setPrincipalName(config.getPrincipalName());
             final long l = data.getCreateDateTime() * 1000;
             messageBoy.setCreateDateTime(new Date(l));
@@ -75,6 +76,7 @@ public class DoffingServiceImpl implements DoffingService {
             silkCarInfo.setRow(rowNum);
             silkCarInfo.setCol(colNum);
             silkCarInfo.setBatchNo(data.getBatch());
+            silkCarInfo.setBatchSpec(data.getBatchSpec());
             silkCarInfo.setGrade(data.getGrade());
             messageBoy.setSilkCarInfo(silkCarInfo);
             final List<MessageBoy.SilkInfo> silkInfos = Lists.newArrayList();

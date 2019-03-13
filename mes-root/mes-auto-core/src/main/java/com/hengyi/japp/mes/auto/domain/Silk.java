@@ -27,7 +27,6 @@ public class Silk extends MongoEntity {
     private Operator doffingOperator;
     private DoffingType doffingType;
     private Date doffingDateTime;
-    private long autoDoffingTimestamp;
     @ToString.Include
     private LineMachine lineMachine;
     @ToString.Include

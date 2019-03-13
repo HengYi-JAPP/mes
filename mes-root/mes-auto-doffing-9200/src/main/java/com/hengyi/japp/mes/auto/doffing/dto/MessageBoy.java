@@ -13,6 +13,7 @@ import java.util.Date;
 @Data
 public class MessageBoy implements Serializable {
     private String id;
+    private String line;
     private String principalName;
     private Date createDateTime;
     private SilkCarInfo silkCarInfo;
@@ -27,6 +28,7 @@ public class MessageBoy implements Serializable {
         private int row;
         private int col;
         private String batchNo;
+        private String batchSpec;
         private String grade;
     }
 

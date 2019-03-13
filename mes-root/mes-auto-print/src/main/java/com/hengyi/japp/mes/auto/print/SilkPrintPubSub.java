@@ -5,10 +5,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.print.command.SilkPrintCommand;
 import com.hengyi.japp.mes.auto.print.config.PrinterConfig;
-import com.hengyi.japp.mes.auto.print.config.SilkPrintConfig;
 import com.hengyi.japp.mes.auto.print.printable.SilkPrintable;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.JedisPubSub;
 
@@ -24,26 +22,27 @@ public class SilkPrintPubSub extends JedisPubSub {
     @Getter
     private final String CHANNEL;
     private final PrinterConfig printerConfig;
-    private final SilkPrintConfig silkPrintConfig;
 
     @Inject
-    private SilkPrintPubSub(PrinterConfig printerConfig, SilkPrintConfig silkPrintConfig) {
+    private SilkPrintPubSub(PrinterConfig printerConfig) {
         this.printerConfig = printerConfig;
-        this.silkPrintConfig = silkPrintConfig;
         CHANNEL = String.join("-", CHANNEL_PREFIX, printerConfig.getId(), printerConfig.getName());
     }
 
-    @SneakyThrows
     public void onMessage(String channel, String message) {
         if (!CHANNEL.equals(channel)) {
             log.error("channel[" + channel + "]：" + message);
             return;
         }
-        final JsonNode silksNode = MAPPER.readTree(message);
-        final JsonNode commandNode = MAPPER.createObjectNode().set("silks", silksNode);
-        final SilkPrintCommand command = MAPPER.convertValue(commandNode, SilkPrintCommand.class);
-        final SilkPrintable silkPrintable = new SilkPrintable(silkPrintConfig, command);
-        silkPrintable.PrintLabel();
+        try {
+            final JsonNode silksNode = MAPPER.readTree(message);
+            final JsonNode commandNode = MAPPER.createObjectNode().set("silks", silksNode);
+            final SilkPrintCommand command = MAPPER.convertValue(commandNode, SilkPrintCommand.class);
+            final SilkPrintable silkPrintable = new SilkPrintable(command);
+            silkPrintable.PrintLabel();
+        } catch (Exception e) {
+            log.error("", e);
+        }
     }
 
     @Override

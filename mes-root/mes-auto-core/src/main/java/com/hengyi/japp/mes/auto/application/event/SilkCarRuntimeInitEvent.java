@@ -104,6 +104,7 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     @Data
     public static class RuiguanAutoDoffingCommand implements Serializable {
         private String id;
+        private String line;
         private String principalName;
         private Date createDateTime;
         private SilkCarInfo silkCarInfo;
@@ -118,6 +119,7 @@ public class SilkCarRuntimeInitEvent extends EventSource {
             private int row;
             private int col;
             private String batchNo;
+            private String batchSpec;
             private String grade;
         }
 

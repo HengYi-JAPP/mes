@@ -168,7 +168,7 @@ public class WorkerModule extends AbstractModule {
     private MongoDatabase MongoDatabase(MesAutoConfig config) {
         final JsonObject mongoOptions = config.getMongoOptions();
         final ServerAddress serverAddress = new ServerAddress(mongoOptions.getString("host"), mongoOptions.getInteger("port"));
-        final String db_name = mongoOptions.getString("db_name", "DEFAULT_DB");
+        final String db_name = mongoOptions.getString("db_name", "mes-auto");
 
         return Optional.ofNullable(mongoOptions.getString("username"))
                 .filter(J::nonBlank)

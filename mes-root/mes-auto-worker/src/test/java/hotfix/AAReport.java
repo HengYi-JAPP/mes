@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -23,17 +24,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static init.UserImport.JSON;
 
 /**
  * @author jzb 2019-01-08
@@ -45,21 +43,29 @@ public class AAReport {
 
     @SneakyThrows
     public static void main(String[] args) {
-        final long startL = System.currentTimeMillis();
+        final RequestBody body = RequestBody.create(JSON, "{}");
+        final Request request = new Request.Builder()
+                .url("http://192.168.0.249:9997/api/rfcs/ZJAPP_CARGO_1")
+                .addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJzYXAtdGVzdCIsImlhdCI6MTU1MjQ1ODQ1NCwiZXhwIjoxNTUyNDY1NjU0LCJpc3MiOiJoZW5neWktZXNiIn0.CtKbR2u3u0ydoWq1FDshqJ013gYV8lR85Nb_QXduYlXRSXfeVqyT1gT6F_cKXlM_WBzAqlLromyEuU2Kte1jrLn7e8TijPRYeLrDObVD5-KDHXJWUqQ74Wx5QDvntsVjCiI6P6F50ezAEl6A1zOcmLvjcPcMYtgQYstN6UWtP_nMzp5IbxHTGP35_m-Fav2UBVQe5DCZGAnuvb7VzV-n0v-zSnvWoNytYvIBosWVKKA2uxoKRxgUViIm3pdTU4qZSqeG6E9cFjvkrizOpJrDBOzFemCYTtH65vAcTr_Sd7LY-b_VsIemB9j_i3HKnihH83yz5NUFoprO0t96amNlyQ")
+                .post(body).build();
+        final Response response = UserImport.client.newCall(request).execute();
+        System.out.println(response.body().string());
 
-        final Workshop workshop = Workshops.B;
-        final LocalDate startLd = LocalDate.of(2019, 3, 1);
-        final LocalDate endLd = LocalDate.of(2019, 3, 1);
-        final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
-                .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
-                .map(it -> new AAReportDay(workshop, it)).sorted()
-                .collect(Collectors.toList());
-
-        days.parallelStream().forEach(AAReport::toExcel);
+//        final long startL = System.currentTimeMillis();
+//
+//        final Workshop workshop = Workshops.B;
+//        final LocalDate startLd = LocalDate.of(2019, 3, 1);
+//        final LocalDate endLd = LocalDate.of(2019, 3, 1);
+//        final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
+//                .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
+//                .map(it -> new AAReportDay(workshop, it)).sorted()
+//                .collect(Collectors.toList());
+//
+//        days.parallelStream().forEach(AAReport::toExcel);
 //        toExcel(new StatisticsReport(workshop, startLd, endLd, days));
 
-        final long endL = System.currentTimeMillis();
-        System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
+//        final long endL = System.currentTimeMillis();
+//        System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
     }
 
     @SneakyThrows

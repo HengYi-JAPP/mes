@@ -118,7 +118,7 @@ public class RiambServiceImpl implements RiambService {
             silkInfo.setSpec(spec);
             silkInfo.setBatchNo(batch.getBatchNo());
             silkInfo.setGradeName(grade.getName());
-            silkInfo.setDoffingNum("" + silk.getAutoDoffingTimestamp());
+            silkInfo.setDoffingNum(silk.getDoffingNum());
             silkInfo.setDoffingDateTime(silk.getDoffingDateTime());
             silkInfo.setDoffingOperatorName(silk.getDoffingOperator().getName());
             silkInfo.setDoffingType(silk.getDoffingType());

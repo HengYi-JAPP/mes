@@ -27,7 +27,10 @@ public abstract class AbstractAutoDoffingSilkCarRecordAdapt implements Serializa
     @ToString.Include
     private int colNum;
     @ToString.Include
+    private String line;
+    @ToString.Include
     private String batch;
+    private String batchSpec;
     private String grade;
     private int state;
     private Long createDateTime;
