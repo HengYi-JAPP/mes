@@ -9,6 +9,8 @@ import com.hengyi.japp.mes.auto.repository.SapT001lRepository;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.NoSuchElementException;
+
 /**
  * @author jzb 2018-06-25
  */
@@ -26,7 +28,7 @@ public class SapT001lServiceImpl implements SapT001lService {
     public Single<SapT001l> create(SapT001lUpdateCommand command) {
         return sapT001lRepository.find(command.getLgort())
                 .onErrorResumeNext(ex -> {
-                    if (ex instanceof JJsonEntityNotExsitException) {
+                    if (ex instanceof NoSuchElementException) {
                         return fetch(command);
                     }
                     throw new RuntimeException(ex);
