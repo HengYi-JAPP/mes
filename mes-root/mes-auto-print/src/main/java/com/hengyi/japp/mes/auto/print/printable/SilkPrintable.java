@@ -62,7 +62,7 @@ public class SilkPrintable implements Printable {
             float imageX = 3;
             for (SilkPrintCommand.Item item : items) {
                 float y = 3;
-                drawString(item.getBatchSpec(), g2d, font, mmToPix(x), mmToPix(y));
+                drawString(J.defaultString(item.getBatchSpec()), g2d, font, mmToPix(x), mmToPix(y));
                 final String lineName = item.getLineName();
                 final int spindle = item.getSpindle();
                 final int lineMachineItem = item.getLineMachineItem();

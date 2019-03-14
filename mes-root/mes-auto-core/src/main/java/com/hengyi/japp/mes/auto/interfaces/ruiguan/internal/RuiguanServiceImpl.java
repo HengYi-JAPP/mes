@@ -62,6 +62,8 @@ public class RuiguanServiceImpl implements RuiguanService {
                         return item;
                     }).collect(toList());
                     final String message = MAPPER.writeValueAsString(silks);
+//                    System.out.println(message);
+//                    return Single.just(message);
                     return redisClient.rxPublish(channel, message);
                 })
                 .ignoreElement()
@@ -73,4 +75,5 @@ public class RuiguanServiceImpl implements RuiguanService {
                     LOG.info(sb.toString());
                 });
     }
+
 }

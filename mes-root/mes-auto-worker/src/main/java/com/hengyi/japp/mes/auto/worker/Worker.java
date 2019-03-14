@@ -74,4 +74,5 @@ public class Worker {
                 .ifPresent(vertxOptions::setClusterHost);
         return vertxOptions;
     }
+
 }

@@ -12,7 +12,6 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import lombok.Data;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.RandomUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -42,10 +41,13 @@ public class DoffingTest {
 
     @SneakyThrows
     public static void main(String[] args) {
+        System.out.println(Long.parseLong("zzzzzz", Character.MAX_RADIX));
+        System.out.println(new Date().getTime() / 1000);
+
         final Vertx vertx = Vertx.vertx();
         INJECTOR = Guice.createInjector(new DoffingModule(vertx));
 
-        testPrint("C520190312183706YJ036P0254");
+        testPrint("C520190314103150YJ036P0254");
 //        doffingService.fetch().flatMapSingle(doffingService::toMessageBody)
 //                .subscribe(System.out::println);
 //        restore();
@@ -60,7 +62,7 @@ public class DoffingTest {
         final var silkCarRecord = em.find(AutoDoffingSilkCarRecordAdapt.class, id);
         rabbitMQClient.rxStart().andThen(doffingService.toMessageBody(silkCarRecord))
                 .flatMapCompletable(body -> {
-                    final String channel = String.join("-", "SilkBarcodePrinter", "test", "C5");
+                    final String channel = String.join("-", "SilkBarcodePrinter", "test", "C6");
                     final MessageBoy messageBoy = MAPPER.readValue(body, MessageBoy.class);
                     final MessageBoy.SilkCarInfo silkCarInfo = messageBoy.getSilkCarInfo();
 
@@ -77,7 +79,10 @@ public class DoffingTest {
                         final long between = ChronoUnit.DAYS.between(INIT_LD, codeLd);
                         String s = Long.toString(between, RADIX);
                         final String dateCode = Strings.padStart(s, 4, '0');
-                        s = Long.toString(RandomUtils.nextLong(), RADIX);
+                        s = Long.toString(silkInfo.getTimestamp(), RADIX);
+                        if (s.length() > 5) {
+                            s = s.substring(0, 5);
+                        }
                         final String codeDoffingNumCode = Strings.padStart(s, 5, '0').substring(0, 5);
                         final String spindleCode = Strings.padStart("" + silkInfo.getSpindle(), 2, '0');
                         item.setCode((dateCode + codeDoffingNumCode + spindleCode + "C").toUpperCase());

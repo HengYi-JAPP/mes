@@ -53,6 +53,18 @@ public class DoffingServiceImpl implements DoffingService {
         }
     }
 
+    private void runInTx(Runnable runnable) {
+        final EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
+        try {
+            runnable.run();
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public Flowable<AutoDoffingSilkCarRecordAdapt> fetch() {
         log.debug("fetch");
@@ -134,14 +146,11 @@ public class DoffingServiceImpl implements DoffingService {
             final long cleanDelaySeconds = TimeUnit.DAYS.toSeconds(cleanDelay);
             final long currentTimestamp = new Date().getTime() / 1000;
             final long cleanTimestamp = currentTimestamp - cleanDelaySeconds;
-            em.createNamedQuery("History.fetchCleanData", AutoDoffingSilkCarRecordAdaptHistory.class)
+            runInTx(() -> em.createNamedQuery("History.fetchCleanData", AutoDoffingSilkCarRecordAdaptHistory.class)
                     .setParameter("cleanTimestamp", cleanTimestamp)
                     .getResultList()
-                    .forEach(this::clean);
+                    .forEach(em::remove));
         });
     }
 
-    private void clean(AutoDoffingSilkCarRecordAdaptHistory history) {
-//            em.remove(history);
-    }
 }

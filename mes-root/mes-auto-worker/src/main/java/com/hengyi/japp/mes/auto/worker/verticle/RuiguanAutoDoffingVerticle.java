@@ -19,7 +19,7 @@ import static com.hengyi.japp.mes.auto.worker.Worker.INJECTOR;
 public class RuiguanAutoDoffingVerticle extends AbstractVerticle {
     private final String ex_name = "mes.auto.doffing.9200";
     private final String queue_name = "generate-silk-car-record";
-    private RabbitMQClient rabbitMQClient = INJECTOR.getInstance(RabbitMQClient.class);
+    private final RabbitMQClient rabbitMQClient = INJECTOR.getInstance(RabbitMQClient.class);
 
     @Override
     public Completable rxStart() {
