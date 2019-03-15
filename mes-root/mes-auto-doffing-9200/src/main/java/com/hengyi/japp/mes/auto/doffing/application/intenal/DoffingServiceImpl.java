@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.doffing.application.intenal;
 
+import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,6 +100,9 @@ public class DoffingServiceImpl implements DoffingService {
                         //silks_A_1_1
                         final String name = String.join("_", "silks", side, "" + row, "" + col);
                         final String json = (String) PropertyUtils.getProperty(data, name);
+                        if (J.isBlank(json)) {
+                            continue;
+                        }
                         final var silkInfo = MAPPER.readValue(json, MessageBoy.SilkInfo.class);
                         silkInfo.setSideType(side);
                         silkInfo.setRow(row);

@@ -66,4 +66,5 @@ public class DoffingModule extends AbstractModule {
     private EntityManager EntityManager(EntityManagerFactory emf) {
         return emf.createEntityManager();
     }
+
 }

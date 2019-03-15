@@ -47,7 +47,7 @@ public class DoffingTest {
         final Vertx vertx = Vertx.vertx();
         INJECTOR = Guice.createInjector(new DoffingModule(vertx));
 
-        testPrint("C520190314103150YJ036P0254");
+        testPrint("C120190315181708YJ048F0091");
 //        doffingService.fetch().flatMapSingle(doffingService::toMessageBody)
 //                .subscribe(System.out::println);
 //        restore();

@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -78,9 +79,9 @@ public class RiambSilkDetachEvent extends EventSource {
      */
     @Data
     public static class Command implements Serializable {
-        @NotBlank
+        @NotNull
         private SilkCarInfo silkCarInfo;
-        @NotBlank
+        @NotNull
         private List<String> silkCodes;
     }
 

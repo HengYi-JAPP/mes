@@ -43,4 +43,5 @@ public class SilkCarRecordAdaptResource {
     public Completable restore(@PathParam("id") String id) {
         return doffingService.restore(id);
     }
+
 }

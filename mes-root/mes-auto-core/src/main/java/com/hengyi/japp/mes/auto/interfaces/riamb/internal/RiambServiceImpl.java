@@ -225,7 +225,7 @@ public class RiambServiceImpl implements RiambService {
             packageBox.setAutomaticPackeLine(jobInfo.getAutomaticPackeLine());
             packageBox.setBudat(jobInfo.getBudatDate());
             packageBox.setPackageType(jobInfo.getPackageType());
-            packageBox.setPalletCode(jobInfo.getPalletType());
+            packageBox.setPalletType(jobInfo.getPalletType());
             packageBox.setFoamType(jobInfo.getFoamType());
             packageBox.setFoamNum(jobInfo.getFoamNum());
             switch (jobInfo.getSaleType()) {

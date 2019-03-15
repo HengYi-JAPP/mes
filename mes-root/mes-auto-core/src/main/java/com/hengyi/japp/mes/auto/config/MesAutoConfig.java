@@ -86,4 +86,7 @@ public class MesAutoConfig {
         return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
     }
 
+    public Path getDoffingSpecPath() {
+        return rootPath.resolve("doffing_spec");
+    }
 }
