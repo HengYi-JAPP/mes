@@ -198,6 +198,9 @@ public class JikonAdapterImpl implements JikonAdapter {
     public Single<String> handle(Principal principal, JikonAdapterSilkDetachEvent.Command command) {
         return command.toEvent(principal).flatMap(event -> {
             final String silkcarCode = command.getSilkcarCode();
+            if (J.isBlank(silkcarCode)) {
+                return Single.just(JikonUtil.ok());
+            }
             return silkCarRuntimeRepository.addEventSource(silkcarCode, event)
                     .andThen(Single.just(JikonUtil.ok()));
         });

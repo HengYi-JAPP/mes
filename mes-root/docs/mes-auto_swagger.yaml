@@ -3272,17 +3272,22 @@ components:
     SmallPackageBoxCreateCommand:
       type: object
       required:
-        - silkCarRecord
+        - silkCarRecords
         - config
       properties:
-        silkCarRecord:
-          $ref: '#/components/schemas/SilkCarRecordDTO'
+        silkCarRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkCarRecordDTO'
         config:
           type: object
           required:
             - silkCount
+            - packageBoxCount
           properties:
             silkCount:
+              type: integer
+            packageBoxCount:
               type: integer
     TemporaryBoxUpdateCommand:
       type: object
