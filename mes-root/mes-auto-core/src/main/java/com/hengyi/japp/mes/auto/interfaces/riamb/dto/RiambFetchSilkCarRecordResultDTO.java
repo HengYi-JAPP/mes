@@ -12,6 +12,7 @@ import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -48,6 +49,7 @@ public class RiambFetchSilkCarRecordResultDTO implements Serializable {
     private List<SilkInfo> silkInfos;
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SilkCarInfo extends EntityDTO {
         private String code;
         private int row;
@@ -56,6 +58,7 @@ public class RiambFetchSilkCarRecordResultDTO implements Serializable {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SilkInfo extends CheckSilkDTO {
         @JsonIgnore
         private Collection<SilkException> silkExceptions;

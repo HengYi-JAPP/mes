@@ -1,28 +1,24 @@
 package com.hengyi.japp.mes.auto.application;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.config.DoffingSpec;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
-import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.data.SilkCarType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.exception.DoffingTagException;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import javax.validation.constraints.NotBlank;
 import java.io.File;
-import java.io.Serializable;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.WatchKey;
@@ -61,7 +57,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
     @Override
     public List<CheckSilkDTO> checkSilks(DoffingType doffingType, Line line, SilkCar silkCar) {
         final DoffingSpec doffingSpec = findDoffingSpec(doffingType, line, silkCar);
-        return doffingSpec.silkCarPositionCheckSpecs.stream().map(it -> {
+        return doffingSpec.getSilkCarPositionCheckSpecs().stream().map(it -> {
             final var silkCarPositions = Lists.newArrayList(it.getSilkCarPositions());
             Collections.shuffle(silkCarPositions);
             final var position = silkCarPositions.get(0);
@@ -79,33 +75,73 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         return Flowable.fromIterable(checkSilks).map(CheckSilkDTO::getCode)
                 .flatMapSingle(silkBarcodeService::findBySilkCode).toList()
                 .flatMapPublisher(silkBarcodes -> {
-                    final List<Single<SilkRuntime>> silkRuntimeList$ = Lists.newArrayList();
                     silkBarcodes = sort(silkBarcodes, checkSilks);
-                    for (int i = 0; i < silkBarcodes.size(); i++) {
-                        final SilkBarcode silkBarcode = silkBarcodes.get(i);
-                        final LineMachine lineMachine = silkBarcode.getLineMachine();
-                        final Batch batch = silkBarcode.getBatch();
-                        final LineMachineSpec lineMachineSpec = doffingSpec.lineMachineSpecs.get(i);
-                        for (LineMachineSilkSpec silkSpec : lineMachineSpec.lineMachineSilkSpecs) {
-                            final SilkRuntime silkRuntime = new SilkRuntime();
-                            silkRuntime.setSideType(silkSpec.getSideType());
-                            silkRuntime.setRow(silkSpec.getRow());
-                            silkRuntime.setCol(silkSpec.getCol());
-                            final var silkRuntime$ = silkRepository.create().map(silk -> {
-                                silkRuntime.setSilk(silk);
-                                silk.setBatch(batch);
-                                silk.setLineMachine(lineMachine);
-                                final int spindle = silkSpec.getSpindle();
-                                silk.setSpindle(spindle);
-                                final String silkCode = silkBarcode.generateSilkCode(spindle);
-                                silk.setCode(silkCode);
-                                return silkRuntime;
-                            });
-                            silkRuntimeList$.add(silkRuntime$);
+                    List<DoffingSpec.LineMachineSpec> lineMachineSpecsChecked = null;
+                    for (List<DoffingSpec.LineMachineSpec> lineMachineSpecs : doffingSpec.getLineMachineSpecsList()) {
+                        final boolean b = checkPositions(checkSilks, lineMachineSpecs, silkBarcodes);
+                        if (b) {
+                            return generateSilkRuntimes(silkBarcodes, lineMachineSpecs);
                         }
                     }
-                    return Single.merge(silkRuntimeList$);
+                    throw new DoffingTagException();
                 });
+    }
+
+    private Flowable<SilkRuntime> generateSilkRuntimes(List<SilkBarcode> silkBarcodes, List<DoffingSpec.LineMachineSpec> lineMachineSpecsChecked) {
+        final List<Single<SilkRuntime>> silkRuntimeList$ = Lists.newArrayList();
+        for (int i = 0; i < silkBarcodes.size(); i++) {
+            final SilkBarcode silkBarcode = silkBarcodes.get(i);
+            final LineMachine lineMachine = silkBarcode.getLineMachine();
+            final Batch batch = silkBarcode.getBatch();
+            final var lineMachineSpec = lineMachineSpecsChecked.get(i);
+            for (var silkSpec : lineMachineSpec.getLineMachineSilkSpecs()) {
+                final SilkRuntime silkRuntime = new SilkRuntime();
+                silkRuntime.setSideType(silkSpec.getSideType());
+                silkRuntime.setRow(silkSpec.getRow());
+                silkRuntime.setCol(silkSpec.getCol());
+                final var silkRuntime$ = silkRepository.create().map(silk -> {
+                    silkRuntime.setSilk(silk);
+                    silk.setBatch(batch);
+                    silk.setLineMachine(lineMachine);
+                    final int spindle = silkSpec.getSpindle();
+                    silk.setSpindle(spindle);
+                    final String silkCode = silkBarcode.generateSilkCode(spindle);
+                    silk.setCode(silkCode);
+                    return silkRuntime;
+                });
+                silkRuntimeList$.add(silkRuntime$);
+            }
+        }
+        return Single.merge(silkRuntimeList$);
+    }
+
+    private boolean checkPositions(List<CheckSilkDTO> checkSilks, List<DoffingSpec.LineMachineSpec> lineMachineSpecs, List<SilkBarcode> silkBarcodes) {
+        for (int i = 0; i < checkSilks.size(); i++) {
+            final CheckSilkDTO checkSilk = checkSilks.get(i);
+            final SilkBarcode silkBarcode = silkBarcodes.get(i);
+            final boolean b = checkPosition(checkSilk, lineMachineSpecs, silkBarcode);
+            if (!b) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkPosition(CheckSilkDTO checkSilk, List<DoffingSpec.LineMachineSpec> lineMachineSpecs, SilkBarcode silkBarcode) {
+        final var silkSpecs = lineMachineSpecs.parallelStream()
+                .flatMap(it -> it.getLineMachineSilkSpecs().parallelStream())
+                .filter(lineMachineSilkSpec ->
+                        Objects.equals(checkSilk.getSideType(), lineMachineSilkSpec.getSideType()) &&
+                                Objects.equals(checkSilk.getRow(), lineMachineSilkSpec.getRow()) &&
+                                Objects.equals(checkSilk.getCol(), lineMachineSilkSpec.getCol())
+                )
+                .collect(toList());
+        if (silkSpecs.size() == 1) {
+            final var silkSpec = silkSpecs.get(0);
+            final String code = silkBarcode.generateSilkCode(silkSpec.getSpindle());
+            return Objects.equals(code, checkSilk.getCode());
+        }
+        return false;
     }
 
     private List<SilkBarcode> sort(List<SilkBarcode> silkBarcodes, List<CheckSilkDTO> checkSilks) {
@@ -119,19 +155,19 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
 
     private DoffingSpec findDoffingSpec(DoffingType doffingType, Line line, SilkCar silkCar) {
         final List<DoffingSpec> matches = doffingSpecs.parallelStream().filter(it -> {
-            if (!Objects.equals(doffingType, it.doffingType)) {
+            if (!Objects.equals(doffingType, it.getDoffingType())) {
                 return false;
             }
-            if (!Objects.equals(it.silkCarSpec.type, silkCar.getType())) {
+            if (!Objects.equals(it.getSilkCarSpec().getType(), silkCar.getType())) {
                 return false;
             }
-            if (!Objects.equals(it.silkCarSpec.row, silkCar.getRow())) {
+            if (!Objects.equals(it.getSilkCarSpec().getRow(), silkCar.getRow())) {
                 return false;
             }
-            if (!Objects.equals(it.silkCarSpec.col, silkCar.getCol())) {
+            if (!Objects.equals(it.getSilkCarSpec().getCol(), silkCar.getCol())) {
                 return false;
             }
-            return Objects.equals(it.lineName, line.getName());
+            return Objects.equals(it.getLineName(), line.getName());
         }).collect(toList());
         if (matches.size() == 1) {
             return matches.get(0);
@@ -162,50 +198,6 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
             builder.add(spec);
         }
         return builder.build();
-    }
-
-    @Data
-    public static class DoffingSpec implements Serializable {
-        private DoffingType doffingType;
-        private String corporationCode;
-        private String lineName;
-        private SilkCarSpec silkCarSpec;
-        private List<SilkCarPositionCheckSpec> silkCarPositionCheckSpecs;
-        private List<LineMachineSpec> lineMachineSpecs;
-    }
-
-    @Data
-    public static class SilkCarSpec implements Serializable {
-        private SilkCarType type;
-        private int row;
-        private int col;
-    }
-
-    @Data
-    public static class SilkCarPositionCheckSpec implements Serializable, Comparable<SilkCarPositionCheckSpec> {
-        private int orderBy;
-        private List<SilkCarPosition> silkCarPositions;
-
-        @Override
-        public int compareTo(SilkCarPositionCheckSpec o) {
-            return ComparisonChain.start()
-                    .compare(orderBy, o.orderBy)
-                    .result();
-        }
-    }
-
-    @Data
-    public static class LineMachineSpec implements Serializable {
-        private int orderBy;
-        private int spindleNum;
-        private List<LineMachineSilkSpec> lineMachineSilkSpecs;
-    }
-
-    @Data
-    @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-    public static class LineMachineSilkSpec extends SilkCarPosition {
-        @EqualsAndHashCode.Include
-        private int spindle;
     }
 
 }

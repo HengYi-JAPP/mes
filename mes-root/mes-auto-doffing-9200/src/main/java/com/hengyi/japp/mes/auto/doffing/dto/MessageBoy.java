@@ -19,9 +19,6 @@ public class MessageBoy implements Serializable {
     private SilkCarInfo silkCarInfo;
     private Collection<SilkInfo> silkInfos;
 
-    /**
-     * { "batchNo":"C5", "lineMachine":47, "spindle":1, "timestamp":1552038447 }
-     */
     @Data
     public static class SilkCarInfo implements Serializable {
         private String code;
