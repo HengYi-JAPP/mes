@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.application;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.vertx.Jvertx;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
@@ -11,6 +12,7 @@ import com.hengyi.japp.mes.auto.domain.Product;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
@@ -108,6 +110,20 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             }
             return event$.flatMapCompletable(event -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event));
         });
+    }
+
+    @Override
+    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingCheckSilksCommand command) {
+        final CheckSilkDTO dto = new CheckSilkDTO();
+        dto.setSideType(SilkCarSideType.A);
+        dto.setRow(1);
+        dto.setCol(1);
+        return Single.just(Lists.newArrayList(dto));
+    }
+
+    @Override
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingCommandV2 command) {
+        return Single.just(new SilkCarRuntime());
     }
 
 }

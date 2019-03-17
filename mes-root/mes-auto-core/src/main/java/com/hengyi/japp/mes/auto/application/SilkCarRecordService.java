@@ -23,4 +23,8 @@ public interface SilkCarRecordService {
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command);
 
     Completable handle(Principal principal, ToDtyEvent.Command command);
+
+    Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingCheckSilksCommand command);
+
+    Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingCommandV2 command);
 }

@@ -9,6 +9,7 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -53,7 +54,14 @@ public class MongoEntityFieldHandler_Date extends AbstractJsonEntityFieldHandler
                 return new Date((Long) $date);
             }
             final String s = (String) $date;
-            return J.nonBlank(s) ? ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.parse(s) : null;
+            if (J.isBlank(s)) {
+                return null;
+            }
+            try {
+                return ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.parse(s);
+            } catch (ParseException ex) {
+                return df.parse(s);
+            }
         }
         log.error("Mongo 时间 设置出错：【" + it + "】");
         throw new RuntimeException();
