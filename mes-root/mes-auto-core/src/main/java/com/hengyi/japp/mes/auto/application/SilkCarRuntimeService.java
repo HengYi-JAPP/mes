@@ -48,8 +48,7 @@ public interface SilkCarRuntimeService {
         final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
         final SilkCar silkCar = silkCarRecord.getSilkCar();
         Collection<SilkRuntime> result = Lists.newArrayList();
-        final Map<Triple<SilkCarSideType, Integer, Integer>, SilkRuntime> map = silkCarRuntime.getSilkRuntimes()
-                .stream()
+        final Map<Triple<SilkCarSideType, Integer, Integer>, SilkRuntime> map = silkCarRuntime.getSilkRuntimes().stream()
                 .collect(Collectors.toMap(it -> Triple.of(it.getSideType(), it.getRow(), it.getCol()), Function.identity()));
         for (SilkRuntime.DTO dto : dtos) {
             final Triple<SilkCarSideType, Integer, Integer> triple = Triple.of(dto.getSideType(), dto.getRow(), dto.getCol());

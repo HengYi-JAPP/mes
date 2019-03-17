@@ -7,10 +7,12 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkCarRecordService;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
+import com.hengyi.japp.mes.auto.application.event.ToDtyEvent;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
@@ -49,6 +51,12 @@ public class SilkCarRecordResource {
     @Path("v2/ManualDoffingEvents")
     @POST
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("ToDtyEvents")
+    @POST
+    public Completable handle(Principal principal, ToDtyEvent.Command command) {
         return silkCarRecordService.handle(principal, command);
     }
 

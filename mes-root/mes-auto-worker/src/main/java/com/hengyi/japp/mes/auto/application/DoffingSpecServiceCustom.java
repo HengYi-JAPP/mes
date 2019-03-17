@@ -16,6 +16,7 @@ import io.reactivex.Single;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 import java.io.File;
@@ -77,7 +78,6 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
                 .flatMapSingle(silkBarcodeService::findBySilkCode).toList()
                 .flatMapPublisher(silkBarcodes -> {
                     silkBarcodes = sort(silkBarcodes, checkSilks);
-                    List<DoffingSpec.LineMachineSpec> lineMachineSpecsChecked = null;
                     for (List<DoffingSpec.LineMachineSpec> lineMachineSpecs : doffingSpec.getLineMachineSpecsList()) {
                         final boolean b = checkPositions(checkSilks, lineMachineSpecs, silkBarcodes);
                         if (b) {
@@ -93,6 +93,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         for (int i = 0; i < silkBarcodes.size(); i++) {
             final SilkBarcode silkBarcode = silkBarcodes.get(i);
             final LineMachine lineMachine = silkBarcode.getLineMachine();
+            final String doffingNum = StringUtils.defaultString(silkBarcode.getDoffingNum());
             final Batch batch = silkBarcode.getBatch();
             final var lineMachineSpec = lineMachineSpecsChecked.get(i);
             for (var silkSpec : lineMachineSpec.getLineMachineSilkSpecs()) {
@@ -104,6 +105,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
                     silkRuntime.setSilk(silk);
                     silk.setBatch(batch);
                     silk.setLineMachine(lineMachine);
+                    silk.setDoffingNum(doffingNum);
                     final int spindle = silkSpec.getSpindle();
                     silk.setSpindle(spindle);
                     final String silkCode = silkBarcode.generateSilkCode(spindle);
