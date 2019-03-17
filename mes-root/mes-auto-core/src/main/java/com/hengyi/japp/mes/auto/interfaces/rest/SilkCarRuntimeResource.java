@@ -81,7 +81,7 @@ public class SilkCarRuntimeResource {
 
     @Path("ManualDoffingEvents")
     @POST
-    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command) {
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingAdaptCommand command) {
         return silkCarRuntimeService.handle(principal, command);
     }
 

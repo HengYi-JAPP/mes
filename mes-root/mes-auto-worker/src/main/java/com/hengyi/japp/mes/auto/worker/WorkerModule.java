@@ -82,6 +82,7 @@ public class WorkerModule extends AbstractModule {
         bind(DownloadService.class).to(DownloadServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
+        bind(DoffingSpecService.class).to(DoffingSpecServiceCustom.class);
 
         bind(OperatorRepository.class).to(OperatorRepositoryMongo.class);
         bind(OperatorGroupRepository.class).to(OperatorGroupRepositoryMongo.class);

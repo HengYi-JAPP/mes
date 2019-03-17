@@ -184,6 +184,27 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
+    public static class ManualDoffingCheckSilksCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        private EntityDTO line;
+    }
+
+    @Data
+    public static class ManualDoffingCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        private EntityDTO grade;
+        @NotNull
+        private EntityDTO line;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
+    }
+
+    @Data
     public static class ManualDoffingAdaptCheckSilksCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
@@ -192,7 +213,7 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
-    public static class ManualDoffingCommand implements Serializable {
+    public static class ManualDoffingAdaptCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
         @Min(1)

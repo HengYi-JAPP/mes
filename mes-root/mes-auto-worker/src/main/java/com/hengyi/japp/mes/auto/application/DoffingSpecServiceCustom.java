@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
@@ -51,7 +52,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         this.silkBarcodeService = silkBarcodeService;
         this.silkRepository = silkRepository;
         doffingSpecs = fetchDoffingSpec();
-        watchDoffingSpec();
+        Executors.newSingleThreadExecutor().submit(this::watchDoffingSpec);
     }
 
     @Override
