@@ -86,6 +86,7 @@ public class RiambSilkDetachEvent extends EventSource {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SilkCarInfo extends EntityDTO {
         @NotBlank
         private String code;
