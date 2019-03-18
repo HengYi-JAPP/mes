@@ -149,6 +149,9 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
 
     private List<SilkBarcode> sort(List<SilkBarcode> silkBarcodes, List<CheckSilkDTO> checkSilks) {
         final var map = silkBarcodes.parallelStream().collect(toMap(SilkBarcode::getCode, Function.identity()));
+        if (map.size() != checkSilks.size()) {
+            throw new RuntimeException("验证丝锭存在重复，请确认丝锭条码！");
+        }
         return checkSilks.stream().map(dto -> {
             @NotBlank final String silkCode = dto.getCode();
             final String code = SilkBarcodeService.silkCodeToSilkBarCode(silkCode);
