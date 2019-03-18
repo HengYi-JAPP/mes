@@ -1,14 +1,17 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
 import com.github.ixtf.japp.core.J;
+import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.SilkBarcodeService;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
+import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkBarcodeLucene;
 import io.reactivex.Completable;
@@ -16,12 +19,16 @@ import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.redis.RedisClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bson.conversions.Bson;
 
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Date;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
 import static com.mongodb.client.model.Filters.eq;
@@ -33,12 +40,14 @@ import static com.mongodb.client.model.Filters.eq;
 @Singleton
 public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcode> implements SilkBarcodeRepository {
     private final SilkBarcodeLucene silkBarcodeLucene;
+    private final RedisClient redisClient;
 //    public static final Semaphore semaphore = new Semaphore(1);
 
     @Inject
-    private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene) {
+    private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene, RedisClient redisClient) {
         super(mongoEntiyManager);
         this.silkBarcodeLucene = silkBarcodeLucene;
+        this.redisClient = redisClient;
     }
 
     @SneakyThrows
@@ -133,4 +142,35 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
             return super.save(silkBarcode);
         }).doOnSuccess(silkBarcodeLucene::index).ignoreElement();
     }
+
+    @Override
+    public Single<SilkBarcode> findByAuto(Principal principal, LineMachine lineMachine, Batch batch, long timestamp) {
+        final Bson lineMachineFilter = eq("lineMachine", lineMachine.getId());
+        final Bson timestampFilter = eq("autoDoffingTimestamp", timestamp);
+        final JsonObject query = unDeletedQuery(lineMachineFilter, timestampFilter);
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .flatMap(it -> rxCreateMongoEntiy(it).toMaybe())
+                .switchIfEmpty(getSilkBarcodeSingle(principal, lineMachine, batch, timestamp));
+    }
+
+    private Single<SilkBarcode> getSilkBarcodeSingle(Principal principal, LineMachine lineMachine, Batch batch, final long timestamp) {
+        final long l = timestamp * 1000;
+        final Date date = new Date(l);
+        final LocalDate codeLd = J.localDate(date);
+        return create().flatMap(silkBarcode -> {
+            silkBarcode.setCodeDate(J.date(codeLd));
+            silkBarcode.setLineMachine(lineMachine);
+            silkBarcode.setBatch(batch);
+            silkBarcode.setAutoDoffingTimestamp(timestamp);
+            return Jvertx.getProxy(OperatorRepository.class).find(principal).flatMap(operator -> {
+                silkBarcode.log(operator);
+                return redisClient.rxIncr(SilkBarcodeService.key(date));
+            }).flatMap(codeDoffingNum -> {
+                silkBarcode.setCodeDoffingNum(codeDoffingNum);
+                silkBarcode.generateCode();
+                return super.save(silkBarcode);
+            });
+        });
+    }
+
 }

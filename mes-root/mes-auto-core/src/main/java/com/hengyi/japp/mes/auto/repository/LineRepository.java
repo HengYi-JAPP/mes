@@ -26,4 +26,6 @@ public interface LineRepository {
     Flowable<Line> listBy(Workshop workshop);
 
     Flowable<Line> list();
+
+    Single<Line> findByName(String lineName);
 }
