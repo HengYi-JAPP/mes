@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -76,8 +77,8 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         final DoffingSpec doffingSpec = findDoffingSpec(doffingType, line, silkCar);
         return Flowable.fromIterable(checkSilks).map(CheckSilkDTO::getCode)
                 .flatMapSingle(silkBarcodeService::findBySilkCode).toList()
+                .flatMap(it -> checkAndSort(it, checkSilks))
                 .flatMapPublisher(silkBarcodes -> {
-                    silkBarcodes = sort(silkBarcodes, checkSilks);
                     for (List<DoffingSpec.LineMachineSpec> lineMachineSpecs : doffingSpec.getLineMachineSpecsList()) {
                         final boolean b = checkPositions(checkSilks, lineMachineSpecs, silkBarcodes);
                         if (b) {
@@ -85,6 +86,27 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
                         }
                     }
                     throw new DoffingTagException();
+                });
+    }
+
+    private Single<List<SilkBarcode>> checkAndSort(List<SilkBarcode> silkBarcodes, List<CheckSilkDTO> checkSilks) {
+        final var map = silkBarcodes.parallelStream().collect(toMap(SilkBarcode::getCode, Function.identity()));
+        if (map.size() != checkSilks.size()) {
+            throw new RuntimeException("验证丝锭存在重复，请确认丝锭条码！");
+        }
+        return Flowable.fromIterable(checkSilks)
+                .map(CheckSilkDTO::getCode)
+                .flatMapMaybe(silkRepository::findByCode)
+                .toList().map(silks -> {
+                    if (J.nonEmpty(silks)) {
+                        final Silk silk = silks.get(0);
+                        throw new RuntimeException("[" + silk.getCode() + "]，重复落筒!");
+                    }
+                    return checkSilks.stream().map(dto -> {
+                        @NotBlank final String silkCode = dto.getCode();
+                        final String code = SilkBarcodeService.silkCodeToSilkBarCode(silkCode);
+                        return map.get(code);
+                    }).collect(collectingAndThen(toList(), Collections::unmodifiableList));
                 });
     }
 
@@ -145,18 +167,6 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
             return Objects.equals(code, checkSilk.getCode());
         }
         return false;
-    }
-
-    private List<SilkBarcode> sort(List<SilkBarcode> silkBarcodes, List<CheckSilkDTO> checkSilks) {
-        final var map = silkBarcodes.parallelStream().collect(toMap(SilkBarcode::getCode, Function.identity()));
-        if (map.size() != checkSilks.size()) {
-            throw new RuntimeException("验证丝锭存在重复，请确认丝锭条码！");
-        }
-        return checkSilks.stream().map(dto -> {
-            @NotBlank final String silkCode = dto.getCode();
-            final String code = SilkBarcodeService.silkCodeToSilkBarCode(silkCode);
-            return map.get(code);
-        }).collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     private DoffingSpec findDoffingSpec(DoffingType doffingType, Line line, SilkCar silkCar) {
