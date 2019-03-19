@@ -20,6 +20,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -111,8 +112,16 @@ public class DoffingServiceImpl implements DoffingService {
                     }
                 }
             }
+            lineMap(messageBoy);
             return MAPPER.writeValueAsString(messageBoy);
         });
+    }
+
+    private void lineMap(MessageBoy messageBoy) {
+        final Map<String, String> lineNameMap = config.getLineNameMap();
+        final String originalLine = messageBoy.getLine();
+        final String line = lineNameMap.getOrDefault(originalLine, originalLine);
+        messageBoy.setLine(line);
     }
 
     @Override
