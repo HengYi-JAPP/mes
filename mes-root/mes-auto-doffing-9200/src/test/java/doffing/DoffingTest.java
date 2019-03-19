@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.hengyi.japp.mes.auto.doffing.DoffingModule;
 import com.hengyi.japp.mes.auto.doffing.application.DoffingService;
 import com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdapt;
+import com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdaptHistory;
 import io.reactivex.Completable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
@@ -42,7 +43,7 @@ public class DoffingTest {
         final Vertx vertx = Vertx.vertx();
         INJECTOR = Guice.createInjector(new DoffingModule(vertx));
 
-        testPrint("C620190318212400YJ036P0424");
+        testPrint("C420190319095453YJ036P0866");
 //        doffingService.fetch().flatMapSingle(doffingService::toMessageBody)
 //                .subscribe(System.out::println);
 //        restore();
@@ -54,8 +55,9 @@ public class DoffingTest {
         final RabbitMQClient rabbitMQClient = INJECTOR.getInstance(RabbitMQClient.class);
         final DoffingService doffingService = INJECTOR.getInstance(DoffingService.class);
         final EntityManager em = INJECTOR.getInstance(EntityManager.class);
-        final var silkCarRecord = em.find(AutoDoffingSilkCarRecordAdapt.class, id);
-        rabbitMQClient.rxStart().andThen(doffingService.toMessageBody(silkCarRecord))
+        final var silkCarRecord = em.find(AutoDoffingSilkCarRecordAdaptHistory.class, id);
+        final AutoDoffingSilkCarRecordAdapt data = MAPPER.convertValue(silkCarRecord, AutoDoffingSilkCarRecordAdapt.class);
+        rabbitMQClient.rxStart().andThen(doffingService.toMessageBody(data))
                 .flatMapCompletable(body -> {
                     System.out.println(body);
 

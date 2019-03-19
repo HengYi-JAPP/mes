@@ -65,7 +65,9 @@ public class RuiguanServiceImpl implements RuiguanService {
     @Override
     public Completable handle(Principal principal, SilkCarRuntimeInitEvent.RuiguanAutoDoffingCommand command) {
         final String id = command.getId();
-        return silkCarRecordRepository.findByAutoId(id).switchIfEmpty(create(principal, command)).ignoreElement();
+        return silkCarRecordRepository.findByAutoId(id).switchIfEmpty(create(principal, command))
+                .doOnError(ex -> log.error("id[" + id + "]，自动落筒失败！", ex))
+                .ignoreElement();
     }
 
     private Single<SilkCarRecord> create(Principal principal, SilkCarRuntimeInitEvent.RuiguanAutoDoffingCommand command) {
