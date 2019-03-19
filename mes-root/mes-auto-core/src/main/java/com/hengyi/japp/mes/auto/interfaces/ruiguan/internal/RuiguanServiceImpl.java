@@ -1,9 +1,12 @@
 package com.hengyi.japp.mes.auto.interfaces.ruiguan.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.ixtf.japp.core.J;
+import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.SilkCarRecordService;
 import com.hengyi.japp.mes.auto.application.command.PrintCommand;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.*;
@@ -15,6 +18,7 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.reactivex.redis.RedisClient;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -28,9 +32,11 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 /**
  * @author jzb 2019-03-11
  */
+@Slf4j
 @Singleton
 public class RuiguanServiceImpl implements RuiguanService {
     private final RedisClient redisClient;
+    private final SilkCarRuntimeRepository silkCarRuntimeRepository;
     private final SilkCarRecordRepository silkCarRecordRepository;
     private final BatchRepository batchRepository;
     private final LineRepository lineRepository;
@@ -42,8 +48,9 @@ public class RuiguanServiceImpl implements RuiguanService {
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private RuiguanServiceImpl(RedisClient redisClient, SilkCarRecordRepository silkCarRecordRepository, BatchRepository batchRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, SilkRepository silkRepository, SilkBarcodeRepository silkBarcodeRepository, GradeRepository gradeRepository, SilkCarRepository silkCarRepository, OperatorRepository operatorRepository) {
+    private RuiguanServiceImpl(RedisClient redisClient, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkCarRecordRepository silkCarRecordRepository, BatchRepository batchRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, SilkRepository silkRepository, SilkBarcodeRepository silkBarcodeRepository, GradeRepository gradeRepository, SilkCarRepository silkCarRepository, OperatorRepository operatorRepository) {
         this.redisClient = redisClient;
+        this.silkCarRuntimeRepository = silkCarRuntimeRepository;
         this.silkCarRecordRepository = silkCarRecordRepository;
         this.batchRepository = batchRepository;
         this.lineRepository = lineRepository;
@@ -112,24 +119,32 @@ public class RuiguanServiceImpl implements RuiguanService {
             }));
         }).toList().flatMap(silkRuntimes -> {
             event.setSilkRuntimes(silkRuntimes);
+            final SilkCar silkCar = event.getSilkCar();
             return silkCarRecordRepository.create().flatMap(silkCarRecord -> {
                 silkCarRecord.setId(command.getId());
-                silkCarRecord.setSilkCar(event.getSilkCar());
+                silkCarRecord.setSilkCar(silkCar);
                 silkCarRecord.setBatch(batch);
                 silkCarRecord.setGrade(event.getGrade());
                 silkCarRecord.setDoffingOperator(event.getOperator());
                 silkCarRecord.setDoffingType(DoffingType.AUTO);
                 silkCarRecord.setDoffingDateTime(event.getFireDateTime());
                 silkCarRecord.initEvent(event);
-                return silkCarRecordRepository.save(silkCarRecord);
-            }).flatMap(silkCarRecord -> Flowable.fromIterable(silkRuntimes)
-                    .flatMapSingle(silkRuntime -> {
-                        final Silk silk = silkRuntime.getSilk();
-                        silk.setSilkCarRecords(Lists.newArrayList(silkCarRecord));
-                        return silkRepository.save(silk);
-                    })
-                    .toList().map(it -> silkCarRecord));
+                final var silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes).map(SilkCarRuntime::getSilkCarRecord);
+                return handlePrevSilkCarData(silkCar).andThen(silkCarRuntime$);
+            });
         })).doOnSuccess(it -> printSilk(it).subscribe());
+    }
+
+    private Completable handlePrevSilkCarData(SilkCar silkCar) {
+        final String code = silkCar.getCode();
+        return silkCarRuntimeRepository.findByCode(code).flatMapCompletable(silkCarRuntime -> {
+            if (J.nonEmpty(silkCarRuntime.getSilkRuntimes()) && !silkCarRuntime.hasPackageBoxEvent()) {
+                log.error("SilkCar[" + silkCar.getCode() + "]，丝车非空！");
+            }
+            final Completable clearSilkCar$ = silkCarRuntimeRepository.clearSilkCarRuntime(code);
+            final SilkCarRecordService silkCarRecordService = Jvertx.getProxy(SilkCarRecordService.class);
+            return silkCarRecordService.save(silkCarRuntime).flatMapCompletable(it -> clearSilkCar$);
+        });
     }
 
     @Override
@@ -184,14 +199,14 @@ public class RuiguanServiceImpl implements RuiguanService {
         boolean reverse = true;
         for (int i = row; i > 0; i--) {
             final List<PrintCommand.Item> rowItems = Lists.newArrayList();
-            for (int j = 0; j < col; j++) {
+            for (int j = 1; j <= col; j++) {
                 findFun.apply(i, j).ifPresent(rowItems::add);
             }
             if (reverse) {
                 Collections.reverse(rowItems);
             }
             items.addAll(rowItems);
-            reverse = false;
+            reverse = !reverse;
         }
     }
 

@@ -24,7 +24,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bson.conversions.Bson;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -145,9 +144,8 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
 
     @Override
     public Single<SilkBarcode> findByAuto(Principal principal, LineMachine lineMachine, Batch batch, long timestamp) {
-        final Bson lineMachineFilter = eq("lineMachine", lineMachine.getId());
-        final Bson timestampFilter = eq("autoDoffingTimestamp", timestamp);
-        final JsonObject query = unDeletedQuery(lineMachineFilter, timestampFilter);
+        final JsonObject query = unDeletedQuery(eq("lineMachine", lineMachine.getId()))
+                .put("autoDoffingTimestamp", timestamp);
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                 .flatMap(it -> rxCreateMongoEntiy(it).toMaybe())
                 .switchIfEmpty(getSilkBarcodeSingle(principal, lineMachine, batch, timestamp));
@@ -167,7 +165,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
                 return redisClient.rxIncr(SilkBarcodeService.key(date));
             }).flatMap(codeDoffingNum -> {
                 silkBarcode.setCodeDoffingNum(codeDoffingNum);
-                silkBarcode.generateCode();
+                silkBarcode.setCode(silkBarcode.generateCode());
                 return super.save(silkBarcode);
             });
         });

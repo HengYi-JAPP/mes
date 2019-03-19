@@ -1,18 +1,15 @@
 package doffing;
 
-import com.github.ixtf.japp.core.J;
-import com.google.common.base.Strings;
 import com.google.inject.Guice;
 import com.hengyi.japp.mes.auto.doffing.DoffingModule;
 import com.hengyi.japp.mes.auto.doffing.application.DoffingService;
 import com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdapt;
-import com.hengyi.japp.mes.auto.doffing.dto.MessageBoy;
 import io.reactivex.Completable;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import lombok.Data;
 import lombok.SneakyThrows;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -23,13 +20,11 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.doffing.Doffing.INJECTOR;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-03-08
@@ -47,7 +42,7 @@ public class DoffingTest {
         final Vertx vertx = Vertx.vertx();
         INJECTOR = Guice.createInjector(new DoffingModule(vertx));
 
-        testPrint("C120190315181708YJ048F0091");
+        testPrint("C620190318212400YJ036P0424");
 //        doffingService.fetch().flatMapSingle(doffingService::toMessageBody)
 //                .subscribe(System.out::println);
 //        restore();
@@ -62,36 +57,40 @@ public class DoffingTest {
         final var silkCarRecord = em.find(AutoDoffingSilkCarRecordAdapt.class, id);
         rabbitMQClient.rxStart().andThen(doffingService.toMessageBody(silkCarRecord))
                 .flatMapCompletable(body -> {
+                    System.out.println(body);
+
+                    final JsonObject message = new JsonObject().put("body", body);
+                    rabbitMQClient.rxBasicPublish("mes.auto.doffing.9200", "", message);
                     final String channel = String.join("-", "SilkBarcodePrinter", "test", "C6");
-                    final MessageBoy messageBoy = MAPPER.readValue(body, MessageBoy.class);
-                    final MessageBoy.SilkCarInfo silkCarInfo = messageBoy.getSilkCarInfo();
-
-                    final var silks = messageBoy.getSilkInfos().stream().map(silkInfo -> {
-                        final var item = new PrintItem();
-                        item.setBatchNo(silkCarInfo.getBatchNo());
-                        item.setBatchSpec(silkCarInfo.getBatchSpec());
-                        item.setLineName(silkInfo.getLine());
-                        item.setLineMachineItem(silkInfo.getLineMachine());
-                        item.setSpindle(silkInfo.getSpindle());
-
-                        item.setCodeDate(messageBoy.getCreateDateTime());
-                        final LocalDate codeLd = J.localDate(item.getCodeDate());
-                        final long between = ChronoUnit.DAYS.between(INIT_LD, codeLd);
-                        String s = Long.toString(between, RADIX);
-                        final String dateCode = Strings.padStart(s, 4, '0');
-                        s = Long.toString(silkInfo.getTimestamp(), RADIX);
-                        if (s.length() > 5) {
-                            s = s.substring(0, 5);
-                        }
-                        final String codeDoffingNumCode = Strings.padStart(s, 5, '0').substring(0, 5);
-                        final String spindleCode = Strings.padStart("" + silkInfo.getSpindle(), 2, '0');
-                        item.setCode((dateCode + codeDoffingNumCode + spindleCode + "C").toUpperCase());
-                        return item;
-                    }).collect(toList());
-                    final String message = MAPPER.writeValueAsString(silks);
-                    try (final Jedis jedis = JEDIS_POOL.getResource()) {
-                        jedis.publish(channel, message);
-                    }
+//                    final MessageBoy messageBoy = MAPPER.readValue(body, MessageBoy.class);
+//                    final MessageBoy.SilkCarInfo silkCarInfo = messageBoy.getSilkCarInfo();
+//
+//                    final var silks = messageBoy.getSilkInfos().stream().map(silkInfo -> {
+//                        final var item = new PrintItem();
+//                        item.setBatchNo(silkCarInfo.getBatchNo());
+//                        item.setBatchSpec(silkCarInfo.getBatchSpec());
+//                        item.setLineName(silkInfo.getLine());
+//                        item.setLineMachineItem(silkInfo.getLineMachine());
+//                        item.setSpindle(silkInfo.getSpindle());
+//
+//                        item.setCodeDate(messageBoy.getCreateDateTime());
+//                        final LocalDate codeLd = J.localDate(item.getCodeDate());
+//                        final long between = ChronoUnit.DAYS.between(INIT_LD, codeLd);
+//                        String s = Long.toString(between, RADIX);
+//                        final String dateCode = Strings.padStart(s, 4, '0');
+//                        s = Long.toString(silkInfo.getTimestamp(), RADIX);
+//                        if (s.length() > 5) {
+//                            s = s.substring(0, 5);
+//                        }
+//                        final String codeDoffingNumCode = Strings.padStart(s, 5, '0').substring(0, 5);
+//                        final String spindleCode = Strings.padStart("" + silkInfo.getSpindle(), 2, '0');
+//                        item.setCode((dateCode + codeDoffingNumCode + spindleCode + "C").toUpperCase());
+//                        return item;
+//                    }).collect(toList());
+//                    final String message = MAPPER.writeValueAsString(silks);
+//                    try (final Jedis jedis = JEDIS_POOL.getResource()) {
+//                        jedis.publish(channel, message);
+//                    }
                     return Completable.complete();
                 })
                 .subscribe();

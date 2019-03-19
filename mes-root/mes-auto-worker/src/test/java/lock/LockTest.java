@@ -9,7 +9,7 @@ import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
-import init.UserImport;
+import hotfix.AAReport;
 import lombok.Cleanup;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -127,7 +127,7 @@ public class LockTest {
                     .addHeader("Authorization", "Bearer " + token)
                     .url(J.strTpl(urlTpl, map))
                     .build();
-            @Cleanup final Response response = UserImport.client.newCall(request).execute();
+            @Cleanup final Response response = AAReport.client.newCall(request).execute();
             @Cleanup final ResponseBody body = response.body();
             @Cleanup final InputStream is = body.byteStream();
             final PackageBox packageBox = MAPPER.readValue(is, PackageBox.class);
@@ -140,7 +140,7 @@ public class LockTest {
                 .addHeader("Authorization", "Bearer " + token)
                 .url(J.strTpl(urlTpl, map))
                 .build();
-        @Cleanup final Response response = UserImport.client.newCall(request).execute();
+        @Cleanup final Response response = AAReport.client.newCall(request).execute();
         @Cleanup final ResponseBody body = response.body();
         @Cleanup final InputStream is = body.byteStream();
         final JsonNode jsonNode = MAPPER.readTree(is);
@@ -167,7 +167,7 @@ public class LockTest {
                     .addHeader("Authorization", "Bearer " + token)
                     .url(J.strTpl(urlTpl, map))
                     .build();
-            @Cleanup final Response response = UserImport.client.newCall(request).execute();
+            @Cleanup final Response response = AAReport.client.newCall(request).execute();
             @Cleanup final ResponseBody body = response.body();
             @Cleanup final InputStream is = body.byteStream();
             final PackageBox packageBox = MAPPER.readValue(is, PackageBox.class);
@@ -179,7 +179,7 @@ public class LockTest {
                     .addHeader("Authorization", "Bearer " + token)
                     .url(J.strTpl(urlTpl, map))
                     .build();
-            @Cleanup final Response response = UserImport.client.newCall(request).execute();
+            @Cleanup final Response response = AAReport.client.newCall(request).execute();
             @Cleanup final ResponseBody body = response.body();
             @Cleanup final InputStream is = body.byteStream();
             final List<SilkCarRecord> silkCarRecords = Lists.newArrayList();
@@ -201,7 +201,7 @@ public class LockTest {
                 .addHeader("Authorization", "Bearer " + token)
                 .url(J.strTpl(urlTpl, map))
                 .build();
-        @Cleanup final Response response = UserImport.client.newCall(request).execute();
+        @Cleanup final Response response = AAReport.client.newCall(request).execute();
         @Cleanup final ResponseBody body = response.body();
         @Cleanup final InputStream is = body.byteStream();
         final JsonNode node = MAPPER.readTree(is);
@@ -223,7 +223,7 @@ public class LockTest {
                 .addHeader("Authorization", "Bearer " + token)
                 .url(J.strTpl(urlTpl, map))
                 .build();
-        @Cleanup final Response response = UserImport.client.newCall(request).execute();
+        @Cleanup final Response response = AAReport.client.newCall(request).execute();
         @Cleanup final ResponseBody body = response.body();
         @Cleanup final InputStream is = body.byteStream();
         final List<SilkBarcode> result = Lists.newArrayList();
