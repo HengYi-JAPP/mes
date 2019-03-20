@@ -119,9 +119,11 @@ public class DoffingServiceImpl implements DoffingService {
 
     private void lineMap(MessageBoy messageBoy) {
         final Map<String, String> lineNameMap = config.getLineNameMap();
-        final String originalLine = messageBoy.getLine();
-        final String line = lineNameMap.getOrDefault(originalLine, originalLine);
-        messageBoy.setLine(line);
+        J.emptyIfNull(messageBoy.getSilkInfos()).forEach(silkInfo -> {
+            final String originalLine = silkInfo.getLine();
+            final String line = lineNameMap.getOrDefault(originalLine, originalLine);
+            silkInfo.setLine(line);
+        });
     }
 
     @Override

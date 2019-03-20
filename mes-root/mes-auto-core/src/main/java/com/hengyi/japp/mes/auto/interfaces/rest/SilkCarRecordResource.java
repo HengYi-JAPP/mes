@@ -54,15 +54,15 @@ public class SilkCarRecordResource {
         return silkCarRecordService.handle(principal, command);
     }
 
-    @Path("v2/AutoDoffingAdaptCheckSilks")
+    @Path("v3/AutoDoffingAdaptCheckSilks")
     @POST
-    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingCheckSilksCommand command) {
+    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingOverWriteCheckSilksCommand command) {
         return silkCarRecordService.handle(principal, command);
     }
 
-    @Path("v2/AutoDoffingAdaptEvents")
+    @Path("v3/AutoDoffingAdaptEvents")
     @POST
-    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingCommandV2 command) {
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingOverWriteCommand command) {
         return silkCarRecordService.handle(principal, command);
     }
 

@@ -163,9 +163,18 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
-    public static class AutoDoffingCheckSilksCommand implements Serializable {
+    public static class AutoDoffingOverWriteCheckSilksCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
+    }
+
+    @Data
+    public static class AutoDoffingOverWriteCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
     }
 
     @Data

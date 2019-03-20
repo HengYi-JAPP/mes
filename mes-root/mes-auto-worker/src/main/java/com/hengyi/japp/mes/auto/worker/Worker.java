@@ -28,21 +28,6 @@ public class Worker {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
-//            final SilkCarRuntimeRepository silkCarRuntimeRepository = Jvertx.getProxy(SilkCarRuntimeRepository.class);
-//            silkCarRuntimeRepository.findByCode("3000F48037").subscribe(silkCarRuntime -> {
-//                for (SilkRuntime silkRuntime : silkCarRuntime.getSilkRuntimes()) {
-//                    try {
-//                        final SilkRuntime.DyeingResultInfo firstDyeingResultInfo = silkRuntime.getFirstDyeingResultInfo();
-//                        final DyeingResult dyeingResult = firstDyeingResultInfo.getDyeingResult();
-//                        final Silk checkSilk = dyeingResult.getSilk();
-//                        if (checkSilk == null) {
-//                            System.out.println();
-//                        }
-//                    } catch (Exception e) {
-//                        System.out.println(silkCarRuntime);
-//                    }
-//                }
-//            });
             return Completable.mergeArray(
                     deployWorker(vertx).ignoreElement(),
                     deployRuiguan(vertx).ignoreElement()

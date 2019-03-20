@@ -2,6 +2,7 @@ package doffing;
 
 import com.google.inject.Guice;
 import com.hengyi.japp.mes.auto.doffing.DoffingModule;
+import com.hengyi.japp.mes.auto.doffing.DoffingModuleConfig;
 import com.hengyi.japp.mes.auto.doffing.application.DoffingService;
 import com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdapt;
 import com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdaptHistory;
@@ -22,6 +23,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -42,8 +44,11 @@ public class DoffingTest {
 
         final Vertx vertx = Vertx.vertx();
         INJECTOR = Guice.createInjector(new DoffingModule(vertx));
+        final DoffingModuleConfig instance = INJECTOR.getInstance(DoffingModuleConfig.class);
+        final Map<String, String> lineNameMap = instance.getLineNameMap();
+        System.out.println(lineNameMap);
 
-        testPrint("C420190319095453YJ036P0866");
+        testPrint("D620190319202520YJ048F0534");
 //        doffingService.fetch().flatMapSingle(doffingService::toMessageBody)
 //                .subscribe(System.out::println);
 //        restore();

@@ -2,8 +2,6 @@ package com.hengyi.japp.mes.auto.worker.verticle;
 
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent.RuiguanAutoDoffingCommand;
 import com.hengyi.japp.mes.auto.interfaces.ruiguan.RuiguanService;
-import io.reactivex.Completable;
-import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import io.vertx.reactivex.rabbitmq.RabbitMQConsumer;
@@ -21,16 +19,16 @@ public class RuiguanAutoDoffingVerticle extends AbstractVerticle {
     private final String queue_name = "generate-silk-car-record";
     private final RabbitMQClient rabbitMQClient = INJECTOR.getInstance(RabbitMQClient.class);
 
-    @Override
-    public Completable rxStart() {
-        final Completable declare$ = rabbitMQClient.rxQueueDeclare(queue_name, true, false, false).ignoreElement();
-        final Completable bind$ = rabbitMQClient.rxQueueBind(queue_name, ex_name, "");
-        final QueueOptions queueOptions = new QueueOptions().setAutoAck(false);
-        final Completable consumer$ = rabbitMQClient.rxBasicConsumer(queue_name, queueOptions)
-                .doOnSuccess(this::handleConsumer)
-                .ignoreElement();
-        return rabbitMQClient.rxStart().andThen(declare$).andThen(bind$).andThen(consumer$);
-    }
+//    @Override
+//    public Completable rxStart() {
+//        final Completable declare$ = rabbitMQClient.rxQueueDeclare(queue_name, true, false, false).ignoreElement();
+//        final Completable bind$ = rabbitMQClient.rxQueueBind(queue_name, ex_name, "");
+//        final QueueOptions queueOptions = new QueueOptions().setAutoAck(false);
+//        final Completable consumer$ = rabbitMQClient.rxBasicConsumer(queue_name, queueOptions)
+//                .doOnSuccess(this::handleConsumer)
+//                .ignoreElement();
+//        return rabbitMQClient.rxStart().andThen(declare$).andThen(bind$).andThen(consumer$);
+//    }
 
     private void handleConsumer(RabbitMQConsumer consumer) {
         consumer.handler(reply -> {

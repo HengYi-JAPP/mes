@@ -42,8 +42,8 @@ public class SilkBarcode extends LoggableMongoEntity {
      * 初始时间
      * 日期编码使用
      */
-    public static final LocalDate INIT_LD = LocalDate.of(2018, Month.AUGUST, 1);
-    //    public static final LocalDate INIT_LD = LocalDate.of(2018, Month.SEPTEMBER, 1);
+    public static final LocalDate INIT_LD = LocalDate.of(2019, Month.MARCH, 1);
+    //    public static final LocalDate INIT_LD = LocalDate.of(2018, Month.AUGUST, 1);
     private String code;
     /**
      * 条码生成日期
