@@ -52,6 +52,8 @@ public class WorkerModule extends AbstractModule {
         bind(AuthService.class).to(AuthServiceImpl.class);
         bind(AdminService.class).to(AdminServiceImpl.class);
 
+        bind(DictionaryService.class).to(DictionaryServiceImpl.class);
+
         bind(CorporationService.class).to(CorporationServiceImpl.class);
         bind(WorkshopService.class).to(WorkshopServiceImpl.class);
         bind(LineService.class).to(LineServiceImpl.class);
@@ -80,6 +82,8 @@ public class WorkerModule extends AbstractModule {
         bind(DownloadService.class).to(DownloadServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
+
+        bind(DictionaryRepository.class).to(DictionaryRepositoryMongo.class);
 
         bind(OperatorRepository.class).to(OperatorRepositoryMongo.class);
         bind(OperatorGroupRepository.class).to(OperatorGroupRepositoryMongo.class);
