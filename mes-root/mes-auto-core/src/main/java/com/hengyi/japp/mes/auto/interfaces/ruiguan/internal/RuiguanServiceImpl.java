@@ -76,7 +76,7 @@ public class RuiguanServiceImpl implements RuiguanService {
         return operatorRepository.find(principal).flatMap(operator -> {
             event.fire(operator);
             event.setCommand(MAPPER.convertValue(command, JsonNode.class));
-            return silkCarRepository.findByCode(silkCarInfo.getCode());
+            return silkCarRepository.findByCodeOrCreate(silkCarInfo);
         }).flatMap(silkCar -> {
             event.setSilkCar(silkCar);
             return gradeRepository.findByName(silkCarInfo.getGrade()).toSingle();

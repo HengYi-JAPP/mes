@@ -2,11 +2,13 @@ package com.hengyi.japp.mes.auto.application.persistence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.SilkCarQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarType;
 import com.hengyi.japp.mes.auto.repository.SilkCarRepository;
 import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
@@ -38,10 +41,26 @@ public class SilkCarRepositoryMongo extends MongoEntityRepository<SilkCar> imple
 
     @Override
     public Single<SilkCar> findByCode(String code) {
-        final JsonObject query = unDeletedQuery(Filters.eq("code", code));
+        final JsonObject query = unDeletedQuery(eq("code", code));
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                 // fixme maybe single
                 .flatMapSingle(this::rxCreateMongoEntiy);
+    }
+
+    @Override
+    public Single<SilkCar> findByCodeOrCreate(SilkCarRuntimeInitEvent.RuiguanAutoDoffingCommand.SilkCarInfo silkCarInfo) {
+        final String code = silkCarInfo.getCode();
+        final JsonObject query = unDeletedQuery(eq("code", code));
+        final Single<SilkCar> create$ = create().flatMap(silkCar -> {
+            silkCar.setCode(code);
+            silkCar.setRow(silkCarInfo.getRow());
+            silkCar.setCol(silkCarInfo.getCol());
+            silkCar.setType(SilkCarType.DEFAULT);
+            return save(silkCar);
+        });
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .map(it -> mongoEntiyManager.createMongoEntiy(entityClass, it))
+                .switchIfEmpty(create$);
     }
 
     @Override
@@ -86,4 +105,5 @@ public class SilkCarRepositoryMongo extends MongoEntityRepository<SilkCar> imple
 
         return Completable.mergeArray(query$, count$).toSingle(() -> builder.build());
     }
+
 }

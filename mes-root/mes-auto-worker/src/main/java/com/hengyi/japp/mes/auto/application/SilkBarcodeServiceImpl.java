@@ -65,7 +65,7 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
         });
     }
 
-    private synchronized Single<SilkBarcode> create(Principal principal, LocalDate codeLd, LineMachine lineMachine, String doffingNum) {
+    private Single<SilkBarcode> create(Principal principal, LocalDate codeLd, LineMachine lineMachine, String doffingNum) {
         return silkBarcodeRepository.find(codeLd, lineMachine, doffingNum, lineMachine.getProductPlan().getBatch())
                 .switchIfEmpty(silkBarcodeRepository.create())
                 .flatMap(silkBarcode -> {
