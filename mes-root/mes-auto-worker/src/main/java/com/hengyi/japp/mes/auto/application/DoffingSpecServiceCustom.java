@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.application;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.config.DoffingSpec;
@@ -24,16 +25,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.listFiles;
 
 /**
@@ -90,10 +88,15 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
     }
 
     private Single<List<SilkBarcode>> checkAndSort(List<SilkBarcode> silkBarcodes, List<CheckSilkDTO> checkSilks) {
-        final var map = silkBarcodes.parallelStream().collect(toMap(SilkBarcode::getCode, Function.identity()));
-        if (map.size() != checkSilks.size()) {
-            throw new RuntimeException("验证丝锭存在重复，请确认丝锭条码！");
-        }
+        final HashMap<String, SilkBarcode> map = Maps.newHashMap();
+        silkBarcodes.forEach(it -> {
+            final String code = it.getCode();
+            map.put(code, it);
+        });
+//        final var map = silkBarcodes.parallelStream().collect(toMap(SilkBarcode::getCode, Function.identity()));
+//        if (map.size() != checkSilks.size()) {
+//            throw new RuntimeException("验证丝锭存在重复，请确认丝锭条码！");
+//        }
         return Flowable.fromIterable(checkSilks)
                 .map(CheckSilkDTO::getCode)
                 .flatMapMaybe(silkRepository::findByCode)
@@ -200,9 +203,10 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         doffingSpecPath.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
         WatchKey key;
         while ((key = watchService.take()) != null) {
-            doffingSpecs = fetchDoffingSpec();
             key.pollEvents();
             key.reset();
+            doffingSpecs = fetchDoffingSpec();
+            log.info("=====刷新落筒规则=====");
         }
     }
 
