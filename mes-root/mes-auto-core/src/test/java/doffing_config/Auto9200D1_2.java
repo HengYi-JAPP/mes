@@ -24,9 +24,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author jzb 2019-03-17
  */
-public class Auto9200C4C6D4 {
+public class Auto9200D1_2 {
     public static void main(String[] args) {
-        Stream.of("C4", "C6", "D4").forEach(Auto9200C4C6D4::doffingSpec);
+        Stream.of("D1", "D2").forEach(Auto9200D1_2::doffingSpec);
     }
 
     @SneakyThrows
@@ -54,6 +54,12 @@ public class Auto9200C4C6D4 {
                 silkCarPosition.setRow(silkSpec.getRow());
                 silkCarPosition.setCol(silkSpec.getCol());
                 return silkCarPosition;
+            }).filter(it -> {
+                final int col = it.getCol();
+                if (col == 3) {
+                    return false;
+                }
+                return true;
             }).collect(toList());
             silkCarPositionCheckSpec.setSilkCarPositions(silkCarPositions);
             return silkCarPositionCheckSpec;
@@ -66,9 +72,9 @@ public class Auto9200C4C6D4 {
 
     private static List<LineMachineSpec> getLineMachineSpecs() {
         final List<LineMachineSpec> result = Lists.newArrayList();
-        result.add(getLineMachineSpec(1, 12));
-        result.add(getLineMachineSpec(2, 12));
-        result.add(getLineMachineSpec(3, 12));
+        result.add(getLineMachineSpec(1, 10));
+        result.add(getLineMachineSpec(2, 10));
+        result.add(getLineMachineSpec(3, 10));
         return result;
     }
 
@@ -78,11 +84,11 @@ public class Auto9200C4C6D4 {
         result.setSpindleNum(spindleNum);
         final List<LineMachineSilkSpec> lineMachineSilkSpecs = Lists.newArrayList();
         result.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        IntStream.rangeClosed(1, 6).forEach(col -> {
+        IntStream.rangeClosed(1, 5).forEach(col -> {
             lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, orderBy, col, col));
         });
-        IntStream.rangeClosed(1, 6).forEach(col -> {
-            final int spindle = col + 6;
+        IntStream.rangeClosed(1, 5).forEach(col -> {
+            final int spindle = col + 5;
             lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, orderBy, col, spindle));
         });
         return result;

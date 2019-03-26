@@ -16,7 +16,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotBlank;
@@ -35,6 +34,7 @@ import java.util.function.Function;
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
 import static java.nio.file.StandardWatchEventKinds.*;
 import static java.util.stream.Collectors.*;
+import static org.apache.commons.io.FileUtils.listFiles;
 
 /**
  * @author jzb 2019-03-15
@@ -201,6 +201,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         WatchKey key;
         while ((key = watchService.take()) != null) {
             doffingSpecs = fetchDoffingSpec();
+            key.pollEvents();
             key.reset();
         }
     }
@@ -209,7 +210,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
     private Collection<DoffingSpec> fetchDoffingSpec() {
         final ImmutableList.Builder<DoffingSpec> builder = ImmutableList.builder();
         final String[] extensions = {"yml"};
-        for (File file : FileUtils.listFiles(doffingSpecPath.toFile(), extensions, true)) {
+        for (File file : listFiles(doffingSpecPath.toFile(), extensions, true)) {
             final var spec = YAML_MAPPER.readValue(file, DoffingSpec.class);
             builder.add(spec);
         }
