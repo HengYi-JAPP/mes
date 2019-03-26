@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 /**
  * 日统计
@@ -42,11 +44,11 @@ public class StatisticsReportDay implements Comparable<StatisticsReportDay>, Ser
 
     protected Collection<StatisticsReport.Item> calcItems() {
         return packageBoxes.parallelStream()
-                .collect(Collectors.groupingBy(PackageBox::getBatch))
+                .collect(groupingBy(PackageBox::getBatch))
                 .entrySet().parallelStream()
                 .map(entry -> new StatisticsReportDay_Batch(entry.getKey(), entry.getValue()))
                 .flatMap(StatisticsReportDay_Batch::lineDiff)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override

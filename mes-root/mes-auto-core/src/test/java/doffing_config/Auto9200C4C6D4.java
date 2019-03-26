@@ -14,6 +14,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
@@ -23,21 +24,21 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author jzb 2019-03-17
  */
-public class Custom9200D5_6 {
+public class Auto9200C4C6D4 {
     public static void main(String[] args) {
-        Stream.of("D5", "D6").forEach(Custom9200D5_6::doffingSpec);
+        Stream.of("C4", "C6", "D4").forEach(Auto9200C4C6D4::doffingSpec);
     }
 
     @SneakyThrows
     private static DoffingSpec doffingSpec(String lineName) {
         final var doffingSpec = new DoffingSpec();
-        doffingSpec.setDoffingType(DoffingType.MANUAL);
+        doffingSpec.setDoffingType(DoffingType.AUTO);
         doffingSpec.setCorporationCode("9200");
         doffingSpec.setLineName(lineName);
         final var silkCarSpec = new SilkCarSpec();
         doffingSpec.setSilkCarSpec(silkCarSpec);
         silkCarSpec.setType(SilkCarType.DEFAULT);
-        silkCarSpec.setRow(4);
+        silkCarSpec.setRow(3);
         silkCarSpec.setCol(6);
 
         final List<List<LineMachineSpec>> lineMachineSpecsList = Lists.newArrayList();
@@ -65,41 +66,24 @@ public class Custom9200D5_6 {
 
     private static List<LineMachineSpec> getLineMachineSpecs() {
         final List<LineMachineSpec> result = Lists.newArrayList();
-        result.add(getLineMachineSpec(1, SilkCarSideType.A, 24));
-        result.add(getLineMachineSpec(2, SilkCarSideType.B, 24));
+        result.add(getLineMachineSpec(1, 12));
+        result.add(getLineMachineSpec(2, 12));
+        result.add(getLineMachineSpec(3, 12));
         return result;
     }
 
-    private static LineMachineSpec getLineMachineSpec(int orderBy, SilkCarSideType sideType, int spindleNum) {
+    private static LineMachineSpec getLineMachineSpec(int orderBy, int spindleNum) {
         final var result = new LineMachineSpec();
         result.setOrderBy(orderBy);
         result.setSpindleNum(spindleNum);
         final List<LineMachineSilkSpec> lineMachineSilkSpecs = Lists.newArrayList();
         result.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 1, 6));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 2, 5));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 3, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 4, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 5, 2));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 6, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 1, 7));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 2, 8));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 3, 9));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 4, 10));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 5, 11));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 6, 12));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 1, 19));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 2, 20));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 3, 21));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 4, 22));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 5, 23));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 6, 24));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 1, 18));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 2, 17));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 3, 16));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 4, 15));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 5, 14));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 6, 13));
+        IntStream.rangeClosed(1, 6).forEach(col -> {
+            lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, orderBy, col, col));
+        });
+        IntStream.rangeClosed(7, 12).forEach(col -> {
+            lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, orderBy, col, col));
+        });
         return result;
     }
 

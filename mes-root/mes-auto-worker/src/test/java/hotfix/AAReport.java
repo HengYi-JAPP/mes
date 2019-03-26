@@ -20,12 +20,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 
@@ -37,33 +41,25 @@ public class AAReport {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.DAYS).readTimeout(1, TimeUnit.DAYS).build();
     private static final String baseUrl = "http://10.2.0.215:9998";
-    private static final String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJ1aWQiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJpc3MiOiJqYXBwLW1lcy1hdXRvIn0.h-CPVnDFw0YyCfm7MIAgXIqTlecAhT5VQe43i5aIUeE";
+    private static final String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOiI1YzA0YTA0NGMzY2FlODEzYjUzMGNkZDEiLCJpYXQiOjE1NDcxMjk4MzEsImlzcyI6ImphcHAtbWVzLWF1dG8iLCJzdWIiOiI1YzA0YTA0NGMzY2FlODEzYjUzMGNkZDEifQ.gO_IM7drZHaEn00kJ2a0kne3B3QrR7bcHVA5fI6ReWElMm2bOjatKogDQfYBs6l31uGTQqSzvGegtmgRsW_BRggUIwRgUEJJ99w1arueAQ_2TJQsIgFnNUoQri3uxrqxv039rKthgmwRmRVMqteJO0k-jZj9RfLARXHzqMPtmlb1j8ZQokrsTGCgouYC0uN1pq2ZhN2MYC3kPty_Rpabgq8RWmLqGAIc6436Lg9d-yEAm_UCYZcuisbjbepCNAUD3frq6qrlhRU8o8vhzYZhxoue7TI4QS-PEk0_crEK_H-Sofc9yoQqUsy9jLp2y2yHQvgpTi5ykveu2jIlitA51g";
 
     @SneakyThrows
     public static void main(String[] args) {
-        final RequestBody body = RequestBody.create(JSON, "{}");
-        final Request request = new Request.Builder()
-                .url("http://192.168.0.249:9997/api/rfcs/ZJAPP_CARGO_1")
-                .addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJzYXAtdGVzdCIsImlhdCI6MTU1MjQ1ODQ1NCwiZXhwIjoxNTUyNDY1NjU0LCJpc3MiOiJoZW5neWktZXNiIn0.CtKbR2u3u0ydoWq1FDshqJ013gYV8lR85Nb_QXduYlXRSXfeVqyT1gT6F_cKXlM_WBzAqlLromyEuU2Kte1jrLn7e8TijPRYeLrDObVD5-KDHXJWUqQ74Wx5QDvntsVjCiI6P6F50ezAEl6A1zOcmLvjcPcMYtgQYstN6UWtP_nMzp5IbxHTGP35_m-Fav2UBVQe5DCZGAnuvb7VzV-n0v-zSnvWoNytYvIBosWVKKA2uxoKRxgUViIm3pdTU4qZSqeG6E9cFjvkrizOpJrDBOzFemCYTtH65vAcTr_Sd7LY-b_VsIemB9j_i3HKnihH83yz5NUFoprO0t96amNlyQ")
-                .post(body).build();
-        final Response response = client.newCall(request).execute();
-        System.out.println(response.body().string());
+        final long startL = System.currentTimeMillis();
 
-//        final long startL = System.currentTimeMillis();
-//
-//        final Workshop workshop = Workshops.B;
-//        final LocalDate startLd = LocalDate.of(2019, 3, 1);
-//        final LocalDate endLd = LocalDate.of(2019, 3, 1);
-//        final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
-//                .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
-//                .map(it -> new AAReportDay(workshop, it)).sorted()
-//                .collect(Collectors.toList());
-//
-//        days.parallelStream().forEach(AAReport::toExcel);
+        final Workshop workshop = Workshops.A;
+        final LocalDate startLd = LocalDate.of(2019, 3, 24);
+        final LocalDate endLd = LocalDate.of(2019, 3, 24);
+        final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
+                .map(it -> new AAReportDay(workshop, it)).sorted()
+                .collect(Collectors.toList());
+
+        days.parallelStream().forEach(AAReport::toExcel);
 //        toExcel(new StatisticsReport(workshop, startLd, endLd, days));
 
-//        final long endL = System.currentTimeMillis();
-//        System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
+        final long endL = System.currentTimeMillis();
+        System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
     }
 
     @SneakyThrows

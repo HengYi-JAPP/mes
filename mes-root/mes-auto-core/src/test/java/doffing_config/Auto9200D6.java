@@ -23,15 +23,15 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author jzb 2019-03-17
  */
-public class Custom9200D5_6 {
+public class Auto9200D6 {
     public static void main(String[] args) {
-        Stream.of("D5", "D6").forEach(Custom9200D5_6::doffingSpec);
+        Stream.of("D6").forEach(Auto9200D6::doffingSpec);
     }
 
     @SneakyThrows
     private static DoffingSpec doffingSpec(String lineName) {
         final var doffingSpec = new DoffingSpec();
-        doffingSpec.setDoffingType(DoffingType.MANUAL);
+        doffingSpec.setDoffingType(DoffingType.AUTO);
         doffingSpec.setCorporationCode("9200");
         doffingSpec.setLineName(lineName);
         final var silkCarSpec = new SilkCarSpec();
@@ -76,30 +76,30 @@ public class Custom9200D5_6 {
         result.setSpindleNum(spindleNum);
         final List<LineMachineSilkSpec> lineMachineSilkSpecs = Lists.newArrayList();
         result.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 1, 6));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 2, 5));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 3, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 4, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 5, 2));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 6, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 1, 7));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 2, 8));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 3, 9));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 4, 10));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 5, 11));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 6, 12));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 1, 19));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 2, 20));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 3, 21));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 4, 22));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 1, 13));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 2, 1));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 3, 17));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 4, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 5, 21));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 1, 6, 9));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 1, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 2, 14));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 3, 6));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 4, 18));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 5, 10));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 2, 6, 22));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 1, 15));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 2, 3));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 3, 19));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 4, 7));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 5, 23));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 6, 24));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 1, 18));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 2, 17));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 3, 16));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 4, 15));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 5, 14));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 6, 13));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 3, 6, 11));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 1, 4));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 2, 16));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 3, 8));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 4, 20));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 5, 12));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(sideType, 4, 6, 24));
         return result;
     }
 

@@ -67,6 +67,38 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     }
 
     @Override
+    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommandV2 command) {
+        final var line$ = lineRepository.find(command.getLine().getId());
+        final var silkCar$ = silkCarRepository.findByCode(command.getSilkCar().getCode());
+        return line$.flatMap(line -> silkCar$.map(silkCar -> doffingSpecService.checkSilks(DoffingType.AUTO, line, silkCar)));
+    }
+
+    @Override
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommandV2 command) {
+        final var event$ = operatorRepository.find(principal).flatMap(operator -> {
+            final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
+            event.fire(operator);
+            return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
+                event.setGrade(grade);
+                return silkCarRepository.findByCode(command.getSilkCar().getCode());
+            }).map(silkCar -> {
+                event.setSilkCar(silkCar);
+                return event;
+            });
+        });
+        final var line$ = lineRepository.find(command.getLine().getId());
+        return line$.flatMap(line -> event$.flatMap(event -> {
+            final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
+            final var checkSilks = command.getCheckSilks();
+            final var silkCar = event.getSilkCar();
+            return doffingSpecService.generateSilkRuntimes(DoffingType.AUTO, line, silkCar, checkSilks).toList().flatMap(silkRuntimes -> {
+                event.setSilkRuntimes(silkRuntimes);
+                return silkCarRuntimeService.doffing(event, DoffingType.AUTO);
+            });
+        }));
+    }
+
+    @Override
     public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCheckSilksCommand command) {
         final var line$ = lineRepository.find(command.getLine().getId());
         final var silkCar$ = silkCarRepository.findByCode(command.getSilkCar().getCode());

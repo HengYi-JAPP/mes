@@ -29,12 +29,15 @@ public class AAReportDay_Batch extends StatisticsReportDay_Batch {
             return;
         }
         final Collection<AAReportSilkCarRecord> silkCarRecords = AAReport.packageBoxSilkCarRecords(packageBox);
-        J.emptyIfNull(silkCarRecords).parallelStream()
-                .map(AAReportSilkCarRecord::getInitSilks)
-                .filter(J::nonEmpty)
-                .flatMap(Collection::parallelStream)
-                .map(SilkRuntime::getSilk)
-                .forEach(silk -> collectToLine(grade, silk));
+        if (J.nonEmpty(silkCarRecords)) {
+            J.emptyIfNull(silkCarRecords).parallelStream()
+                    .map(AAReportSilkCarRecord::getInitSilks)
+                    .filter(J::nonEmpty)
+                    .flatMap(Collection::parallelStream)
+                    .map(SilkRuntime::getSilk)
+                    .forEach(silk -> collectToLine(grade, silk));
+            return;
+        }
     }
 
 }

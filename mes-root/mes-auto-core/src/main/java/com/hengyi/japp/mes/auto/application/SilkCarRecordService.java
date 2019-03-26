@@ -18,6 +18,10 @@ public interface SilkCarRecordService {
 
     Single<SilkCarRecord> save(SilkCarRuntime silkCarRuntime);
 
+    Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommandV2 command);
+
+    Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommandV2 command);
+
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCheckSilksCommand command);
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command);
