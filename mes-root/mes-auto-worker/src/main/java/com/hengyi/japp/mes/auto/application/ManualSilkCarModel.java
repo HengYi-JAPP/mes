@@ -126,7 +126,7 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             }
         } else {
             final int size = silkBarcodes.size();
-            if (size == 1) {
+            if (builder.build().size() == 10 && size == 1) {
                 final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1)).collect(toList());
                 return Single.merge(collect).toList();
             }
