@@ -141,7 +141,6 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 final Single<SilkCarRuntime> result$ = SilkCarModel.append(Single.just(silkCarRuntime), command.getLineMachineCount())
                         .flatMap(it -> it.generateSilkRuntimes(command.getCheckSilks()))
                         .flatMap(silkRuntimes -> {
-                            silkCarRecord.setDoffingType(DoffingType.MANUAL);
                             silkRuntimes.forEach(silkRuntime -> {
                                 final Silk silk = silkRuntime.getSilk();
                                 silk.setDoffingType(DoffingType.MANUAL);
@@ -152,7 +151,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                                 }
                             });
                             event.setSilkRuntimes(silkRuntimes);
-                            final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes);
+                            final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes).flatMap(it -> {
+                                final SilkCarRecord silkCarRecord1 = it.getSilkCarRecord();
+                                silkCarRecord1.setDoffingType(DoffingType.MANUAL);
+                                return silkCarRecordRepository.save(silkCarRecord1).map(_it -> it);
+                            });
                             return checkSilkDuplicate(silkRuntimes).andThen(silkCarRuntime$);
                         });
                 final Completable checkRole$ = authService.checkRole(event.getOperator(), RoleType.DOFFING);
@@ -404,13 +407,18 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     private Completable checkSilkDuplicate(Collection<SilkRuntime> silkRuntimes) {
         return Flowable.fromIterable(J.emptyIfNull(silkRuntimes))
                 .map(SilkRuntime::getSilk)
-                .map(Silk::getCode)
-                .map(SilkBarcodeService::silkCodeToSilkBarCode).distinct()
-                .map(it -> it + "01")
+                .map(silk -> {
+                    final LineMachine lineMachine = silk.getLineMachine();
+                    final Line line = lineMachine.getLine();
+                    final Workshop workshop = line.getWorkshop();
+                    final String code = silk.getCode();
+                    final String silkBarCode = SilkBarcodeService.silkCodeToSilkBarCode(code);
+                    return silkBarCode + "01" + workshop.getCode();
+                }).distinct()
                 .flatMapMaybe(silkRepository::findByCode).toList()
                 .flatMapCompletable(silks -> {
                     if (J.nonEmpty(silks)) {
-                        throw new SilkDuplicateException();
+                        throw new SilkDuplicateException(silks.get(0));
                     }
                     return Completable.complete();
                 });
