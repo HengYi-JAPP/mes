@@ -39,7 +39,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Optional;
 
-import static io.vertx.config.yaml.YamlProcessor.YAML_MAPPER;
+import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
+
 
 /**
  * @author jzb 2018-03-21
