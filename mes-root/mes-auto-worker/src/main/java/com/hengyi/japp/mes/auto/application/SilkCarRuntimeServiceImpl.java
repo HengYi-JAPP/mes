@@ -152,8 +152,9 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                             });
                             event.setSilkRuntimes(silkRuntimes);
                             final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes).flatMap(it -> {
-                                silkCarRecord.setDoffingType(DoffingType.MANUAL);
-                                return silkCarRecordRepository.save(silkCarRecord).map(_it -> it);
+                                final SilkCarRecord silkCarRecord1 = it.getSilkCarRecord();
+                                silkCarRecord1.setDoffingType(DoffingType.MANUAL);
+                                return silkCarRecordRepository.save(silkCarRecord1).map(_it -> it);
                             });
                             return checkSilkDuplicate(silkRuntimes).andThen(silkCarRuntime$);
                         });
