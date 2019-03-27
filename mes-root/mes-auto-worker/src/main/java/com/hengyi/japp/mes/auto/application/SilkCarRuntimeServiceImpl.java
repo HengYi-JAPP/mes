@@ -407,9 +407,14 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     private Completable checkSilkDuplicate(Collection<SilkRuntime> silkRuntimes) {
         return Flowable.fromIterable(J.emptyIfNull(silkRuntimes))
                 .map(SilkRuntime::getSilk)
-                .map(Silk::getCode)
-                .map(SilkBarcodeService::silkCodeToSilkBarCode).distinct()
-                .map(it -> it + "01")
+                .map(silk -> {
+                    final LineMachine lineMachine = silk.getLineMachine();
+                    final Line line = lineMachine.getLine();
+                    final Workshop workshop = line.getWorkshop();
+                    final String code = silk.getCode();
+                    final String silkBarCode = SilkBarcodeService.silkCodeToSilkBarCode(code);
+                    return silkBarCode + "01" + workshop.getCode();
+                }).distinct()
                 .flatMapMaybe(silkRepository::findByCode).toList()
                 .flatMapCompletable(silks -> {
                     if (J.nonEmpty(silks)) {
