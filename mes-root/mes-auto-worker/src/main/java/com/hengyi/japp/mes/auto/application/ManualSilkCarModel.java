@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.github.ixtf.japp.core.J;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -84,7 +85,7 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             final Line line = lineMachine.getLine();
             final Workshop workshop = line.getWorkshop();
             if ("C".equals(workshop.getCode())) {
-                return generateSilkRuntimesBySilkBarcodesC(silkBarcodes);
+                return generateSilkRuntimesBySilkBarcodesC(builder, silkBarcodes);
             }
             for (int spindle : lineMachine.getSpindleSeq()) {
                 final SilkRuntime silkRuntime = new SilkRuntime();
@@ -103,21 +104,34 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         return addAll(builder.build());
     }
 
-    private Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC(List<SilkBarcode> silkBarcodes) {
+    private Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC(ImmutableList.Builder<Single<SilkRuntime>> builder, List<SilkBarcode> silkBarcodes) {
         final int row = silkCar.getRow();
         final int col = silkCar.getCol();
         if (row != 3 || col != 4) {
             throw new RuntimeException("丝车不符!");
         }
-        final int size = silkBarcodes.size();
-        if (size != 2) {
-            throw new RuntimeException("验证数不符!");
+
+        if (J.isEmpty(builder.build())) {
+            final int size = silkBarcodes.size();
+            if (size == 1) {
+                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)).collect(toList());
+                return Single.merge(collect).toList();
+            }
+            if (size == 2) {
+                final List<Single<SilkRuntime>> collect = Stream.concat(
+                        generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)),
+                        generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1))
+                ).collect(toList());
+                return Single.merge(collect).toList();
+            }
+        } else {
+            final int size = silkBarcodes.size();
+            if (size == 1) {
+                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1)).collect(toList());
+                return Single.merge(collect).toList();
+            }
         }
-        final List<Single<SilkRuntime>> collect = Stream.concat(
-                generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)),
-                generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1))
-        ).collect(toList());
-        return Single.merge(collect).toList();
+        throw new RuntimeException("验证数不符!");
     }
 
     private Stream<Single<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC(SilkCarSideType sideType, SilkBarcode silkBarcode) {
