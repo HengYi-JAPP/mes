@@ -141,7 +141,6 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 final Single<SilkCarRuntime> result$ = SilkCarModel.append(Single.just(silkCarRuntime), command.getLineMachineCount())
                         .flatMap(it -> it.generateSilkRuntimes(command.getCheckSilks()))
                         .flatMap(silkRuntimes -> {
-                            silkCarRecord.setDoffingType(DoffingType.MANUAL);
                             silkRuntimes.forEach(silkRuntime -> {
                                 final Silk silk = silkRuntime.getSilk();
                                 silk.setDoffingType(DoffingType.MANUAL);
@@ -152,7 +151,10 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                                 }
                             });
                             event.setSilkRuntimes(silkRuntimes);
-                            final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes);
+                            final Single<SilkCarRuntime> silkCarRuntime$ = silkCarRuntimeRepository.create(silkCarRecord, silkRuntimes).flatMap(it -> {
+                                silkCarRecord.setDoffingType(DoffingType.MANUAL);
+                                return silkCarRecordRepository.save(silkCarRecord).map(_it -> it);
+                            });
                             return checkSilkDuplicate(silkRuntimes).andThen(silkCarRuntime$);
                         });
                 final Completable checkRole$ = authService.checkRole(event.getOperator(), RoleType.DOFFING);
