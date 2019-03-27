@@ -3,10 +3,7 @@ package com.hengyi.japp.mes.auto.application;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.hengyi.japp.mes.auto.domain.LineMachine;
-import com.hengyi.japp.mes.auto.domain.SilkBarcode;
-import com.hengyi.japp.mes.auto.domain.SilkCar;
-import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
@@ -16,8 +13,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.hengyi.japp.mes.auto.application.SilkCarModel.shuffle;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2018-11-15
@@ -82,6 +81,11 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
 
         for (SilkBarcode silkBarcode : silkBarcodes) {
             final LineMachine lineMachine = silkBarcode.getLineMachine();
+            final Line line = lineMachine.getLine();
+            final Workshop workshop = line.getWorkshop();
+            if ("C".equals(workshop.getName())) {
+                return generateSilkRuntimesBySilkBarcodesC(silkBarcodes);
+            }
             for (int spindle : lineMachine.getSpindleSeq()) {
                 final SilkRuntime silkRuntime = new SilkRuntime();
                 final Single<SilkRuntime> silkRuntime$ = silkRepository.create().map(silk -> {
@@ -90,7 +94,6 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
                     silk.setDoffingNum(silkBarcode.getDoffingNum());
                     silk.setSpindle(spindle);
                     silk.setLineMachine(lineMachine);
-//                    silk.setBatch(lineMachine.getProductPlan().getBatch());
                     silk.setBatch(silkBarcode.getBatch());
                     return silkRuntime;
                 });
@@ -98,6 +101,60 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             }
         }
         return addAll(builder.build());
+    }
+
+    private Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC(List<SilkBarcode> silkBarcodes) {
+        final int row = silkCar.getRow();
+        final int col = silkCar.getCol();
+        if (row != 3 || col != 4) {
+            throw new RuntimeException("丝车不符!");
+        }
+        final int size = silkBarcodes.size();
+        if (size != 2) {
+            throw new RuntimeException("验证数不符!");
+        }
+        final List<Single<SilkRuntime>> collect = Stream.concat(
+                generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)),
+                generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1))
+        ).collect(toList());
+        return Single.merge(collect).toList();
+    }
+
+    private Stream<Single<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC(SilkCarSideType sideType, SilkBarcode silkBarcode) {
+        final LineMachine lineMachine = silkBarcode.getLineMachine();
+        final int spindleNum = lineMachine.getSpindleNum();
+        if (spindleNum != 10) {
+            throw new RuntimeException("丝锭数不符!");
+        }
+        return Stream.of(
+                silkCarRuntime(sideType, 1, 3, silkBarcode, 1),
+                silkCarRuntime(sideType, 1, 2, silkBarcode, 2),
+                silkCarRuntime(sideType, 2, 1, silkBarcode, 3),
+                silkCarRuntime(sideType, 2, 2, silkBarcode, 4),
+                silkCarRuntime(sideType, 2, 3, silkBarcode, 5),
+                silkCarRuntime(sideType, 2, 4, silkBarcode, 6),
+                silkCarRuntime(sideType, 3, 4, silkBarcode, 7),
+                silkCarRuntime(sideType, 3, 3, silkBarcode, 8),
+                silkCarRuntime(sideType, 3, 2, silkBarcode, 9),
+                silkCarRuntime(sideType, 3, 1, silkBarcode, 10)
+        );
+    }
+
+    private Single<SilkRuntime> silkCarRuntime(SilkCarSideType sideType, int row, int col, SilkBarcode silkBarcode, int spindle) {
+        final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
+        final SilkRuntime silkRuntime = new SilkRuntime();
+        silkRuntime.setSideType(sideType);
+        silkRuntime.setRow(row);
+        silkRuntime.setCol(col);
+        return silkRepository.create().map(silk -> {
+            silkRuntime.setSilk(silk);
+            silk.setCode(silkBarcode.generateSilkCode(spindle));
+            silk.setDoffingNum(silkBarcode.getDoffingNum());
+            silk.setSpindle(spindle);
+            silk.setLineMachine(silkBarcode.getLineMachine());
+            silk.setBatch(silkBarcode.getBatch());
+            return silkRuntime;
+        });
     }
 
     @Override
