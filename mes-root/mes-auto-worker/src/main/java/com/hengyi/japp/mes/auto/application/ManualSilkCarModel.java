@@ -83,7 +83,7 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             final LineMachine lineMachine = silkBarcode.getLineMachine();
             final Line line = lineMachine.getLine();
             final Workshop workshop = line.getWorkshop();
-            if ("C".equals(workshop.getName())) {
+            if ("C".equals(workshop.getCode())) {
                 return generateSilkRuntimesBySilkBarcodesC(silkBarcodes);
             }
             for (int spindle : lineMachine.getSpindleSeq()) {
