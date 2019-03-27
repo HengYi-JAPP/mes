@@ -418,7 +418,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 .flatMapMaybe(silkRepository::findByCode).toList()
                 .flatMapCompletable(silks -> {
                     if (J.nonEmpty(silks)) {
-                        throw new SilkDuplicateException();
+                        throw new SilkDuplicateException(silks.get(0));
                     }
                     return Completable.complete();
                 });
