@@ -129,9 +129,9 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         } else {
             final int size = silkBarcodes.size();
             if (build.size() == 10 && size == 1) {
-                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1)).collect(toList());
-                collect.addAll(build);
-                return Single.merge(collect).toList();
+                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(0)).collect(toList());
+                builder.addAll(collect);
+                return Single.merge(builder.build()).toList();
             }
         }
         throw new RuntimeException("验证数不符!");
