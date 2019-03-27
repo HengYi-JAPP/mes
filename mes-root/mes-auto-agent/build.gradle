@@ -1,5 +1,6 @@
 dependencies {
-    compile project(':mes-auto-core')
+    compile project(':mes-auto-core'),
+            "io.vertx:vertx-mqtt"
 }
 
 mainClassName = "com.hengyi.japp.mes.auto.agent.Agent"
