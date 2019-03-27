@@ -13,6 +13,7 @@ import io.reactivex.Single;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -111,7 +112,8 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             throw new RuntimeException("丝车不符!");
         }
 
-        if (J.isEmpty(builder.build())) {
+        final Collection<Single<SilkRuntime>> build = builder.build();
+        if (J.isEmpty(build)) {
             final int size = silkBarcodes.size();
             if (size == 1) {
                 final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)).collect(toList());
@@ -126,9 +128,9 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             }
         } else {
             final int size = silkBarcodes.size();
-            if (builder.build().size() == 10 && size == 1) {
+            if (build.size() == 10 && size == 1) {
                 final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1)).collect(toList());
-                collect.addAll(builder.build());
+                collect.addAll(build);
                 return Single.merge(collect).toList();
             }
         }
