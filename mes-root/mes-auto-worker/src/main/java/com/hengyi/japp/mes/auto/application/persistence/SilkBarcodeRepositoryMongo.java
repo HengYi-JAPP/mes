@@ -111,6 +111,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
                     }
                     if (list.size() > 1) {
                         final String s = String.join(" ", codeLd.toString(), lineMachine.getLine().getName(), "" + lineMachine.getItem(), doffingNum, batch.getBatchNo());
+                        log.error(s + " 丝锭标签重复 " + list);
                         throw new RuntimeException(s);
                     }
                     return find(IterableUtils.get(list, 0)).toMaybe();
