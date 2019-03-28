@@ -77,8 +77,8 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommandV2 command) {
         final var event$ = operatorRepository.find(principal).flatMap(operator -> {
             final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
-            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
             event.fire(operator);
+            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
             return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
                 event.setGrade(grade);
                 return silkCarRepository.findByCode(command.getSilkCar().getCode());
@@ -88,7 +88,7 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             });
         });
         final var line$ = lineRepository.find(command.getLine().getId());
-        return line$.flatMap(line -> event$.flatMap(event -> {
+        final Single<SilkCarRuntime> result$ = line$.flatMap(line -> event$.flatMap(event -> {
             final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
             final var checkSilks = command.getCheckSilks();
             final var silkCar = event.getSilkCar();
@@ -97,6 +97,8 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
                 return silkCarRuntimeService.doffing(event, DoffingType.AUTO);
             });
         }));
+        final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
+        return checks$.andThen(result$);
     }
 
     @Override
@@ -110,8 +112,8 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command) {
         final var event$ = operatorRepository.find(principal).flatMap(operator -> {
             final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
-            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
             event.fire(operator);
+            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
             return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
                 event.setGrade(grade);
                 return silkCarRepository.findByCode(command.getSilkCar().getCode());
@@ -121,7 +123,7 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             });
         });
         final var line$ = lineRepository.find(command.getLine().getId());
-        return line$.flatMap(line -> event$.flatMap(event -> {
+        final Single<SilkCarRuntime> result$ = line$.flatMap(line -> event$.flatMap(event -> {
             final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
             final var checkSilks = command.getCheckSilks();
             final var silkCar = event.getSilkCar();
@@ -130,6 +132,8 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
                 return silkCarRuntimeService.doffing(event, DoffingType.MANUAL);
             });
         }));
+        final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
+        return checks$.andThen(result$);
     }
 
     @Override
