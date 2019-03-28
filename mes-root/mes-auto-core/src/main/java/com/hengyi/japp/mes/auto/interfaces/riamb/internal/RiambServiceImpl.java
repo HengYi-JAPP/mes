@@ -222,22 +222,14 @@ public class RiambServiceImpl implements RiambService {
             packageBox.setCreateDateTime(command.getCreateDateTime());
             packageBox.setPalletCode(command.getPalletCode());
 
+            packageBox.setRiambJobId(jobInfo.getId());
             packageBox.setAutomaticPackeLine(jobInfo.getAutomaticPackeLine());
             packageBox.setBudat(jobInfo.getBudatDate());
             packageBox.setPackageType(jobInfo.getPackageType());
             packageBox.setPalletType(jobInfo.getPalletType());
             packageBox.setFoamType(jobInfo.getFoamType());
             packageBox.setFoamNum(jobInfo.getFoamNum());
-            switch (jobInfo.getSaleType()) {
-                case "外贸": {
-                    packageBox.setSaleType(SaleType.FOREIGN);
-                    break;
-                }
-                case "内贸": {
-                    packageBox.setSaleType(SaleType.DOMESTIC);
-                    break;
-                }
-            }
+            packageBox.setSaleType(getSaleType(jobInfo));
 
             return packageClassRepository.findByName(jobInfo.getPackageClassNo()).flatMap(packageClass -> {
                 packageBox.setPrintClass(packageClass);
@@ -281,4 +273,19 @@ public class RiambServiceImpl implements RiambService {
             });
         });
     }
+
+    private SaleType getSaleType(RiambPackageBoxEvent.AutomaticPackeJobInfo jobInfo) {
+        switch (jobInfo.getSaleType()) {
+            case "FOREIGN":
+            case "外贸":
+                return SaleType.FOREIGN;
+
+            case "DOMESTIC":
+            case "内销":
+            case "内贸":
+                return SaleType.DOMESTIC;
+        }
+        return null;
+    }
+
 }

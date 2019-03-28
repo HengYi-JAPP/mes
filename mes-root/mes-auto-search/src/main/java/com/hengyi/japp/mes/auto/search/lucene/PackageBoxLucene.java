@@ -69,6 +69,8 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
         doc.add(new StringField("grade", grade.getId(), Field.Store.NO));
         doc.add(new FacetField("grade", grade.getId()));
 
+        doc.add(new StringField("riambJobId", J.defaultString(packageBox.getRiambJobId()), Field.Store.NO));
+
         J.emptyIfNull(packageBox.getSilks()).stream().map(Silk::getId)
                 .forEach(it -> doc.add(new StringField("silk", it, Field.Store.NO)));
         J.emptyIfNull(packageBox.getSilkCarRecords()).stream().forEach(silkCarRecord -> {

@@ -105,6 +105,7 @@ public class RiambPackageBoxEvent extends EventSource {
         private String batchNo;
         @NotBlank
         private String gradeName;
+        @NotBlank
         private String packageClassNo;
         private String saleType;
         private Date budatDate;
