@@ -77,6 +77,7 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommandV2 command) {
         final var event$ = operatorRepository.find(principal).flatMap(operator -> {
             final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
+            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
             event.fire(operator);
             return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
                 event.setGrade(grade);
@@ -109,6 +110,7 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command) {
         final var event$ = operatorRepository.find(principal).flatMap(operator -> {
             final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
+            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
             event.fire(operator);
             return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
                 event.setGrade(grade);
