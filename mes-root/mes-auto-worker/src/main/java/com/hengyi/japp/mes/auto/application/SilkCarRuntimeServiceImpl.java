@@ -402,18 +402,25 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     }
 
     private Completable checkSilkDuplicate(Collection<SilkRuntime> silkRuntimes) {
-        return Flowable.fromIterable(J.emptyIfNull(silkRuntimes))
-                .map(SilkRuntime::getSilk)
-                .map(Silk::getCode)
-                .map(SilkBarcodeService::silkCodeToSilkBarCode).distinct()
-                .map(it -> it + "01")
-                .flatMapMaybe(silkRepository::findByCode).toList()
-                .flatMapCompletable(silks -> {
-                    if (J.nonEmpty(silks)) {
-                        throw new SilkDuplicateException();
-                    }
-                    return Completable.complete();
-                });
+        return Flowable.fromIterable(J.emptyIfNull(silkRuntimes)).flatMapCompletable(silkRuntime -> {
+            final Silk silk = silkRuntime.getSilk();
+            return silkRepository.findByCode(silk.getCode()).isEmpty().flatMapCompletable(it ->
+                    it ? Completable.complete() : Completable.error(new SilkDuplicateException(silk))
+            );
+        });
+
+//        return Flowable.fromIterable(J.emptyIfNull(silkRuntimes))
+//                .map(SilkRuntime::getSilk)
+//                .map(Silk::getCode)
+//                .map(SilkBarcodeService::silkCodeToSilkBarCode).distinct()
+//                .map(it -> it + "01")
+//                .flatMapMaybe(silkRepository::findByCode).toList()
+//                .flatMapCompletable(silks -> {
+//                    if (J.nonEmpty(silks)) {
+//                        throw new SilkDuplicateException(silk);
+//                    }
+//                    return Completable.complete();
+//                });
     }
 
     private Completable handlePrevSilkCarData(SilkCar silkCar) {
