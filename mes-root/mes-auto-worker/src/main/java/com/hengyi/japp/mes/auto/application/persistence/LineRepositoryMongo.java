@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.regex;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
@@ -37,12 +39,19 @@ public class LineRepositoryMongo extends MongoEntityRepository<Line> implements 
     }
 
     @Override
+    public Single<Line> findByName(String lineName) {
+        final JsonObject query = unDeletedQuery(eq("name", lineName));
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .flatMapSingle(this::rxCreateMongoEntiy);
+    }
+
+    @Override
     public Flowable<Line> autoComplete(String q) {
         if (StringUtils.isBlank(q)) {
             return Flowable.empty();
         }
         final Pattern pattern = Pattern.compile(q, CASE_INSENSITIVE);
-        final Bson qFilter = Filters.regex("name", pattern);
+        final Bson qFilter = regex("name", pattern);
         final JsonObject query = unDeletedQuery(qFilter);
         final FindOptions findOptions = new FindOptions()
                 .setLimit(10);
@@ -66,7 +75,7 @@ public class LineRepositoryMongo extends MongoEntityRepository<Line> implements 
                 .filter(StringUtils::isNotBlank)
                 .map(q -> {
                     final Pattern pattern = Pattern.compile(q, CASE_INSENSITIVE);
-                    return Filters.regex("name", pattern);
+                    return regex("name", pattern);
                 })
                 .orElse(null);
         final JsonObject query = unDeletedQuery(workshopFilter, qFilter);

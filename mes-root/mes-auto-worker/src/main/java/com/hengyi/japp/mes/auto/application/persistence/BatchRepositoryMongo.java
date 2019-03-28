@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
@@ -11,6 +12,7 @@ import com.hengyi.japp.mes.auto.repository.BatchRepository;
 import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
@@ -68,6 +71,17 @@ public class BatchRepositoryMongo extends MongoEntityRepository<Batch> implement
                 .ignoreElement();
 
         return Completable.mergeArray(query$, count$).toSingle(() -> builder.build());
+    }
+
+    @Override
+    public Maybe<Batch> findByBatchNo(String batchNo) {
+        final JsonObject query = MongoUtil.query(eq("batchNo", batchNo));
+        return mongoClient.rxFind(collectionName, query).flatMapMaybe(list -> {
+            if (J.isEmpty(list)) {
+                return Maybe.empty();
+            }
+            return rxCreateMongoEntiy(list.get(0)).toMaybe();
+        });
     }
 
     @Override

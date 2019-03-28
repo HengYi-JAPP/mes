@@ -1,8 +1,6 @@
 package com.hengyi.japp.mes.auto.print;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -17,12 +15,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
 
 /**
  * @author jzb 2018-08-06
  */
 public class PrintModule extends AbstractModule {
-    public static final ObjectMapper YAML_MAPPER = new YAMLMapper();
 
     @Provides
     @Singleton

@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.repository;
 import com.hengyi.japp.mes.auto.application.query.DictionaryQuery;
 import com.hengyi.japp.mes.auto.domain.Dictionary;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 /**
@@ -17,7 +18,7 @@ public interface DictionaryRepository {
 
     Single<Dictionary> save(Dictionary dictionary);
 
-    Flowable<Dictionary> findByKey(String key);
+    Maybe<Dictionary> findByKey(String key);
 
     Flowable<Dictionary> list();
 

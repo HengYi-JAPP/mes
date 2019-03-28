@@ -88,7 +88,7 @@ public class SmallPackageBoxEvent extends EventSource {
     }
 
     @Data
-    public class BatchCommand implements Serializable {
+    public static class BatchCommand implements Serializable {
         @Size(min = 1)
         @NotNull
         private List<SilkCarRecordDTO> silkCarRecords;

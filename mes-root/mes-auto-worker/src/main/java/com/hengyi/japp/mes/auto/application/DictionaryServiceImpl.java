@@ -7,6 +7,7 @@ import com.hengyi.japp.mes.auto.domain.Dictionary;
 import com.hengyi.japp.mes.auto.repository.DictionaryRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +46,7 @@ public class DictionaryServiceImpl implements DictionaryService {
     }
 
     @Override
-    public Flowable<Dictionary> getByKey(String key) {
+    public Maybe<Dictionary> getByKey(String key) {
         return dictionaryRepository.findByKey(key);
     }
 

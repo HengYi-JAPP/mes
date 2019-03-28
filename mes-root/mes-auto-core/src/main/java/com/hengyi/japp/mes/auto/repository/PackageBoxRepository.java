@@ -20,4 +20,6 @@ public interface PackageBoxRepository {
     Single<PackageBoxQuery.Result> query(PackageBoxQuery packageBoxQuery);
 
     Single<PackageBoxQueryForMeasure.Result> query(PackageBoxQueryForMeasure packageBoxQuery);
+
+    Single<PackageBox> findOrCreateByCode(String code);
 }

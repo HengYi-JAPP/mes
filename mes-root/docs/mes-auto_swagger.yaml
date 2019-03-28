@@ -1062,6 +1062,29 @@ paths:
                   $ref: '#/components/schemas/Workshop'
         '400':
           $ref: '#/components/responses/JException'
+  /api/workshopsAndLines:
+    get:
+      tags:
+        - config
+      summary: 车间列表和线别
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    worksohp:
+                      $ref: '#/components/schemas/Workshop'
+                    lines:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Line'
+        '400':
+          $ref: '#/components/responses/JException'
   /api/workshops/{id}:
     put:
       tags:

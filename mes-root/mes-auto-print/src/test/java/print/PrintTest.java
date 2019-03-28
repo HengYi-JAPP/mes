@@ -1,6 +1,7 @@
 package print;
 
 import com.hengyi.japp.mes.auto.print.command.SilkPrintCommand;
+import com.hengyi.japp.mes.auto.print.printable.SilkPrintable;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
@@ -15,8 +16,9 @@ import java.util.stream.IntStream;
 public class PrintTest {
 
     public static void main(String[] args) throws Exception {
-//        final SilkPrintCommand command = command(10);
-//        command.toPrintable().PrintLabel();
+        final SilkPrintCommand command = command(10);
+        final SilkPrintable silkPrintable = new SilkPrintable(command);
+        silkPrintable.PrintLabel();
     }
 
     public static SilkPrintCommand command(int count) {

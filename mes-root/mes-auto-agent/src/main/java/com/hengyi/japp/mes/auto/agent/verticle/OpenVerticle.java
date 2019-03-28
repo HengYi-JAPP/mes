@@ -14,8 +14,10 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.http.HttpServerResponse;
+import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.handler.JWTAuthHandler;
 import io.vertx.reactivex.ext.web.handler.sockjs.SockJSHandler;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,6 +57,9 @@ public class OpenVerticle extends AbstractVerticle {
                                 .end(Buffer.buffer(dto.getContent()));
                     }, rc::fail);
         });
+
+        final JWTAuth jwtAuth = JWTAuth.create(vertx, config.getJwtAuthOptions());
+        router.route("/riamb/*").handler(JWTAuthHandler.create(jwtAuth));
 
         final HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setDecompressionSupported(true)

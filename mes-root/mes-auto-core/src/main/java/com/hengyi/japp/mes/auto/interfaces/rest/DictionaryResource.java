@@ -7,6 +7,7 @@ import com.hengyi.japp.mes.auto.application.command.DictionaryUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.Dictionary;
 import com.hengyi.japp.mes.auto.repository.DictionaryRepository;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
@@ -57,7 +58,7 @@ public class DictionaryResource {
 //    }
     @Path("dictionaries/{key}")
     @GET
-    public Flowable<Dictionary> getByKey(@PathParam("key") @NotBlank String key) {
+    public Maybe<Dictionary> getByKey(@PathParam("key") @NotBlank String key) {
         return dictionaryService.getByKey(key);
     }
 

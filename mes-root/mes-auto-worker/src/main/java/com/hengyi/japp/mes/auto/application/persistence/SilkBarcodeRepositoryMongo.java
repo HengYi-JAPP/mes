@@ -1,29 +1,40 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
 import com.github.ixtf.japp.core.J;
+import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.SilkBarcodeService;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
-import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
+import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkBarcodeLucene;
-import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.redis.RedisClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * @author jzb 2018-06-24
@@ -32,12 +43,14 @@ import java.time.LocalDate;
 @Singleton
 public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcode> implements SilkBarcodeRepository {
     private final SilkBarcodeLucene silkBarcodeLucene;
-//    public static final Semaphore semaphore = new Semaphore(1);
+    private final RedisClient redisClient;
+    private final ExecutorService es = Executors.newSingleThreadExecutor();
 
     @Inject
-    private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene) {
+    private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene, RedisClient redisClient) {
         super(mongoEntiyManager);
         this.silkBarcodeLucene = silkBarcodeLucene;
+        this.redisClient = redisClient;
     }
 
     @SneakyThrows
@@ -47,20 +60,34 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
             silkBarcode.setCode(silkBarcode.generateCode());
         }
 
-//        semaphore.acquire();
         final LineMachine lineMachine = silkBarcode.getLineMachine();
         final String doffingNum = silkBarcode.getDoffingNum();
         final Batch batch = silkBarcode.getBatch();
         final LocalDate codeLd = J.localDate(silkBarcode.getCodeDate());
-        final Single<SilkBarcode> create$ = super.save(silkBarcode)
-                .doOnSuccess(silkBarcodeLucene::index);
-        return find(codeLd, lineMachine, doffingNum, batch).switchIfEmpty(create$);
-//                .doAfterTerminate(semaphore::release);
+        synchronized (SilkBarcodeRepositoryMongo.class) {
+            final SilkBarcodeQuery silkBarcodeQuery = SilkBarcodeQuery.builder()
+                    .startLd(codeLd)
+                    .endLd(codeLd)
+                    .lineMachineId(lineMachine.getId())
+                    .doffingNum(doffingNum)
+                    .batchId(batch.getId())
+                    .build();
+            final Collection<String> ids = silkBarcodeLucene.query(silkBarcodeQuery);
+            if (J.nonEmpty(ids)) {
+                return find(IterableUtils.get(ids, 0));
+            }
+            final SilkBarcode result = Single.just(silkBarcode)
+                    .subscribeOn(Schedulers.from(es))
+                    .flatMap(super::save)
+                    .doOnSuccess(silkBarcodeLucene::index)
+                    .blockingGet();
+            return Single.just(result);
+        }
     }
 
     @Override
     public Single<SilkBarcode> findByCode(String code) {
-        final JsonObject query = MongoUtil.unDeletedQuery(Filters.eq("code", code));
+        final JsonObject query = unDeletedQuery(eq("code", code));
         return mongoClient.rxFind(collectionName, query)
                 .flatMapPublisher(Flowable::fromIterable)
                 .singleOrError()
@@ -132,4 +159,34 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
             return super.save(silkBarcode);
         }).doOnSuccess(silkBarcodeLucene::index).ignoreElement();
     }
+
+    @Override
+    public Single<SilkBarcode> findByAuto(Principal principal, LineMachine lineMachine, Batch batch, long timestamp) {
+        final JsonObject query = unDeletedQuery(eq("lineMachine", lineMachine.getId()))
+                .put("autoDoffingTimestamp", timestamp);
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .flatMap(it -> rxCreateMongoEntiy(it).toMaybe())
+                .switchIfEmpty(getSilkBarcodeSingle(principal, lineMachine, batch, timestamp));
+    }
+
+    private Single<SilkBarcode> getSilkBarcodeSingle(Principal principal, LineMachine lineMachine, Batch batch, final long timestamp) {
+        final long l = timestamp * 1000;
+        final Date date = new Date(l);
+        final LocalDate codeLd = J.localDate(date);
+        return create().flatMap(silkBarcode -> {
+            silkBarcode.setCodeDate(J.date(codeLd));
+            silkBarcode.setLineMachine(lineMachine);
+            silkBarcode.setBatch(batch);
+            silkBarcode.setAutoDoffingTimestamp(timestamp);
+            return Jvertx.getProxy(OperatorRepository.class).find(principal).flatMap(operator -> {
+                silkBarcode.log(operator);
+                return redisClient.rxIncr(SilkBarcodeService.key(date));
+            }).flatMap(codeDoffingNum -> {
+                silkBarcode.setCodeDoffingNum(codeDoffingNum);
+                silkBarcode.setCode(silkBarcode.generateCode());
+                return super.save(silkBarcode);
+            });
+        });
+    }
+
 }
