@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.interfaces.rest;
 
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.WorkshopService;
@@ -14,6 +15,7 @@ import io.reactivex.Single;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 import java.security.Principal;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -64,4 +66,18 @@ public class WorkshopResource {
     public Flowable<Workshop> get() {
         return workshopRepository.list();
     }
+
+    @Path("workshopsAndLines")
+    @GET
+    public Flowable<Map> workshopsAndLines() {
+        return workshopRepository.list().flatMapSingle(workshop -> {
+            final Map result = Maps.newHashMap();
+            result.put("workshop", workshop);
+            return lineRepository.listBy(workshop).toList().map(lines -> {
+                result.put("lines", lines);
+                return result;
+            });
+        });
+    }
+
 }

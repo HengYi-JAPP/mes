@@ -29,4 +29,6 @@ public interface SilkRepository {
     Completable delete(Silk silk);
 
     Silk find_(String id);
+
+    Single<Silk> findByCodeOrCreate(String code);
 }

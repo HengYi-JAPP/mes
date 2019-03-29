@@ -34,6 +34,16 @@ public class MongoUtil {
                 .get();
     }
 
+    public static JsonObject query(Bson... filters) {
+        final Stream<Bson> stream = filters == null ? Stream.empty() : Stream.of(filters);
+        return stream.filter(Objects::nonNull)
+                .reduce(Filters::and)
+                .map(bson -> bson.toBsonDocument(BsonDocument.class, com.mongodb.MongoClient.getDefaultCodecRegistry()))
+                .map(BsonDocument::toJson)
+                .map(JsonObject::new)
+                .orElse(new JsonObject());
+    }
+
     public static JsonObject ascendingQuery(String... fieldNames) {
         return Optional.of(fieldNames)
                 .map(Sorts::ascending)

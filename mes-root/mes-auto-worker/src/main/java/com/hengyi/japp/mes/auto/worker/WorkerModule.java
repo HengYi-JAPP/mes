@@ -17,6 +17,8 @@ import com.hengyi.japp.mes.auto.interfaces.jikon.JikonAdapter;
 import com.hengyi.japp.mes.auto.interfaces.jikon.internal.JikonAdapterImpl;
 import com.hengyi.japp.mes.auto.interfaces.riamb.RiambService;
 import com.hengyi.japp.mes.auto.interfaces.riamb.internal.RiambServiceImpl;
+import com.hengyi.japp.mes.auto.interfaces.ruiguan.RuiguanService;
+import com.hengyi.japp.mes.auto.interfaces.ruiguan.internal.RuiguanServiceImpl;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.internal.WarehouseServiceImpl;
 import com.hengyi.japp.mes.auto.report.api.ReportServiceImpl;
@@ -52,6 +54,8 @@ public class WorkerModule extends AbstractModule {
         bind(AuthService.class).to(AuthServiceImpl.class);
         bind(AdminService.class).to(AdminServiceImpl.class);
 
+        bind(DictionaryService.class).to(DictionaryServiceImpl.class);
+
         bind(CorporationService.class).to(CorporationServiceImpl.class);
         bind(WorkshopService.class).to(WorkshopServiceImpl.class);
         bind(LineService.class).to(LineServiceImpl.class);
@@ -80,6 +84,9 @@ public class WorkerModule extends AbstractModule {
         bind(DownloadService.class).to(DownloadServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
+        bind(DoffingSpecService.class).to(DoffingSpecServiceCustom.class);
+
+        bind(DictionaryRepository.class).to(DictionaryRepositoryMongo.class);
 
         bind(OperatorRepository.class).to(OperatorRepositoryMongo.class);
         bind(OperatorGroupRepository.class).to(OperatorGroupRepositoryMongo.class);
@@ -115,6 +122,7 @@ public class WorkerModule extends AbstractModule {
         bind(TemporaryBoxRecordRepository.class).to(TemporaryBoxRecordRepositoryMongo.class);
         bind(LoginRepository.class).to(LoginRepositoryMongo.class);
 
+        bind(RuiguanService.class).to(RuiguanServiceImpl.class);
         bind(RiambService.class).to(RiambServiceImpl.class);
         bind(JikonAdapter.class).to(JikonAdapterImpl.class);
         bind(FacevisaService.class).to(FacevisaServiceImpl.class);
@@ -165,7 +173,7 @@ public class WorkerModule extends AbstractModule {
     private MongoDatabase MongoDatabase(MesAutoConfig config) {
         final JsonObject mongoOptions = config.getMongoOptions();
         final ServerAddress serverAddress = new ServerAddress(mongoOptions.getString("host"), mongoOptions.getInteger("port"));
-        final String db_name = mongoOptions.getString("db_name", "DEFAULT_DB");
+        final String db_name = mongoOptions.getString("db_name", "mes-auto");
 
         return Optional.ofNullable(mongoOptions.getString("username"))
                 .filter(J::nonBlank)

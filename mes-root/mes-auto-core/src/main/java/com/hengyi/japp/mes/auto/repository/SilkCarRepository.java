@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.repository;
 
+import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.application.query.SilkCarQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import io.reactivex.Flowable;
@@ -20,4 +21,6 @@ public interface SilkCarRepository {
     Flowable<SilkCar> autoComplete(String q);
 
     Single<SilkCarQuery.Result> query(SilkCarQuery silkCarQuery);
+
+    Single<SilkCar> findByCodeOrCreate(SilkCarRuntimeInitEvent.RuiguanAutoDoffingCommand.SilkCarInfo silkCarInfo);
 }

@@ -276,7 +276,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     }
 
     @Override
-    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command) {
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingAdaptCommand command) {
         final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
         return silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(it -> {
