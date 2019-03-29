@@ -7,7 +7,6 @@ import com.hengyi.japp.mes.auto.domain.Dictionary;
 import com.hengyi.japp.mes.auto.repository.DictionaryRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +51,7 @@ public class DictionaryServiceImpl implements DictionaryService {
 
 
     @Override
-    public Completable delete(Principal principal, String id) {
-        return null;
+    public Completable delete(String id) {
+        return dictionaryRepository.delete(id);
     }
 }

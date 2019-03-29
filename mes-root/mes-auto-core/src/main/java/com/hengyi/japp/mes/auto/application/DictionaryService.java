@@ -4,7 +4,6 @@ import com.hengyi.japp.mes.auto.application.command.DictionaryUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.Dictionary;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 import java.security.Principal;
@@ -21,5 +20,5 @@ public interface DictionaryService {
 
     Flowable<Dictionary> getByKey(String key);
 
-    Completable delete(Principal principal, String id);
+    Completable delete(String id);
 }

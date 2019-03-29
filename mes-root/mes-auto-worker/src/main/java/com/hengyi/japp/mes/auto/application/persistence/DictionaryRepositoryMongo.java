@@ -1,24 +1,16 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
-import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
-import com.hengyi.japp.mes.auto.application.query.DictionaryQuery;
 import com.hengyi.japp.mes.auto.domain.Dictionary;
 import com.hengyi.japp.mes.auto.repository.DictionaryRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Maybe;
-import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.FindOptions;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.conversions.Bson;
-
-import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -44,22 +36,9 @@ public class DictionaryRepositoryMongo extends MongoEntityRepository<Dictionary>
     }
 
     @Override
-    public Single<DictionaryQuery.Result> query(DictionaryQuery dictionaryQuery) {
-        final int first = dictionaryQuery.getFirst();
-        final int pageSize = dictionaryQuery.getPageSize();
-        final DictionaryQuery.Result.ResultBuilder builder = DictionaryQuery.Result.builder().first(first).pageSize(pageSize);
-        final FindOptions findOptions = new FindOptions().setSkip(first).setLimit(pageSize);
-        final Completable count$ = mongoClient.rxCount(collectionName, null)
-                .doOnSuccess(builder::count)
-                .ignoreElement();
-
-        final Completable query$ = mongoClient.rxFindWithOptions(collectionName, null, findOptions)
-                .flatMapPublisher(Flowable::fromIterable)
-                .flatMapSingle(this::rxCreateMongoEntiy)
-                .toList()
-                .doOnSuccess(builder::dictionaries)
-                .ignoreElement();
-
-        return Completable.mergeArray(query$, count$).toSingle(() -> builder.build());
+    public Completable delete(String id) {
+        final JsonObject query = MongoUtil.query(eq("_id", id));
+        return mongoClient.rxFindOneAndDelete(collectionName, query).ignoreElement();
     }
+
 }

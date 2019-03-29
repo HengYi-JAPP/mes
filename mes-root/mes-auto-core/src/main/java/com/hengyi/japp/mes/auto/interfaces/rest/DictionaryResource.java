@@ -6,8 +6,8 @@ import com.hengyi.japp.mes.auto.application.DictionaryService;
 import com.hengyi.japp.mes.auto.application.command.DictionaryUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.Dictionary;
 import com.hengyi.japp.mes.auto.repository.DictionaryRepository;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
@@ -46,16 +46,12 @@ public class DictionaryResource {
         return dictionaryService.update(principal, id, command);
     }
 
-    //    @Path("dictionaries")
-//    @GET
-//    public Single<DictionaryQuery.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
-//                                                @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize){
-//        final DictionaryQuery dictionaryQuery = DictionaryQuery.builder()
-//                .first(first)
-//                .pageSize(pageSize)
-//                .build();
-//        return dictionaryRepository.query(dictionaryQuery);
-//    }
+    @Path("dictionaries/{id}")
+    @DELETE
+    public Completable delete(@PathParam("id") @NotBlank String id) {
+        return dictionaryService.delete(id);
+    }
+
     @Path("dictionaries/{key}")
     @GET
     public Flowable<Dictionary> getByKey(@PathParam("key") @NotBlank String key) {

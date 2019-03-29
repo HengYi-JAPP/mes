@@ -1,9 +1,8 @@
 package com.hengyi.japp.mes.auto.repository;
 
-import com.hengyi.japp.mes.auto.application.query.DictionaryQuery;
 import com.hengyi.japp.mes.auto.domain.Dictionary;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 /**
@@ -22,5 +21,6 @@ public interface DictionaryRepository {
 
     Flowable<Dictionary> list();
 
-    Single<DictionaryQuery.Result> query(DictionaryQuery query);
+    Completable delete(String id);
+
 }
