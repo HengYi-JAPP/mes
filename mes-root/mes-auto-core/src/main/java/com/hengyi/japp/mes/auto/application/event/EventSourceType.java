@@ -84,6 +84,13 @@ public enum EventSourceType {
         }
     },
 
+    SmallPackageBoxEvent {
+        @Override
+        public Single<SmallPackageBoxEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.application.event.SmallPackageBoxEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
     PackageBoxFlipEvent {
         @Override
         public Single<PackageBoxFlipEvent> from(JsonNode jsonNode) {

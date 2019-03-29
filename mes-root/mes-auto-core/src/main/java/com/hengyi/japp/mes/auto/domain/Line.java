@@ -1,8 +1,10 @@
 package com.hengyi.japp.mes.auto.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.application.persistence.annotations.MongoCache;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
+import com.hengyi.japp.mes.auto.interfaces.jackson.WorkshopEmbedSerializer;
 import com.hengyi.japp.mes.auto.repository.LineMachineRepository;
 import io.reactivex.Flowable;
 import lombok.Data;
@@ -19,6 +21,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @MongoCache
 public class Line extends LoggableMongoEntity {
+    @JsonSerialize(using = WorkshopEmbedSerializer.class)
     private Workshop workshop;
     @ToString.Include
     private String name;

@@ -1905,7 +1905,30 @@ paths:
         '400':
           $ref: '#/components/responses/JException'
 
-  /api/currentSelPackageBoxes:
+
+  /api/smallPackageBoxes:
+    post:
+      tags:
+        - admin
+      summary: 小包装生成唛头
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmallPackageBoxCreateCommand'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PackageBox'
+        '400':
+          $ref: '#/components/responses/JException'
+  /api/currentSelfPackageBoxes:
     get:
       tags:
         - api
@@ -3246,6 +3269,26 @@ components:
           type: string
         sortBy:
           type: string
+    SmallPackageBoxCreateCommand:
+      type: object
+      required:
+        - silkCarRecords
+        - config
+      properties:
+        silkCarRecords:
+          type: array
+          items:
+            $ref: '#/components/schemas/SilkCarRecordDTO'
+        config:
+          type: object
+          required:
+            - silkCount
+            - packageBoxCount
+          properties:
+            silkCount:
+              type: integer
+            packageBoxCount:
+              type: integer
     TemporaryBoxUpdateCommand:
       type: object
       required:

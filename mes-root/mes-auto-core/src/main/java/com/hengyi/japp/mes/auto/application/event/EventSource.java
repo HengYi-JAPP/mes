@@ -91,10 +91,14 @@ public abstract class EventSource implements Serializable, Comparable<EventSourc
     }
 
     public void fire(Operator operator) {
+        fire(operator, new Date());
+    }
+
+    public void fire(Operator operator, Date fireDateTime) {
         this.eventId = new ObjectId().toHexString();
         this.operator = operator;
         this.operator.setId(operator.getId());
-        this.fireDateTime = new Date();
+        this.fireDateTime = fireDateTime;
     }
 
     @Data

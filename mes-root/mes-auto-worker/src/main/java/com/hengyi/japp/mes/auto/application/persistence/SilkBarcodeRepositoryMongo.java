@@ -32,6 +32,7 @@ import java.time.LocalDate;
 @Singleton
 public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcode> implements SilkBarcodeRepository {
     private final SilkBarcodeLucene silkBarcodeLucene;
+//    public static final Semaphore semaphore = new Semaphore(1);
 
     @Inject
     private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene) {
@@ -39,13 +40,22 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
         this.silkBarcodeLucene = silkBarcodeLucene;
     }
 
+    @SneakyThrows
     @Override
     public Single<SilkBarcode> save(SilkBarcode silkBarcode) {
         if (J.isBlank(silkBarcode.getCode())) {
             silkBarcode.setCode(silkBarcode.generateCode());
         }
-        return super.save(silkBarcode)
+
+//        semaphore.acquire();
+        final LineMachine lineMachine = silkBarcode.getLineMachine();
+        final String doffingNum = silkBarcode.getDoffingNum();
+        final Batch batch = silkBarcode.getBatch();
+        final LocalDate codeLd = J.localDate(silkBarcode.getCodeDate());
+        final Single<SilkBarcode> create$ = super.save(silkBarcode)
                 .doOnSuccess(silkBarcodeLucene::index);
+        return find(codeLd, lineMachine, doffingNum, batch).switchIfEmpty(create$);
+//                .doAfterTerminate(semaphore::release);
     }
 
     @Override
@@ -119,7 +129,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
     public Completable delete(String id) {
         return find(id).flatMap(silkBarcode -> {
             silkBarcode.setDeleted(true);
-            return save(silkBarcode);
-        }).ignoreElement();
+            return super.save(silkBarcode);
+        }).doOnSuccess(silkBarcodeLucene::index).ignoreElement();
     }
 }

@@ -26,14 +26,6 @@ public class Worker {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
-//            final ReportService reportService = Jvertx.getProxy(ReportService.class);
-//            final LocalDate startLd = LocalDate.of(2019, 1, 14);
-//            final LocalDate endLd = LocalDate.of(2019, 1, 14);
-//            reportService.statisticsReport("5bffa63d8857b85a437d1fc5", startLd, endLd)
-//                    .subscribe(report -> {
-//                        System.out.println(report);
-//                    });
-
 //            final SilkCarRuntimeRepository silkCarRuntimeRepository = Jvertx.getProxy(SilkCarRuntimeRepository.class);
 //            silkCarRuntimeRepository.findByCode("3000F48037").subscribe(silkCarRuntime -> {
 //                for (SilkRuntime silkRuntime : silkCarRuntime.getSilkRuntimes()) {
@@ -50,12 +42,6 @@ public class Worker {
 //                }
 //            });
 
-//            final AuthService authService = Jvertx.getProxy(AuthService.class);
-//            final TokenCommand tokenCommand = new TokenCommand();
-//            tokenCommand.setLoginId("12000077");
-//            tokenCommand.setLoginPassword("123456");
-//            authService.token(tokenCommand).subscribe(System.out::println);
-
             return deployWorker(vertx).ignoreElement();
         }).subscribe();
     }
@@ -71,7 +57,7 @@ public class Worker {
     private static VertxOptions vertxOptions() {
         final VertxOptions vertxOptions = new VertxOptions()
                 .setWorkerPoolSize(1000)
-                .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(10))
+                .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(1000000))
                 .setMaxWorkerExecuteTime(TimeUnit.MINUTES.toNanos(5));
         Optional.ofNullable(System.getProperty("vertx.cluster.host"))
                 .filter(J::nonBlank)

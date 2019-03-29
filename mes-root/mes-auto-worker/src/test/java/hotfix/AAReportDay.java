@@ -3,6 +3,7 @@ package hotfix;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
+import com.hengyi.japp.mes.auto.domain.Workshop;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -13,8 +14,8 @@ import java.util.stream.Collectors;
  */
 public class AAReportDay extends StatisticsReportDay {
 
-    public AAReportDay(LocalDate ld) {
-        super(null, ld, AAReport.packageBoxes(ld));
+    public AAReportDay(Workshop workshop, LocalDate ld) {
+        super(workshop, ld, AAReport.packageBoxes(workshop, ld));
     }
 
     @Override

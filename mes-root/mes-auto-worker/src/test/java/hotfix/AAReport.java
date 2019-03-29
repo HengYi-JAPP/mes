@@ -6,10 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
-import com.hengyi.japp.mes.auto.domain.Silk;
-import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
-import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.report.PoiUtil;
 import init.UserImport;
 import lombok.Cleanup;
@@ -50,15 +47,16 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
+        final Workshop workshop = Workshops.B;
         final LocalDate startLd = LocalDate.of(2019, 3, 1);
         final LocalDate endLd = LocalDate.of(2019, 3, 1);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
-                .map(AAReportDay::new).sorted()
+                .map(it -> new AAReportDay(workshop, it)).sorted()
                 .collect(Collectors.toList());
 
         days.parallelStream().forEach(AAReport::toExcel);
-//        toExcel(new StatisticsReport(null, startLd, endLd, days));
+//        toExcel(new StatisticsReport(workshop, startLd, endLd, days));
 
         final long endL = System.currentTimeMillis();
         System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
@@ -69,7 +67,7 @@ public class AAReport {
         @Cleanup final Workbook wb = new XSSFWorkbook();
         final Sheet sheet = wb.createSheet();
         PoiUtil.fillData(wb, sheet, report.getItems());
-        @Cleanup final FileOutputStream os = new FileOutputStream("/home/jzb/" + report.getLd() + ".xlsx");
+        @Cleanup final FileOutputStream os = new FileOutputStream("/home/jzb/" + report.getWorkshop().getName() + "." + report.getLd() + ".xlsx");
         wb.write(os);
     }
 
@@ -78,9 +76,29 @@ public class AAReport {
         @Cleanup final Workbook wb = new XSSFWorkbook();
         final Sheet sheet = wb.createSheet();
         PoiUtil.fillData(wb, sheet, report.getItems());
-        @Cleanup final FileOutputStream os = new FileOutputStream("/home/jzb/" + report.getStartLd() + "~" + report.getEndLd() + ".xlsx");
+        @Cleanup final FileOutputStream os = new FileOutputStream("/home/jzb/" + report.getWorkshop().getName() + "." + report.getStartLd() + "~" + report.getEndLd() + ".xlsx");
         wb.write(os);
     }
+
+    @SneakyThrows
+    public static List<PackageBox> packageBoxes(Workshop workshop, LocalDate ld) {
+        final String urlTpl = baseUrl + "/api/packageBoxes?startDate=${ld}&endDate=${ld}&pageSize=10000&workshopId=${workshopId}";
+        final Map<String, String> map = ImmutableMap.of("workshopId", workshop.getId(), "ld", "" + ld);
+        final Request request = new Request.Builder()
+                .addHeader("Authorization", "Bearer " + token)
+                .url(J.strTpl(urlTpl, map))
+                .build();
+        @Cleanup final Response response = UserImport.client.newCall(request).execute();
+        @Cleanup final ResponseBody body = response.body();
+        @Cleanup final InputStream is = body.byteStream();
+        final List<PackageBox> result = Lists.newArrayList();
+        for (JsonNode node : MAPPER.readTree(is).get("packageBoxes")) {
+            final PackageBox packageBox = MAPPER.convertValue(node, PackageBox.class);
+            result.add(packageBox);
+        }
+        return result;
+    }
+
 
     @SneakyThrows
     public static List<Silk> packageBoxSilks(PackageBox packageBox) {
@@ -122,23 +140,18 @@ public class AAReport {
         return result;
     }
 
-    @SneakyThrows
-    public static List<PackageBox> packageBoxes(LocalDate ld) {
-        final String urlTpl = baseUrl + "/api/packageBoxes?startDate=${ld}&endDate=${ld}&pageSize=10000&workshopId=5bffa63d8857b85a437d1fc5&productId=5bffa63c8857b85a437d1f93";
-        final Map<String, String> map = ImmutableMap.of("ld", "" + ld);
-        final Request request = new Request.Builder()
-                .addHeader("Authorization", "Bearer " + token)
-                .url(J.strTpl(urlTpl, map))
-                .build();
-        @Cleanup final Response response = UserImport.client.newCall(request).execute();
-        @Cleanup final ResponseBody body = response.body();
-        @Cleanup final InputStream is = body.byteStream();
-        final List<PackageBox> result = Lists.newArrayList();
-        for (JsonNode node : MAPPER.readTree(is).get("packageBoxes")) {
-            final PackageBox packageBox = MAPPER.convertValue(node, PackageBox.class);
-            result.add(packageBox);
+    public static class Workshops {
+        public static final Workshop A;
+        public static final Workshop B;
+
+        static {
+            A = new Workshop();
+            A.setId("5c6e63713d0045000136458c");
+            A.setName("A");
+            B = new Workshop();
+            B.setId("5bffa63d8857b85a437d1fc5");
+            B.setName("B");
         }
-        return result;
     }
 
     @Data

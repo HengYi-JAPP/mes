@@ -1,13 +1,16 @@
 package proxy;
 
-import com.google.inject.Guice;
+import com.github.ixtf.japp.core.J;
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
-import com.hengyi.japp.mes.auto.GuiceModule;
-import com.hengyi.japp.mes.auto.worker.WorkerModule;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.ext.mongo.MongoClient;
+import lombok.Data;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.hengyi.japp.mes.auto.application.command.PrintCommand.DOFFING_NUM_PATTERN;
 
 /**
  * @author jzb 2019-02-24
@@ -16,21 +19,42 @@ public class ProxyTest {
     public static Injector INJECTOR;
 
     public static void main(String[] args) {
-        final Vertx vertx = Vertx.vertx();
-        INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
-
-        vertx.deployVerticle(new AbstractVerticle() {
-        });
-
-        final MongoClient mongoClient = INJECTOR.getInstance(MongoClient.class);
-        final String s = "{\"creator\":\"5c04a044c3cae813b530cdd1\",\"lineMachine\":\"5bfd4b87716bb151bd059df3\",\"mdt\":{\"$date\":\"2019-02-24T09:54:16+08:00\"},\"cdt\":{\"$date\":\"2019-02-24T09:54:16+08:00\"},\"batch\":\"5bfd4b87716bb151bd059db5\",\"codeDate\":{\"$date\":\"2019-02-24T00:00:00+08:00\"},\"code\":\"005R0000T\",\"modifier\":\"5c04a044c3cae813b530cdd1\",\"doffingNum\":\"A1\",\"codeDoffingNum\":29,\"_id\":\"5c71f9451e332602e39b4441\"}";
-        final JsonObject document = new JsonObject(s);
-//        final String id = mongoClient.rxSave("T_SilkBarcode", document).blockingGet();
-        mongoClient.rxSave("T_SilkBarcode", document).defaultIfEmpty("test")
-                .subscribe(it -> {
-                    System.out.println(it);
-                }, ex -> ex.printStackTrace());
+        final List<TestItem> items = Lists.newArrayList(new TestItem("A10"), new TestItem("A2"));
+        Collections.sort(items);
+        System.out.println(items);
 
 
+        final Pattern pattern = Pattern.compile("(\\d+$)");
+        final Matcher matcher = pattern.matcher("A10");
+        if (matcher.find()) {
+            final Integer integer = Integer.valueOf(matcher.group(0));
+            final String group = matcher.group(0);
+            System.out.println(group);
+        }
+        final int start = matcher.start();
+        System.out.println(start);
+    }
+
+    @Data
+    public static class TestItem implements Comparable<TestItem> {
+        private final String doffingNum;
+
+        @Override
+        public int compareTo(TestItem o) {
+            int i = 0;
+            if (J.nonBlank(doffingNum) && J.nonBlank(o.doffingNum)) {
+                final Matcher m1 = DOFFING_NUM_PATTERN.matcher(doffingNum);
+                final Matcher m2 = DOFFING_NUM_PATTERN.matcher(o.doffingNum);
+                if (m1.find() && m2.find()) {
+                    final Integer i1 = Integer.valueOf(m1.group(0));
+                    final Integer i2 = Integer.valueOf(m2.group(0));
+                    i = Integer.compare(i1, i2);
+                    if (i != 0) {
+                        return i;
+                    }
+                }
+            }
+            return i;
+        }
     }
 }

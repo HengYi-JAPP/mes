@@ -19,7 +19,6 @@ public class SilkBarcodeGenerateCommand implements Serializable {
     @NotNull
     private EntityDTO lineMachine;
     @NotNull
-//    private LocalDate codeDate;
     private Date codeDate;
     @NotBlank
     private String doffingNum;
