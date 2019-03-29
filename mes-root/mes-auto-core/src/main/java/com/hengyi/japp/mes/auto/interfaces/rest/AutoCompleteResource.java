@@ -25,14 +25,16 @@ public class AutoCompleteResource {
     private final FormConfigRepository formConfigRepository;
     private final PermissionRepository permissionRepository;
     private final OperatorRepository operatorRepository;
+    private final BatchRepository batchRepository;
 
     @Inject
-    private AutoCompleteResource(LineRepository lineRepository, SilkCarRepository silkCarRepository, FormConfigRepository formConfigRepository, PermissionRepository permissionRepository, OperatorRepository operatorRepository) {
+    private AutoCompleteResource(LineRepository lineRepository, SilkCarRepository silkCarRepository, FormConfigRepository formConfigRepository, PermissionRepository permissionRepository, OperatorRepository operatorRepository, BatchRepository batchRepository) {
         this.lineRepository = lineRepository;
         this.silkCarRepository = silkCarRepository;
         this.formConfigRepository = formConfigRepository;
         this.permissionRepository = permissionRepository;
         this.operatorRepository = operatorRepository;
+        this.batchRepository = batchRepository;
     }
 
     @Path("line")
@@ -63,6 +65,12 @@ public class AutoCompleteResource {
     @GET
     public Flowable<Operator> operator(@QueryParam("q") String q) {
         return operatorRepository.autoComplete(q);
+    }
+
+    @Path("batch")
+    @GET
+    public Flowable<Batch> batch(@QueryParam("q") String q) {
+        return batchRepository.autoComplete(q);
     }
 
 }

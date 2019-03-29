@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
@@ -81,5 +82,17 @@ public class BatchRepositoryMongo extends MongoEntityRepository<Batch> implement
             }
             return rxCreateMongoEntiy(list.get(0)).toMaybe();
         });
+    }
+
+    @Override
+    public Flowable<Batch> autoComplete(String q) {
+        if (StringUtils.isBlank(q)) {
+            return Flowable.empty();
+        }
+        final Pattern pattern = Pattern.compile(q, CASE_INSENSITIVE);
+        final Bson qFilter = Filters.regex("batchNo", pattern);
+        final JsonObject query = unDeletedQuery(qFilter);
+        final FindOptions findOptions = new FindOptions().setLimit(10);
+        return mongoClient.rxFindWithOptions(collectionName, query, findOptions).flatMapPublisher(Flowable::fromIterable).flatMapSingle(this::rxCreateMongoEntiy);
     }
 }

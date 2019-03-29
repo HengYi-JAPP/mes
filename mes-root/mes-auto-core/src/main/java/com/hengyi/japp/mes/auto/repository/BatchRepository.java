@@ -21,5 +21,7 @@ public interface BatchRepository {
 
     Flowable<Batch> list();
 
+    Flowable<Batch> autoComplete(String q);
+
     Maybe<Batch> findByBatchNo(String batchNo);
 }
