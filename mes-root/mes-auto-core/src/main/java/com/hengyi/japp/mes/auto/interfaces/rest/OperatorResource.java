@@ -59,8 +59,8 @@ public class OperatorResource {
 
     @Path("operators/{id}/info")
     @PUT
-    public Single<Operator> updateInfo(@PathParam("id") @NotBlank String id, OperatorUpdateCommand command) {
-        return operatorService.updateInfo(id, command);
+    public Single<Operator> updateInfo(Principal principal, @PathParam("id") @NotBlank String id, OperatorUpdateCommand command) {
+        return operatorService.updateInfo(principal, id, command);
     }
 
     @Path("operators/{id}/password")

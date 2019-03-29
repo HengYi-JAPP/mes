@@ -12,6 +12,7 @@ import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.exception.DoffingTagException;
+import com.hengyi.japp.mes.auto.exception.SilkDuplicateException;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -103,7 +104,7 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
                 .toList().map(silks -> {
                     if (J.nonEmpty(silks)) {
                         final Silk silk = silks.get(0);
-                        throw new RuntimeException("[" + silk.getCode() + "]，重复落筒!");
+                        throw new SilkDuplicateException(silk);
                     }
                     return checkSilks.stream().map(dto -> {
                         @NotBlank final String silkCode = dto.getCode();
