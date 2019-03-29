@@ -36,15 +36,11 @@ public class DictionaryRepositoryMongo extends MongoEntityRepository<Dictionary>
     }
 
     @Override
-    public Maybe<Dictionary> findByKey(String key) {
+    public Flowable<Dictionary> findByKey(String key) {
         final JsonObject query = MongoUtil.query(eq("key", key));
         return mongoClient.rxFind(collectionName, query)
-                .flatMapMaybe(list -> {
-                    if (J.isEmpty(list)) {
-                        return Maybe.empty();
-                    }
-                    return rxCreateMongoEntiy(list.get(0)).toMaybe();
-                });
+                .flatMapPublisher(Flowable::fromIterable)
+                .flatMapSingle(this::rxCreateMongoEntiy);
     }
 
     @Override

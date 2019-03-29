@@ -19,7 +19,7 @@ public interface DictionaryService {
 
     Single<Dictionary> update(Principal principal, String id, DictionaryUpdateCommand command);
 
-    Maybe<Dictionary> getByKey(String key);
+    Flowable<Dictionary> getByKey(String key);
 
     Completable delete(Principal principal, String id);
 }

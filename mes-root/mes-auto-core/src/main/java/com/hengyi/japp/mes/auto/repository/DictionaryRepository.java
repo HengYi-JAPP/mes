@@ -18,7 +18,7 @@ public interface DictionaryRepository {
 
     Single<Dictionary> save(Dictionary dictionary);
 
-    Maybe<Dictionary> findByKey(String key);
+    Flowable<Dictionary> findByKey(String key);
 
     Flowable<Dictionary> list();
 

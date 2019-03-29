@@ -46,7 +46,7 @@ public class DictionaryServiceImpl implements DictionaryService {
     }
 
     @Override
-    public Maybe<Dictionary> getByKey(String key) {
+    public Flowable<Dictionary> getByKey(String key) {
         return dictionaryRepository.findByKey(key);
     }
 

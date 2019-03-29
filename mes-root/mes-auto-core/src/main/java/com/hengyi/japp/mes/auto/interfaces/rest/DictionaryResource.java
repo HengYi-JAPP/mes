@@ -58,7 +58,7 @@ public class DictionaryResource {
 //    }
     @Path("dictionaries/{key}")
     @GET
-    public Maybe<Dictionary> getByKey(@PathParam("key") @NotBlank String key) {
+    public Flowable<Dictionary> getByKey(@PathParam("key") @NotBlank String key) {
         return dictionaryService.getByKey(key);
     }
 
