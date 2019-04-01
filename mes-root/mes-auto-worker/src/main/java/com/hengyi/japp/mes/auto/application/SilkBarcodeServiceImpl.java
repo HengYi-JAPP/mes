@@ -65,6 +65,41 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
         });
     }
 
+    @Override
+    public Completable createAndPrint(MesAutoPrinter mesAutoPrinter, Flowable<SilkBarcode> flowable) {
+        return flowable.map(SilkBarcode::getId)
+                .flatMapSingle(silkBarcodeRepository::find)
+                .map(silkBarcode -> {
+                    final Collection<SilkBarcode.SilkInfo> silkInfos = silkBarcode.listSilkInfo();
+                    final Map<Integer, SilkBarcode.SilkInfo> map = silkInfos.stream()
+                            .collect(Collectors.toMap(SilkBarcode.SilkInfo::getSpindle, Function.identity()));
+                    final LineMachine lineMachine = silkBarcode.getLineMachine();
+                    final List<PrintCommand.Item> result = Lists.newArrayList();
+                    for (Integer spindle : lineMachine.getSpindleSeq()) {
+                        final SilkBarcode.SilkInfo silkInfo = map.get(spindle);
+                        final PrintCommand.Item item = new PrintCommand.Item();
+                        final Date codeDate = silkInfo.getCodeDate();
+                        final Line line = lineMachine.getLine();
+                        final String doffingNum = silkInfo.getDoffingNum();
+                        final Batch batch = silkInfo.getBatch();
+                        final String batchNo = batch.getBatchNo();
+                        final String spec = batch.getSpec();
+                        final String code = silkInfo.getCode();
+                        item.setCode(code);
+                        item.setCodeDate(codeDate);
+                        item.setLineName(line.getName());
+                        item.setLineMachineItem(lineMachine.getItem());
+                        item.setSpindle(spindle);
+                        item.setDoffingNum(doffingNum);
+                        item.setBatchNo(batchNo);
+                        item.setBatchSpec(spec);
+                        result.add(item);
+                    }
+                    return result;
+                }).flatMap(Flowable::fromIterable).toList()
+                .flatMapCompletable(it -> print(mesAutoPrinter, it));
+    }
+
     private Single<SilkBarcode> create(Principal principal, LocalDate codeLd, LineMachine lineMachine, String doffingNum) {
         return silkBarcodeRepository.find(codeLd, lineMachine, doffingNum, lineMachine.getProductPlan().getBatch())
                 .switchIfEmpty(silkBarcodeRepository.create())

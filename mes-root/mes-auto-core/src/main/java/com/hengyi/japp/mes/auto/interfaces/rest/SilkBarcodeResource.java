@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkBarcodeService;
+import com.hengyi.japp.mes.auto.application.command.SilkBarcodeCreateAndPrintCommand;
 import com.hengyi.japp.mes.auto.application.command.SilkBarcodeGenerateCommand;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
@@ -51,6 +52,14 @@ public class SilkBarcodeResource {
                 .flatMapSingle(command -> silkBarcodeService.generate(principal, command))
                 .toList()
                 .ignoreElement();
+    }
+
+    @Path("silkBarcodes/createAndPrint")
+    @POST
+    public Completable createAndPrint(Principal principal, SilkBarcodeCreateAndPrintCommand.Batch commands) {
+        Flowable<SilkBarcode> flowable = Flowable.fromIterable(commands.getCommands())
+                .flatMapSingle(command -> silkBarcodeService.generate(principal, command));
+        return silkBarcodeService.createAndPrint(commands.getMesAutoPrinter(), flowable);
     }
 
     @Path("silkBarcodes/{id}")
