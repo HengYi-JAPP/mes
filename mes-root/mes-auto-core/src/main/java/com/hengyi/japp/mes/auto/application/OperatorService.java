@@ -20,5 +20,5 @@ public interface OperatorService {
 
     Completable password(String id, PasswordChangeCommand command);
 
-    Single<Operator> updateInfo(String id, OperatorUpdateCommand command);
+    Single<Operator> updateInfo(Principal principal, String id, OperatorUpdateCommand command);
 }

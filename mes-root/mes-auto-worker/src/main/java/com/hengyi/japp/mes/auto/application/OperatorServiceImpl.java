@@ -120,7 +120,7 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     @Override
-    public Single<Operator> updateInfo(String id, OperatorUpdateCommand command) {
+    public Single<Operator> updateInfo(Principal principal, String id, OperatorUpdateCommand command) {
         return operatorRepository.find(id).flatMap(operator -> {
             operator.setName(command.getName());
             operator.setHrId(command.getHrId());
