@@ -42,6 +42,7 @@ public class AppendSilkCarModel extends ManualSilkCarModel {
                     silkCarRuntime.getSilkRuntimes().stream().map(Single::just).forEach(builder::add);
                     return generateSilkRuntimesBySilkBarcodes(builder, silkBarcodes).map(it -> {
                         final List<SilkRuntime> result = Lists.newArrayList(it);
+                        SilkCarRuntimeService.checkAndGetBatch(result);
                         result.removeAll(silkCarRuntime.getSilkRuntimes());
                         return result;
                     });
