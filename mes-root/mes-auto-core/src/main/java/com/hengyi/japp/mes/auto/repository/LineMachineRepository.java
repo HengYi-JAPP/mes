@@ -16,9 +16,14 @@ public interface LineMachineRepository {
 
     Single<LineMachine> save(LineMachine lineMachine);
 
+
     Flowable<LineMachine> listByLineId(String lineId);
 
-    Flowable<LineMachine> listBy(Line line);
+    default Flowable<LineMachine> listBy(Line line) {
+        return listByLineId(line.getId());
+    }
 
     Flowable<LineMachine> list();
+
+    Single<LineMachine> findBy(Line line, int lineMachineItem);
 }

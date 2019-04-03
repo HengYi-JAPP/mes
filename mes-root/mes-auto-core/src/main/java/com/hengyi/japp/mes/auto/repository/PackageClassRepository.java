@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.domain.PackageClass;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 /**
@@ -16,4 +17,6 @@ public interface PackageClassRepository {
     Single<PackageClass> find(String id);
 
     Flowable<PackageClass> list();
+
+    Maybe<PackageClass> findByName(String name);
 }

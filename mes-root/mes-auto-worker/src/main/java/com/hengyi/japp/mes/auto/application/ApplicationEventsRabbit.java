@@ -8,11 +8,13 @@ import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.LineMachineProductPlan;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.interfaces.jikon.dto.GetSilkSpindleInfoDTO;
+import com.hengyi.japp.mes.auto.interfaces.riamb.dto.RiambFetchSilkCarRecordResultDTO;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import lombok.SneakyThrows;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 
@@ -35,7 +37,7 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
     public void fire(LineMachineProductPlan lineMachineProductPlan) {
         final LineMachine lineMachine = lineMachineProductPlan.getLineMachine();
         final Line line = lineMachine.getLine();
-        final ImmutableMap<String, Object> map = ImmutableMap.of("lineMachine", lineMachine, "batch", lineMachineProductPlan.getBatch());
+        final Map<String, Object> map = ImmutableMap.of("lineMachine", lineMachine, "batch", lineMachineProductPlan.getBatch());
         final String message = MAPPER.writeValueAsString(map);
         vertx.eventBus().publish("mes-auto://websocket/boards/workshopExceptionReport/lines/" + line.getId(), message);
     }
@@ -43,7 +45,15 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
     @SneakyThrows
     @Override
     public void fire(SilkCarRuntime silkCarRuntime, GetSilkSpindleInfoDTO dto, List<String> reasons) {
-        final ImmutableMap<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime, "reasons", reasons);
+        final Map<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime, "reasons", reasons);
+        final String message = MAPPER.writeValueAsString(map);
+        vertx.eventBus().publish("mes-auto://websocket/boards/JikonAdapterSilkCarInfoFetchReasons", message);
+    }
+
+    @SneakyThrows
+    @Override
+    public void fire(SilkCarRuntime silkCarRuntime, RiambFetchSilkCarRecordResultDTO dto, List<String> reasons) {
+        final Map<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime, "reasons", reasons);
         final String message = MAPPER.writeValueAsString(map);
         vertx.eventBus().publish("mes-auto://websocket/boards/JikonAdapterSilkCarInfoFetchReasons", message);
     }

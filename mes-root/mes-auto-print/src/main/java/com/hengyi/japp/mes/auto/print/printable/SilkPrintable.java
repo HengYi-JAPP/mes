@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.print.Jprint.mmToPix;
+import static com.hengyi.japp.mes.auto.print.Print.INJECTOR;
 
 /**
  * @author jzb 2018-08-18
@@ -37,8 +38,8 @@ public class SilkPrintable implements Printable {
     private final SilkPrintCommand command;
     private final int numPages;
 
-    public SilkPrintable(SilkPrintConfig config, SilkPrintCommand command) {
-        this.config = config;
+    public SilkPrintable(SilkPrintCommand command) {
+        this.config = INJECTOR.getInstance(SilkPrintConfig.class);
         this.command = command;
 
         final double size = command.getSilks().size();
@@ -61,7 +62,7 @@ public class SilkPrintable implements Printable {
             float imageX = 3;
             for (SilkPrintCommand.Item item : items) {
                 float y = 3;
-                drawString(item.getBatchSpec(), g2d, font, mmToPix(x), mmToPix(y));
+                drawString(J.defaultString(item.getBatchSpec()), g2d, font, mmToPix(x), mmToPix(y));
                 final String lineName = item.getLineName();
                 final int spindle = item.getSpindle();
                 final int lineMachineItem = item.getLineMachineItem();
@@ -70,11 +71,10 @@ public class SilkPrintable implements Printable {
                 drawString(s2, g2d, font, mmToPix(x), mmToPix(y));
                 y += 3.5;
                 drawString(item.getBatchNo(), g2d, font, mmToPix(x), mmToPix(y));
-                final String prefix = "GXHY";
                 final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                 final String dateString = df.format(item.getCodeDate());
                 final String doffingNum = J.defaultString(item.getDoffingNum());
-                final String s4 = String.join("", prefix, dateString, doffingNum);
+                final String s4 = String.join("", config.getCorpPrefix(), dateString, doffingNum);
                 y += 3.5;
                 drawString(s4, g2d, font, mmToPix(x), mmToPix(y));
                 final String code = item.getCode();

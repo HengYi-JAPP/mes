@@ -56,6 +56,13 @@ public enum EventSourceType {
         }
     },
 
+    ToDtyEvent {
+        @Override
+        public Single<ToDtyEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.application.event.ToDtyEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
     ProductProcessSubmitEvent {
         @Override
         public Single<ProductProcessSubmitEvent> from(JsonNode jsonNode) {
@@ -123,6 +130,27 @@ public enum EventSourceType {
         @Override
         public Single<com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterPackageBoxEvent> from(JsonNode jsonNode) {
             return com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterPackageBoxEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
+    RiambSilkCarInfoFetchEvent {
+        @Override
+        public Single<com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkCarInfoFetchEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkCarInfoFetchEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
+    RiambSilkDetachEvent {
+        @Override
+        public Single<com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkDetachEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambSilkDetachEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
+    RiambPackageBoxEvent {
+        @Override
+        public Single<com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambPackageBoxEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.interfaces.riamb.event.RiambPackageBoxEvent.DTO.from(jsonNode).toEvent();
         }
     },
 

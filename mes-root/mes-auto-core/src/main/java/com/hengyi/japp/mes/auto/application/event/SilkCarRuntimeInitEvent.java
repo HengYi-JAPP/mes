@@ -7,6 +7,7 @@ import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
@@ -101,6 +102,44 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
+    public static class RuiguanAutoDoffingCommand implements Serializable {
+        private String id;
+        private String line;
+        private String principalName;
+        private Date createDateTime;
+        private SilkCarInfo silkCarInfo;
+        private Collection<SilkInfo> silkInfos;
+
+        /**
+         * @author jzb 2019-03-09
+         */
+        @Data
+        public static class SilkCarInfo implements Serializable {
+            private String code;
+            private int row;
+            private int col;
+            private String batchNo;
+            private String batchSpec;
+            private String grade;
+        }
+
+        /**
+         * @author jzb 2019-03-09
+         */ // { "line":"C5", "lineMachine":47, "spindle":1, "timestamp":1552038447 }
+        @Data
+        public static class SilkInfo implements Serializable {
+            private SilkCarSideType sideType;
+            private int row;
+            private int col;
+            private String line;
+            private int lineMachine;
+            private int spindle;
+            private long timestamp;
+            private Date doffingDateTime;
+        }
+    }
+
+    @Data
     public static class AutoDoffingCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
@@ -121,6 +160,32 @@ public class SilkCarRuntimeInitEvent extends EventSource {
             private EntityDTO grade;
             private Date doffingDateTime;
         }
+    }
+
+    @Data
+    public static class AutoDoffingOverWriteCheckSilksCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+    }
+
+    @Data
+    public static class AutoDoffingOverWriteCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
+    }
+
+    @Data
+    public static class AutoDoffingCommandV2 implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
+        @NotNull
+        private EntityDTO grade;
     }
 
     @Data
@@ -145,6 +210,27 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
+    public static class ManualDoffingCheckSilksCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        private EntityDTO line;
+    }
+
+    @Data
+    public static class ManualDoffingCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        private EntityDTO grade;
+        @NotNull
+        private EntityDTO line;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
+    }
+
+    @Data
     public static class ManualDoffingAdaptCheckSilksCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
@@ -153,7 +239,7 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
-    public static class ManualDoffingCommand implements Serializable {
+    public static class ManualDoffingAdaptCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
         @Min(1)
