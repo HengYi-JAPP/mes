@@ -31,8 +31,7 @@ import java.util.concurrent.Executors;
 
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static org.apache.commons.io.FileUtils.listFiles;
 
 /**
@@ -81,7 +80,14 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
                     for (List<DoffingSpec.LineMachineSpec> lineMachineSpecs : doffingSpec.getLineMachineSpecsList()) {
                         final boolean b = checkPositions(checkSilks, lineMachineSpecs, silkBarcodes);
                         if (b) {
-                            return generateSilkRuntimes(silkBarcodes, lineMachineSpecs);
+                            return generateSilkRuntimes(silkBarcodes, lineMachineSpecs).toList().flatMapPublisher(silkRuntimes -> {
+                                final int size = silkRuntimes.size();
+                                final int distinctSize = silkRuntimes.stream().map(SilkRuntime::getSilk).map(Silk::getCode).collect(toSet()).size();
+                                if (size == distinctSize) {
+                                    return Flowable.fromIterable(silkRuntimes);
+                                }
+                                throw new DoffingTagException();
+                            });
                         }
                     }
                     throw new DoffingTagException();
@@ -89,12 +95,11 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
     }
 
     private Single<List<SilkBarcode>> checkAndSort(List<SilkBarcode> silkBarcodes, List<CheckSilkDTO> checkSilks) {
-        final HashMap<String, SilkBarcode> map = Maps.newHashMap();
+        final Map<String, SilkBarcode> map = Maps.newHashMap();
         silkBarcodes.forEach(it -> {
             final String code = it.getCode();
             map.put(code, it);
         });
-//        final var map = silkBarcodes.parallelStream().collect(toMap(SilkBarcode::getCode, Function.identity()));
 //        if (map.size() != checkSilks.size()) {
 //            throw new RuntimeException("验证丝锭存在重复，请确认丝锭条码！");
 //        }

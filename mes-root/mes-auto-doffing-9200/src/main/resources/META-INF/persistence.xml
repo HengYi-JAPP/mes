@@ -5,6 +5,7 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <class>com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdapt</class>
         <class>com.hengyi.japp.mes.auto.doffing.domain.AutoDoffingSilkCarRecordAdaptHistory</class>
+        <class>com.hengyi.japp.mes.auto.doffing.domain.LogEntity</class>
         <properties>
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://10.61.0.17:3306/mes-auto"/>
             <property name="javax.persistence.jdbc.user" value="root"/>

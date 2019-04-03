@@ -14,5 +14,5 @@ public interface AdminService {
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminManualDoffingCommand command);
 
-    Completable unlockSilkBarcodeRepositoryMongo(Principal principal);
+    Completable deleteSilkCarRecord(Principal principal, String id);
 }

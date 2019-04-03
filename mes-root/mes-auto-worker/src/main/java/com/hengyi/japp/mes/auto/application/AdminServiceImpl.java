@@ -11,10 +11,7 @@ import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.repository.GradeRepository;
-import com.hengyi.japp.mes.auto.repository.OperatorRepository;
-import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
-import com.hengyi.japp.mes.auto.repository.SilkCarRepository;
+import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +28,16 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Singleton
 public class AdminServiceImpl implements AdminService {
     private final SilkCarRuntimeService silkCarRuntimeService;
+    private final SilkCarRecordRepository silkCarRecordRepository;
     private final SilkCarRepository silkCarRepository;
     private final GradeRepository gradeRepository;
     private final PackageBoxRepository packageBoxRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private AdminServiceImpl(SilkCarRuntimeService silkCarRuntimeService, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository) {
+    private AdminServiceImpl(SilkCarRuntimeService silkCarRuntimeService, SilkCarRecordRepository silkCarRecordRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository) {
         this.silkCarRuntimeService = silkCarRuntimeService;
+        this.silkCarRecordRepository = silkCarRecordRepository;
         this.silkCarRepository = silkCarRepository;
         this.gradeRepository = gradeRepository;
         this.packageBoxRepository = packageBoxRepository;
@@ -89,7 +88,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Completable unlockSilkBarcodeRepositoryMongo(Principal principal) {
+    public Completable deleteSilkCarRecord(Principal principal, String id) {
+//        silkCarRecordRepository.f
 //        SilkBarcodeRepositoryMongo.semaphore.release();
         return Completable.complete();
     }

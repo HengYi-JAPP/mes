@@ -8,10 +8,7 @@ import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import java.security.Principal;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -36,10 +33,10 @@ public class AdminResource {
         return adminService.handle(principal, command);
     }
 
-    @Path("SilkBarcodeRepositoryMongo/lock")
+    @Path("silkCarRecords/{id}")
     @DELETE
-    public Completable handle(Principal principal) {
-        return adminService.unlockSilkBarcodeRepositoryMongo(principal);
+    public Completable handle(Principal principal, @PathParam("id") String id) {
+        return adminService.deleteSilkCarRecord(principal, id);
     }
 
 }

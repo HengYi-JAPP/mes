@@ -16,15 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static com.hengyi.japp.mes.auto.doffing.Doffing.callInTx;
+import static com.hengyi.japp.mes.auto.doffing.Doffing.runInTx;
 
 /**
  * @author jzb 2019-03-08
@@ -40,31 +40,6 @@ public class DoffingServiceImpl implements DoffingService {
     private DoffingServiceImpl(EntityManager em, DoffingModuleConfig config) {
         this.em = em;
         this.config = config;
-    }
-
-    private <T> T callInTx(Callable<T> callable) {
-        final EntityTransaction transaction = em.getTransaction();
-        transaction.begin();
-        try {
-            final T result = callable.call();
-            transaction.commit();
-            return result;
-        } catch (Exception e) {
-            transaction.rollback();
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void runInTx(Runnable runnable) {
-        final EntityTransaction transaction = em.getTransaction();
-        transaction.begin();
-        try {
-            runnable.run();
-            transaction.commit();
-        } catch (Exception e) {
-            transaction.rollback();
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -145,7 +120,7 @@ public class DoffingServiceImpl implements DoffingService {
             final var history = MAPPER.convertValue(data, AutoDoffingSilkCarRecordAdaptHistory.class);
             history.setModifyDateTime(new Date().getTime() / 1000);
             history.setState(1);
-            return callInTx(() -> {
+            return callInTx(em, () -> {
                 final var result = em.merge(history);
                 em.merge(data);
                 em.remove(data);
@@ -161,7 +136,7 @@ public class DoffingServiceImpl implements DoffingService {
             final long cleanDelaySeconds = TimeUnit.DAYS.toSeconds(cleanDelay);
             final long currentTimestamp = new Date().getTime() / 1000;
             final long cleanTimestamp = currentTimestamp - cleanDelaySeconds;
-            runInTx(() -> em.createNamedQuery("History.fetchCleanData", AutoDoffingSilkCarRecordAdaptHistory.class)
+            runInTx(em, () -> em.createNamedQuery("History.fetchCleanData", AutoDoffingSilkCarRecordAdaptHistory.class)
                     .setParameter("cleanTimestamp", cleanTimestamp)
                     .getResultList()
                     .forEach(em::remove));

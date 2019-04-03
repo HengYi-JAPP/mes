@@ -11,6 +11,10 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.reactivex.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import java.util.concurrent.Callable;
+
 /**
  * @author jzb 2019-03-07
  */
@@ -40,6 +44,31 @@ public class Doffing {
     private static Single<String> deploySchedule(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions().setWorker(true);
         return vertx.rxDeployVerticle(ScheduleVerticle.class.getName(), deploymentOptions);
+    }
+
+    public static <T> T callInTx(EntityManager em, Callable<T> callable) {
+        final EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
+        try {
+            final T result = callable.call();
+            transaction.commit();
+            return result;
+        } catch (Exception e) {
+            transaction.rollback();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void runInTx(EntityManager em, Runnable runnable) {
+        final EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
+        try {
+            runnable.run();
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+            throw new RuntimeException(e);
+        }
     }
 
 }
