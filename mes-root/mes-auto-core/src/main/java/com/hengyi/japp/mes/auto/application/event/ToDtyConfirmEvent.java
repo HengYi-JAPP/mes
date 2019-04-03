@@ -23,7 +23,7 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
  */
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-public class ToDtyEvent extends EventSource {
+public class ToDtyConfirmEvent extends EventSource {
     private JsonNode command;
 
     @Override
@@ -38,7 +38,7 @@ public class ToDtyEvent extends EventSource {
 
     @Override
     public EventSourceType getType() {
-        return EventSourceType.ToDtyEvent;
+        return EventSourceType.ToDtyConfirmEvent;
     }
 
     @Override
@@ -57,8 +57,8 @@ public class ToDtyEvent extends EventSource {
             return MAPPER.convertValue(jsonNode, DTO.class);
         }
 
-        public Single<ToDtyEvent> toEvent() {
-            final ToDtyEvent event = new ToDtyEvent();
+        public Single<ToDtyConfirmEvent> toEvent() {
+            final ToDtyConfirmEvent event = new ToDtyConfirmEvent();
             event.setCommand(command);
             return toEvent(event);
         }

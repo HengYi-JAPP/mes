@@ -3,7 +3,6 @@ package com.hengyi.japp.mes.auto.doffing;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.doffing.verticle.AgentVerticle;
-import com.hengyi.japp.mes.auto.doffing.verticle.ScheduleVerticle;
 import com.hengyi.japp.mes.auto.doffing.verticle.WorkerVerticle;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -42,8 +41,9 @@ public class Doffing {
     }
 
     private static Single<String> deploySchedule(Vertx vertx) {
-        final DeploymentOptions deploymentOptions = new DeploymentOptions().setWorker(true);
-        return vertx.rxDeployVerticle(ScheduleVerticle.class.getName(), deploymentOptions);
+        return Single.just("");
+//        final DeploymentOptions deploymentOptions = new DeploymentOptions().setWorker(true);
+//        return vertx.rxDeployVerticle(ScheduleVerticle.class.getName(), deploymentOptions);
     }
 
     public static <T> T callInTx(EntityManager em, Callable<T> callable) {

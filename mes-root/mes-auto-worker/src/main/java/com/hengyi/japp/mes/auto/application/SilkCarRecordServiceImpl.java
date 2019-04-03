@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
+import com.hengyi.japp.mes.auto.application.event.ToDtyConfirmEvent;
 import com.hengyi.japp.mes.auto.application.event.ToDtyEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
@@ -151,6 +152,26 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             final Product product = batch.getProduct();
             if (!"POY".equals(product.getName())) {
                 throw new RuntimeException("POY可以推加弹！");
+            }
+            return event$.flatMapCompletable(event -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event));
+        });
+    }
+
+    @Override
+    public Completable handle(Principal principal, ToDtyConfirmEvent.Command command) {
+        final var event$ = operatorRepository.find(principal).map(operator -> {
+            final ToDtyConfirmEvent event = new ToDtyConfirmEvent();
+            event.fire(operator);
+            event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+            return event;
+        });
+        final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
+        return silkCarRuntimeService.find(command.getSilkCarRecord()).flatMapCompletable(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            final Batch batch = silkCarRecord.getBatch();
+            final Product product = batch.getProduct();
+            if (!"POY".equals(product.getName())) {
+                throw new RuntimeException("POY可以推加弹确认！");
             }
             return event$.flatMapCompletable(event -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event));
         });

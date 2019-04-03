@@ -6,7 +6,9 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.hengyi.japp.mes.auto.doffing.application.DoffingService;
+import com.hengyi.japp.mes.auto.doffing.application.LogEntityService;
 import com.hengyi.japp.mes.auto.doffing.application.intenal.DoffingServiceImpl;
+import com.hengyi.japp.mes.auto.doffing.application.intenal.LogEntityServiceImpl;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import lombok.SneakyThrows;
@@ -32,6 +34,7 @@ public class DoffingModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(DoffingService.class).to(DoffingServiceImpl.class);
+        bind(LogEntityService.class).to(LogEntityServiceImpl.class);
     }
 
     @Provides

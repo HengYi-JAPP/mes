@@ -19,6 +19,7 @@ public class LogEntity implements Serializable {
     private String id;
     private String level;
     private String message;
+    private String command;
     private String operatorName;
     private Date createDateTime;
 }

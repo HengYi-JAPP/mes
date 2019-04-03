@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.application;
 
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
+import com.hengyi.japp.mes.auto.application.event.ToDtyConfirmEvent;
 import com.hengyi.japp.mes.auto.application.event.ToDtyEvent;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
@@ -27,6 +28,8 @@ public interface SilkCarRecordService {
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command);
 
     Completable handle(Principal principal, ToDtyEvent.Command command);
+
+    Completable handle(Principal principal, ToDtyConfirmEvent.Command command);
 
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingOverWriteCheckSilksCommand command);
 

@@ -34,8 +34,9 @@ public class LogEntityServiceImpl implements LogEntityService {
             logEntity.setId(Jcodec.uuid58());
             logEntity.setCreateDateTime(new Date());
             logEntity.setLevel(command.getLevel());
-            logEntity.setOperatorName(command.getOperatorName());
             logEntity.setMessage(command.getMessage());
+            logEntity.setCommand(command.getCommand());
+            logEntity.setOperatorName(command.getOperatorName());
             em.merge(logEntity);
         }));
     }

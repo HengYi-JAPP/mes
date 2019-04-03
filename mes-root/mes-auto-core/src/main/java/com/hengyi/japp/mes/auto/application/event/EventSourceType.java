@@ -63,6 +63,13 @@ public enum EventSourceType {
         }
     },
 
+    ToDtyConfirmEvent {
+        @Override
+        public Single<ToDtyConfirmEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.application.event.ToDtyConfirmEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
     ProductProcessSubmitEvent {
         @Override
         public Single<ProductProcessSubmitEvent> from(JsonNode jsonNode) {
