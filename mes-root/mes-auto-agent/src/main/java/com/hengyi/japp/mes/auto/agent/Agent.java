@@ -57,7 +57,7 @@ public class Agent {
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(10));
         Optional.ofNullable(System.getProperty("vertx.cluster.host"))
                 .filter(J::nonBlank)
-                .ifPresent(vertxOptions::setClusterHost);
+                .ifPresent(vertxOptions.getEventBusOptions()::setHost);
         return vertxOptions;
     }
 }
