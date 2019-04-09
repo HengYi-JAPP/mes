@@ -1,17 +1,18 @@
 package lock;
 
+import com.github.ixtf.japp.codec.Jcodec;
 import com.github.ixtf.japp.core.J;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
-import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.index.*;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
-import org.apache.lucene.store.FSDirectory;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Date;
 import java.util.Optional;
@@ -24,9 +25,13 @@ public class LockTest {
 
     @SneakyThrows
     public static void main(String[] args) {
-        final Path indexPath = Paths.get("/home/jzb/logs/SilkBarcode");
-        indexWriter = new IndexWriter(FSDirectory.open(indexPath), new IndexWriterConfig(new SmartChineseAnalyzer()));
-        testdd();
+        System.out.println(Jcodec.uuid58());
+        final LocalDateTime ldt = LocalDateTime.of(2019, Month.MARCH, 21, 6, 34, 21);
+        System.out.println(J.date(ldt).getTime());
+
+//        final Path indexPath = Paths.get("/home/jzb/logs/SilkBarcode");
+//        indexWriter = new IndexWriter(FSDirectory.open(indexPath), new IndexWriterConfig(new SmartChineseAnalyzer()));
+//        testdd();
     }
 
     // line: 5c8782bba3f0a0602365d799
