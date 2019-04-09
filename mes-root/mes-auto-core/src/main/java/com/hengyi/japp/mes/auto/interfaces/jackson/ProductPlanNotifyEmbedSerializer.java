@@ -21,6 +21,7 @@ public class ProductPlanNotifyEmbedSerializer extends JsonSerializer<ProductPlan
 
         gen.writeStringField("id", value.getId());
         gen.writeStringField("name", value.getName());
+        gen.writeObjectField("startDate", value.getStartDate());
 
         gen.writeEndObject();
     }
