@@ -29,6 +29,7 @@ import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 
+import javax.validation.constraints.NotBlank;
 import java.security.Principal;
 import java.util.*;
 
@@ -239,10 +240,11 @@ public class JikonAdapterImpl implements JikonAdapter {
     public Single<String> handle(Principal principal, JikonAdapterPackageBoxEvent.Command command) {
         final Single<Map<String, PackageClass>> packageClassMap$ = packageClassRepository.list().toMap(PackageClass::getRiambCode);
         final Single<Map<String, Grade>> gradeMap$ = gradeRepository.list().toMap(Grade::getName);
-        return packageClassMap$.flatMap(packageClassMap -> gradeMap$.flatMap(gradeMap -> packageBoxRepository.create().flatMap(packageBox -> {
+        @NotBlank final String boxCode = command.getBoxCode();
+        return packageClassMap$.flatMap(packageClassMap -> gradeMap$.flatMap(gradeMap -> packageBoxRepository.findByCodeOrCreate(boxCode).flatMap(packageBox -> {
             packageBox.setType(PackageBoxType.AUTO);
             packageBox.command(MAPPER.convertValue(command, JsonNode.class));
-            packageBox.setCode(command.getBoxCode());
+            packageBox.setCode(boxCode);
             packageBox.setNetWeight(Double.parseDouble(command.getNetWeight()));
             packageBox.setGrossWeight(Double.parseDouble(command.getGrossWeight()));
             packageBox.setAutomaticPackeLine(command.getAutomaticPackeLine());
