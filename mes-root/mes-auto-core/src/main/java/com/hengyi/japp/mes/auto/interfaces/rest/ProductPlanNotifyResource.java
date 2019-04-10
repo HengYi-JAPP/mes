@@ -79,12 +79,11 @@ public class ProductPlanNotifyResource {
     @Path("productPlanNotifies/{id}/batchExe")
     @POST
     public Completable get(Principal principal, @PathParam("id") @NotBlank String id, ProductPlanNotifyExeCommand.Batch commands) {
-        return Flowable.fromIterable(commands.getLineMachines())
-                .flatMapCompletable(it -> {
-                    final ProductPlanNotifyExeCommand command = new ProductPlanNotifyExeCommand();
-                    command.setLineMachine(it);
-                    return productPlanNotifyService.exe(principal, id, command);
-                });
+        return Flowable.fromIterable(commands.getLineMachines()).flatMapCompletable(it -> {
+            final ProductPlanNotifyExeCommand command = new ProductPlanNotifyExeCommand();
+            command.setLineMachine(it);
+            return productPlanNotifyService.exe(principal, id, command);
+        });
     }
 
     @Path("productPlanNotifies/{id}/exeInfo")

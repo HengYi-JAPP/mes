@@ -8,7 +8,9 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ApplicationEvents;
+import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.EventSourceType;
+import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
 import com.hengyi.japp.mes.auto.application.event.SilkNoteFeedbackEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
@@ -29,10 +31,10 @@ import org.apache.commons.collections4.IterableUtils;
 
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.interfaces.jikon.dto.GetSilkSpindleInfoDTO.*;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author jzb 2018-06-20
@@ -47,9 +49,10 @@ public class JikonAdapterImpl implements JikonAdapter {
     private final GradeRepository gradeRepository;
     private final PackageClassRepository packageClassRepository;
     private final OperatorRepository operatorRepository;
+    private final ProductProcessRepository productProcessRepository;
 
     @Inject
-    private JikonAdapterImpl(ApplicationEvents applicationEvents, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, PackageBoxRepository packageBoxRepository, GradeRepository gradeRepository, PackageClassRepository packageClassRepository, OperatorRepository operatorRepository) {
+    private JikonAdapterImpl(ApplicationEvents applicationEvents, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, PackageBoxRepository packageBoxRepository, GradeRepository gradeRepository, PackageClassRepository packageClassRepository, OperatorRepository operatorRepository, ProductProcessRepository productProcessRepository) {
         this.applicationEvents = applicationEvents;
         this.silkCarRuntimeRepository = silkCarRuntimeRepository;
         this.silkRepository = silkRepository;
@@ -57,23 +60,29 @@ public class JikonAdapterImpl implements JikonAdapter {
         this.gradeRepository = gradeRepository;
         this.packageClassRepository = packageClassRepository;
         this.operatorRepository = operatorRepository;
+        this.productProcessRepository = productProcessRepository;
     }
 
     @Override
     public Single<String> handle(Principal principal, JikonAdapterSilkCarInfoFetchEvent.Command command) {
         final String silkcarCode = command.getSilkcarCode();
         return command.toEvent(principal).flatMap(event -> silkCarRuntimeRepository.findByCode(silkcarCode).flatMapSingle(silkCarRuntime -> {
-            final GetSilkSpindleInfoDTO dto = getResult(silkCarRuntime, command);
-            event.setResult(JikonUtil.success(dto));
-            final Single<String> result$ = Single.fromCallable(() -> event.getResult());
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            final Batch batch = silkCarRecord.getBatch();
+            final Product product = batch.getProduct();
+            return productProcessRepository.listBy(product).toList().flatMap(productProcesses -> {
+                final GetSilkSpindleInfoDTO dto = getResult(silkCarRuntime, productProcesses);
+                event.setResult(JikonUtil.success(dto));
+                final Single<String> result$ = Single.fromCallable(() -> event.getResult());
 
-            if (eliminateFlage_NO.equals(dto.getAutomaticPackeFlage())) {
-                return result$;
-            }
-            final Completable addEventSource$ = silkCarRuntimeRepository.addEventSource(silkcarCode, event);
-            return addEventSource$.andThen(result$)
-                    .doOnSuccess(it -> saveSilkExceptions(dto))
-                    .doOnSuccess(it -> prepareFacevisa(dto));
+                if (eliminateFlage_NO.equals(dto.getAutomaticPackeFlage())) {
+                    return result$;
+                }
+                final Completable addEventSource$ = silkCarRuntimeRepository.addEventSource(silkcarCode, event);
+                return addEventSource$.andThen(result$)
+                        .doOnSuccess(it -> saveSilkExceptions(dto))
+                        .doOnSuccess(it -> prepareFacevisa(dto));
+            });
         })).onErrorReturn(JikonUtil::error);
     }
 
@@ -100,14 +109,24 @@ public class JikonAdapterImpl implements JikonAdapter {
         facevisaService.prepare(dto).subscribe();
     }
 
-    private GetSilkSpindleInfoDTO getResult(SilkCarRuntime silkCarRuntime, JikonAdapterSilkCarInfoFetchEvent.Command command) {
+    private GetSilkSpindleInfoDTO getResult(SilkCarRuntime silkCarRuntime, List<ProductProcess> allProductProcesses) {
         final GetSilkSpindleInfoDTO dto = new GetSilkSpindleInfoDTO();
         final Collection<SilkRuntime> silkRuntimes = J.emptyIfNull(silkCarRuntime.getSilkRuntimes());
         final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+        final Collection<EventSource> eventSources = silkCarRuntime.getEventSources();
         final SilkCar silkCar = silkCarRecord.getSilkCar();
         final Batch batch = silkCarRecord.getBatch();
         final int spec = silkCar.getRow() * silkCar.getCol() * 2;
         dto.setSpec("" + spec);
+
+        final Set<ProductProcess> unProductProcesses = J.emptyIfNull(allProductProcesses).stream().filter(ProductProcess::isMustProcess).collect(toSet());
+        J.emptyIfNull(eventSources).stream()
+                .filter(it -> !it.isDeleted() && it.getType() == EventSourceType.ProductProcessSubmitEvent)
+                .forEach(eventSource -> {
+                    final ProductProcessSubmitEvent productProcessSubmitEvent = (ProductProcessSubmitEvent) eventSource;
+                    final ProductProcess productProcess = productProcessSubmitEvent.getProductProcess();
+                    unProductProcesses.remove(productProcess);
+                });
 
         final List<GetSilkSpindleInfoDTO.Item> items = Lists.newArrayList();
         //"Silk[" + silkRuntime.getSideType() + "-" + silkRuntime.getRow() + "-" + silkRuntime.getCol() + "]"
@@ -151,7 +170,7 @@ public class JikonAdapterImpl implements JikonAdapter {
         }
 
         dto.setAutomaticPackeFlage(J.isEmpty(dyeingUnSubmitteds) ? AutomaticPackeFlage_YES : AutomaticPackeFlage_NO);
-        J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
+        J.emptyIfNull(eventSources).stream()
                 .filter(it -> !it.isDeleted() && it.getType() == EventSourceType.SilkNoteFeedbackEvent)
                 .forEach(it -> {
                     final SilkNoteFeedbackEvent silkNoteFeedbackEvent = (SilkNoteFeedbackEvent) it;
@@ -160,10 +179,14 @@ public class JikonAdapterImpl implements JikonAdapter {
                 });
         final Set<SilkNote> checkFeedbackSilkNotes = J.emptyIfNull(feedbackSilkNotes).stream()
                 .filter(SilkNote::isMustFeedback)
-                .collect(Collectors.toSet());
+                .collect(toSet());
         if (J.nonEmpty(checkFeedbackSilkNotes)) {
             dto.setAutomaticPackeFlage(AutomaticPackeFlage_NO);
         }
+        if (J.nonEmpty(unProductProcesses)) {
+            dto.setAutomaticPackeFlage(AutomaticPackeFlage_NO);
+        }
+
         if (AutomaticPackeFlage_NO.equals(dto.getAutomaticPackeFlage())) {
             final List<String> reasons = Lists.newArrayList();
             if (J.nonEmpty(dyeingUnSubmitteds)) {
@@ -172,6 +195,12 @@ public class JikonAdapterImpl implements JikonAdapter {
             if (J.nonEmpty(checkFeedbackSilkNotes)) {
                 checkFeedbackSilkNotes.forEach(silkNote -> {
                     final String name = silkNote.getName();
+                    reasons.add(name + "未处理");
+                });
+            }
+            if (J.nonEmpty(unProductProcesses)) {
+                unProductProcesses.forEach(productProcess -> {
+                    final String name = productProcess.getName();
                     reasons.add(name + "未处理");
                 });
             }
@@ -228,7 +257,7 @@ public class JikonAdapterImpl implements JikonAdapter {
             ).toList().flatMap(silks -> {
                 packageBox.setSilks(silks);
                 packageBox.setSilkCount(silks.size());
-                final Set<Batch> batches = J.emptyIfNull(silks).stream().map(Silk::getBatch).collect(Collectors.toSet());
+                final Set<Batch> batches = J.emptyIfNull(silks).stream().map(Silk::getBatch).collect(toSet());
                 if (batches.size() == 1) {
                     final Batch batch = IterableUtils.get(batches, 0);
                     packageBox.setBatch(batch);
