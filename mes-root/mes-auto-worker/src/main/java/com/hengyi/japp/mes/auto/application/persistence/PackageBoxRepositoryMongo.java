@@ -106,6 +106,14 @@ public class PackageBoxRepositoryMongo extends MongoEntityRepository<PackageBox>
     }
 
     @Override
+    public Single<PackageBox> findByCodeOrCreate(String code) {
+        final JsonObject query = unDeletedQuery(Filters.eq("code", code));
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .switchIfEmpty(Single.just(new JsonObject()))
+                .flatMap(this::rxCreateMongoEntiy);
+    }
+
+    @Override
     public Single<PackageBoxQuery.Result> query(PackageBoxQuery packageBoxQuery) {
         final int first = packageBoxQuery.getFirst();
         final int pageSize = packageBoxQuery.getPageSize();
