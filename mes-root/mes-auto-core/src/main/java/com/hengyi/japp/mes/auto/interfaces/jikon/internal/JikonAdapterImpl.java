@@ -265,6 +265,7 @@ public class JikonAdapterImpl implements JikonAdapter {
                     packageBox.setBatch(batch);
                 } else {
                     log.error("PackageBox[" + packageBox.getCode() + "],混批!");
+//                    packageBox.setBatch(IterableUtils.get(batches, 0));
                 }
                 return operatorRepository.find(principal).flatMap(operator -> {
                     packageBox.log(operator);

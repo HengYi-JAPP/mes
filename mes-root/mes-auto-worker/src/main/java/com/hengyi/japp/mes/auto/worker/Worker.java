@@ -42,6 +42,7 @@ public class Worker {
 //                }
 //            });
 
+
             return deployWorker(vertx).ignoreElement();
         }).subscribe();
     }
