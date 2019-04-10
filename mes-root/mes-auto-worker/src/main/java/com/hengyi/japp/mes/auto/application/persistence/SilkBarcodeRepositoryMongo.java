@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkBarcodeService;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
+import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
@@ -14,6 +15,7 @@ import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkBarcodeLucene;
+import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
@@ -60,6 +62,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
             silkBarcode.setCode(silkBarcode.generateCode());
         }
 
+//        semaphore.acquire();
         final LineMachine lineMachine = silkBarcode.getLineMachine();
         final String doffingNum = silkBarcode.getDoffingNum();
         final Batch batch = silkBarcode.getBatch();
@@ -87,7 +90,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
 
     @Override
     public Single<SilkBarcode> findByCode(String code) {
-        final JsonObject query = unDeletedQuery(eq("code", code));
+        final JsonObject query = MongoUtil.unDeletedQuery(Filters.eq("code", code));
         return mongoClient.rxFind(collectionName, query)
                 .flatMapPublisher(Flowable::fromIterable)
                 .singleOrError()
