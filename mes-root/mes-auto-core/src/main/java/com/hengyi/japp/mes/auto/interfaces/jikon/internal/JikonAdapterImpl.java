@@ -184,8 +184,10 @@ public class JikonAdapterImpl implements JikonAdapter {
         if (J.nonEmpty(checkFeedbackSilkNotes)) {
             dto.setAutomaticPackeFlage(AutomaticPackeFlage_NO);
         }
-        if (J.nonEmpty(unProductProcesses)) {
-            dto.setAutomaticPackeFlage(AutomaticPackeFlage_NO);
+        if (silkCarRecord.getCarpoolDateTime() == null) {
+            if (J.nonEmpty(unProductProcesses)) {
+                dto.setAutomaticPackeFlage(AutomaticPackeFlage_NO);
+            }
         }
 
         if (AutomaticPackeFlage_NO.equals(dto.getAutomaticPackeFlage())) {
@@ -199,11 +201,13 @@ public class JikonAdapterImpl implements JikonAdapter {
                     reasons.add(name + "未处理");
                 });
             }
-            if (J.nonEmpty(unProductProcesses)) {
-                unProductProcesses.forEach(productProcess -> {
-                    final String name = productProcess.getName();
-                    reasons.add(name + "未处理");
-                });
+            if (silkCarRecord.getCarpoolDateTime() == null) {
+                if (J.nonEmpty(unProductProcesses)) {
+                    unProductProcesses.forEach(productProcess -> {
+                        final String name = productProcess.getName();
+                        reasons.add(name + "未处理");
+                    });
+                }
             }
             applicationEvents.fire(silkCarRuntime, dto, reasons);
         }
