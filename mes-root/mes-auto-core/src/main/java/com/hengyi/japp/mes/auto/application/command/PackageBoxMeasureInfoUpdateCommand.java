@@ -16,6 +16,8 @@ import java.util.Date;
  */
 @Data
 public class PackageBoxMeasureInfoUpdateCommand implements Serializable {
+    private double pipeType;
+    private double tare;
     @NotNull
     private SaleType saleType;
     @Min(1)
