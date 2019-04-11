@@ -42,6 +42,8 @@ public interface SilkBarcodeService {
 
     Single<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand command);
 
+    Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatch commands);
+
     Completable createAndPrint(MesAutoPrinter mesAutoPrinter, Flowable<SilkBarcode> flowable);
 
     Completable print(Principal principal, PrintCommand.SilkBarcodePrintCommand command);

@@ -12,6 +12,7 @@ import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import com.hengyi.japp.mes.auto.domain.data.MesAutoPrinter;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.repository.BatchRepository;
 import com.hengyi.japp.mes.auto.repository.LineMachineRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
@@ -39,13 +40,15 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
     private final RedisClient redisClient;
     private final SilkBarcodeRepository silkBarcodeRepository;
     private final LineMachineRepository lineMachineRepository;
+    private final BatchRepository batchRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private SilkBarcodeServiceImpl(RedisClient redisClient, SilkBarcodeRepository silkBarcodeRepository, LineMachineRepository lineMachineRepository, OperatorRepository operatorRepository) {
+    private SilkBarcodeServiceImpl(RedisClient redisClient, SilkBarcodeRepository silkBarcodeRepository, LineMachineRepository lineMachineRepository, BatchRepository batchRepository, OperatorRepository operatorRepository) {
         this.redisClient = redisClient;
         this.silkBarcodeRepository = silkBarcodeRepository;
         this.lineMachineRepository = lineMachineRepository;
+        this.batchRepository = batchRepository;
         this.operatorRepository = operatorRepository;
     }
 
@@ -63,6 +66,17 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
             return silkBarcodeRepository.find(codeDate, lineMachine, doffingNum, lineMachine.getProductPlan().getBatch())
                     .switchIfEmpty(create(principal, codeDate, lineMachine, doffingNum));
         });
+    }
+
+    @Override
+    public Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatch commands) {
+        return batchRepository.find(commands.getBatch().getId()).flatMapPublisher(batch -> Flowable.fromIterable(commands.getCommands()).flatMapSingle(command -> {
+            final LocalDate codeDate = J.localDate(command.getCodeDate());
+            final String doffingNum = command.getDoffingNum();
+            return lineMachineRepository.find(command.getLineMachine().getId()).flatMap(lineMachine -> silkBarcodeRepository.find(codeDate, lineMachine, doffingNum, batch)
+                    .switchIfEmpty(create(principal, codeDate, lineMachine, doffingNum))
+            );
+        }));
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.application.command;
 
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -32,5 +33,12 @@ public class SilkBarcodeGenerateCommand implements Serializable {
         @NotNull
         @Size(min = 1)
         private Collection<SilkBarcodeGenerateCommand> commands;
+    }
+
+    @Data
+    @EqualsAndHashCode
+    public static class BatchAndBatch extends Batch {
+        @NotNull
+        private EntityDTO batch;
     }
 }
