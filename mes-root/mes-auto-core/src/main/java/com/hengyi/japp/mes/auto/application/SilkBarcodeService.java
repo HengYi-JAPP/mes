@@ -38,6 +38,8 @@ public interface SilkBarcodeService {
 
     Single<SilkBarcode> findBySilkCode(String code);
 
+    Completable generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndPrint command);
+
     Single<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand command);
 
     Completable print(Principal principal, PrintCommand.SilkBarcodePrintCommand command);

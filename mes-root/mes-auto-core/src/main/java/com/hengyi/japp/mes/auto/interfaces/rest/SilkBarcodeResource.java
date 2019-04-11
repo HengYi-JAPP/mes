@@ -53,6 +53,12 @@ public class SilkBarcodeResource {
                 .ignoreElement();
     }
 
+    @Path("silkBarcodes/createAndPrint")
+    @POST
+    public Completable createAndPrint(Principal principal, SilkBarcodeGenerateCommand.BatchAndPrint commands) {
+        return silkBarcodeService.generate(principal, commands);
+    }
+
     @Path("silkBarcodes/{id}")
     @GET
     public Single<SilkBarcode> get(@PathParam("id") @NotBlank String id) {

@@ -56,6 +56,24 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
     }
 
     @Override
+    public Completable generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndPrint commands) {
+        return Flowable.fromIterable(commands.getCommands())
+                .flatMapSingle(command -> generate(principal, command))
+                .map(it -> {
+                    final EntityDTO result = new EntityDTO();
+                    result.setId(it.getId());
+                    return result;
+                })
+                .toList()
+                .flatMapCompletable(silkBarcodes -> {
+                    final var command = new PrintCommand.SilkBarcodePrintCommand();
+                    command.setSilkBarcodes(silkBarcodes);
+                    command.setMesAutoPrinter(commands.getMesAutoPrinter());
+                    return print(principal, command);
+                });
+    }
+
+    @Override
     public Single<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand command) {
         return lineMachineRepository.find(command.getLineMachine().getId()).flatMap(lineMachine -> {
             final LocalDate codeDate = J.localDate(command.getCodeDate());
