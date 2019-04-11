@@ -69,7 +69,6 @@ public class LineResource {
         return lineRepository.find(id);
     }
 
-
     @Path("lines/{id}/lineMachines")
     @GET
     public Flowable<LineMachine> lineMachines(@PathParam("id") @NotBlank String id) {

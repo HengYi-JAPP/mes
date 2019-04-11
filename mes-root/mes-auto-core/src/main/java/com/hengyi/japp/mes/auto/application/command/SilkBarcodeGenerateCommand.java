@@ -45,4 +45,11 @@ public class SilkBarcodeGenerateCommand implements Serializable {
         @Size(min = 1)
         private Collection<SilkBarcodeGenerateCommand> commands;
     }
+
+    @Data
+    @EqualsAndHashCode
+    public static class BatchAndBatch extends Batch {
+        @NotNull
+        private EntityDTO batch;
+    }
 }

@@ -5,6 +5,7 @@ import com.hengyi.japp.mes.auto.application.command.PrintCommand;
 import com.hengyi.japp.mes.auto.application.command.SilkBarcodeGenerateCommand;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 import org.apache.commons.lang3.CharUtils;
 
@@ -41,6 +42,8 @@ public interface SilkBarcodeService {
     Completable generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndPrint command);
 
     Single<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand command);
+
+    Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatch commands);
 
     Completable print(Principal principal, PrintCommand.SilkBarcodePrintCommand command);
 
