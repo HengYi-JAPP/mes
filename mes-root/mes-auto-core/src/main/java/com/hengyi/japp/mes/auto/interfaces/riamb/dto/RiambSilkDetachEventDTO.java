@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.interfaces.riamb.dto;
 
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
@@ -18,6 +19,7 @@ public class RiambSilkDetachEventDTO implements Serializable {
     private List<String> silkCodes;
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class SilkCarInfo extends EntityDTO {
         @NotBlank
         private String code;

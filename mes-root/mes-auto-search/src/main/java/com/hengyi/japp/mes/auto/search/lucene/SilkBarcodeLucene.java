@@ -102,12 +102,15 @@ public class SilkBarcodeLucene extends BaseLucene<SilkBarcode> {
         }
 
         addQuery(bqBuilder, "batch", silkBarcodeQuery.getBatchId());
-        Optional.ofNullable(silkBarcodeQuery.getDoffingNum())
-                .filter(J::nonBlank)
-                .ifPresent(it -> {
-                    it = it + "*";
-                    bqBuilder.add(new WildcardQuery(new Term("doffingNum", it)), BooleanClause.Occur.MUST);
-                });
+        addQuery(bqBuilder, "doffingNum", silkBarcodeQuery.getDoffingNum());
+        if (J.isBlank(silkBarcodeQuery.getDoffingNum())) {
+            Optional.ofNullable(silkBarcodeQuery.getDoffingNumQ())
+                    .filter(J::nonBlank)
+                    .ifPresent(it -> {
+                        it = it + "*";
+                        bqBuilder.add(new WildcardQuery(new Term("doffingNum", it)), BooleanClause.Occur.MUST);
+                    });
+        }
         return bqBuilder.build();
     }
 
