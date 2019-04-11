@@ -330,6 +330,8 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                 packageBox.setNetWeight(command.getNetWeight());
                 packageBox.setGrossWeight(command.getGrossWeight());
             }
+            packageBox.setPipeType(command.getPipeType());
+            packageBox.setTare(command.getTare());
             packageBox.setBudat(command.getBudat());
             packageBox.setPalletType(command.getPalletType());
             packageBox.setPackageType(command.getPackageType());
