@@ -41,9 +41,6 @@ public class SilkBarcodeGenerateCommand implements Serializable {
     public static class BatchAndPrint extends Batch {
         @NotNull
         private MesAutoPrinter mesAutoPrinter;
-        @NotNull
-        @Size(min = 1)
-        private Collection<SilkBarcodeGenerateCommand> commands;
     }
 
     @Data
