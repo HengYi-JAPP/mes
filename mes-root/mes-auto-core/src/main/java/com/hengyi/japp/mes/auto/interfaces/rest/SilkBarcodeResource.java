@@ -91,7 +91,7 @@ public class SilkBarcodeResource {
                 .pageSize(pageSize)
                 .startLd(startLd)
                 .endLd(endLd)
-                .doffingNum(StringUtils.upperCase(doffingNum))
+                .doffingNumQ(StringUtils.upperCase(doffingNum))
                 .lineId(lineId)
                 .lineMachineId(lineMachineId)
                 .build();
