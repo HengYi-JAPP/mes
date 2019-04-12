@@ -81,15 +81,14 @@ public class SilkBarcodeServiceImpl implements SilkBarcodeService {
                 .doffingNum(doffingNum)
                 .batchId(batch.getId())
                 .build();
-        final Collection<SilkBarcode> silkBarcodes = Single.just(silkBarcodeQuery)
-                .subscribeOn(Schedulers.from(es))
+        final Collection<SilkBarcode> silkBarcodes = Single.just(silkBarcodeQuery).subscribeOn(Schedulers.from(es))
                 .flatMap(silkBarcodeRepository::query)
                 .map(SilkBarcodeQuery.Result::getSilkBarcodes)
                 .blockingGet();
         if (J.nonEmpty(silkBarcodes)) {
             return IterableUtils.get(silkBarcodes, 0);
         }
-        return silkBarcodeRepository.create().flatMap(silkBarcode -> {
+        return silkBarcodeRepository.create().subscribeOn(Schedulers.from(es)).flatMap(silkBarcode -> {
             silkBarcode.setCodeDate(J.date(codeLd));
             silkBarcode.setDoffingNum(doffingNum);
             silkBarcode.setBatch(batch);
