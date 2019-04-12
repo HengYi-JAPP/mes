@@ -58,7 +58,8 @@ public class SilkBarcodeResource {
     @Path("batchSilkBarcodesAndBatchAndPrint")
     @POST
     public Completable create(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatchAndPrint commands) {
-        return silkBarcodeService.generate(principal, commands).toList().ignoreElement();
+        return silkBarcodeService.generate(principal, commands).toList()
+                .flatMapCompletable(it -> silkBarcodeService.print(principal, commands.getMesAutoPrinter(), it));
     }
 
     @Path("silkBarcodes/createAndPrint")
