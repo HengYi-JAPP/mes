@@ -40,7 +40,11 @@ public class SilkBarcodeGenerateTemplateRepositoryMongo extends MongoEntityRepos
             final JsonObject query = new JsonObject().put("_id", lineMachine.getId());
             return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                     .switchIfEmpty(Single.just(new JsonObject()))
-                    .flatMap(this::rxCreateMongoEntiy);
+                    .flatMap(this::rxCreateMongoEntiy)
+                    .map(it -> {
+                        it.setLineMachine(lineMachine);
+                        return it;
+                    });
         });
     }
 }
