@@ -139,6 +139,9 @@ public class RiambServiceImpl implements RiambService {
             if (J.nonEmpty(silkInfo.getDyeingExceptionStrings())) {
                 silkInfo.setEliminateFlage(eliminateFlage_YES);
             }
+            if (grade.getSortBy() < 100) {
+                silkInfo.setEliminateFlage(eliminateFlage_YES);
+            }
             if (silkInfo.isDyeingSubmitted()) {
                 silkInfo.setGrabFlage(grabFlage_YES);
             } else {
