@@ -23,6 +23,8 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class PackageBox extends LoggableMongoEntity {
+    private double tare;
+    private double pipeType;
     @ToString.Include
     private PackageBoxType type;
     @ToString.Include
