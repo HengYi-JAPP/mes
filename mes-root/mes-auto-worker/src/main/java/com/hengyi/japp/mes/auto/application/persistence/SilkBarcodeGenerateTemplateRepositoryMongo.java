@@ -13,6 +13,8 @@ import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * @author jzb 2018-06-24
  */
@@ -37,11 +39,13 @@ public class SilkBarcodeGenerateTemplateRepositoryMongo extends MongoEntityRepos
     @Override
     public Flowable<SilkBarcodeGenerateTemplate> listByLineId(String lineId) {
         return lineMachineRepository.listByLineId(lineId).flatMapSingle(lineMachine -> {
-            final JsonObject query = new JsonObject().put("_id", lineMachine.getId());
+            @NotBlank final String id = lineMachine.getId();
+            final JsonObject query = new JsonObject().put("_id", id);
             return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                     .switchIfEmpty(Single.just(new JsonObject()))
                     .flatMap(this::rxCreateMongoEntiy)
                     .map(it -> {
+                        it.setId(id);
                         it.setLineMachine(lineMachine);
                         return it;
                     });

@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
-
 /**
  * @author jzb 2018-06-21
  */
@@ -37,21 +36,21 @@ public class SilkBarcodeGenerateCommand implements Serializable {
     }
 
     @Data
-    @EqualsAndHashCode
+    @EqualsAndHashCode(callSuper = true)
     public static class BatchAndPrint extends Batch {
         @NotNull
         private MesAutoPrinter mesAutoPrinter;
     }
 
     @Data
-    @EqualsAndHashCode
+    @EqualsAndHashCode(callSuper = true)
     public static class BatchAndBatch extends Batch {
         @NotNull
         private EntityDTO batch;
     }
 
     @Data
-    @EqualsAndHashCode
+    @EqualsAndHashCode(callSuper = true)
     public static class BatchAndBatchAndPrint extends BatchAndBatch {
         @NotNull
         private MesAutoPrinter mesAutoPrinter;
