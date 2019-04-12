@@ -6,6 +6,8 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkBarcodeService;
 import com.hengyi.japp.mes.auto.application.command.PrintCommand;
 import com.hengyi.japp.mes.auto.domain.data.MesAutoPrinter;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
+import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
@@ -27,11 +29,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Produces(APPLICATION_JSON)
 public class PrintResource {
     private final SilkBarcodeService silkBarcodeService;
+    private final SilkBarcodeRepository silkBarcodeRepository;
     private final RedisClient redisClient;
 
     @Inject
-    private PrintResource(SilkBarcodeService silkBarcodeService, RedisClient redisClient) {
+    private PrintResource(SilkBarcodeService silkBarcodeService, SilkBarcodeRepository silkBarcodeRepository, RedisClient redisClient) {
         this.silkBarcodeService = silkBarcodeService;
+        this.silkBarcodeRepository = silkBarcodeRepository;
         this.redisClient = redisClient;
     }
 
@@ -56,13 +60,15 @@ public class PrintResource {
     @Path("/prints/silkBarcodes/print")
     @POST
     public Completable print(Principal principal, PrintCommand.SilkBarcodePrintCommand command) {
-        return silkBarcodeService.print(principal, command);
+        return Flowable.fromIterable(command.getSilkBarcodes()).map(EntityDTO::getId)
+                .flatMapSingle(silkBarcodeRepository::find).toList()
+                .flatMapCompletable(it -> silkBarcodeService.print(principal, command.getMesAutoPrinter(), it));
     }
 
     @Path("/prints/silks/print")
     @POST
     public Completable print(Principal principal, PrintCommand.SilkPrintCommand command) {
-        return silkBarcodeService.print(principal, command);
+        return silkBarcodeService.print(command.getMesAutoPrinter(), command.getSilks());
     }
 
 }

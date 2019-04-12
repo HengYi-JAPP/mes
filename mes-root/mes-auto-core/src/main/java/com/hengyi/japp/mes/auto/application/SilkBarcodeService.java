@@ -4,6 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.command.PrintCommand;
 import com.hengyi.japp.mes.auto.application.command.SilkBarcodeGenerateCommand;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
+import com.hengyi.japp.mes.auto.domain.data.MesAutoPrinter;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -11,7 +12,9 @@ import org.apache.commons.lang3.CharUtils;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author jzb 2018-06-22
@@ -39,15 +42,14 @@ public interface SilkBarcodeService {
 
     Single<SilkBarcode> findBySilkCode(String code);
 
-    Completable generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndPrint command);
-
     Single<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand command);
+
+    Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.Batch commands);
 
     Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatch commands);
 
-    Completable print(Principal principal, PrintCommand.SilkBarcodePrintCommand command);
+    Completable print(Principal principal, MesAutoPrinter mesAutoPrinter, List<SilkBarcode> silkBarcodes);
 
-    Completable print(Principal principal, PrintCommand.SilkPrintCommand command);
+    Completable print(MesAutoPrinter printer, Collection<PrintCommand.Item> silks);
 
-    Single<SilkBarcode> changeBatch(Principal principal, String id);
 }
