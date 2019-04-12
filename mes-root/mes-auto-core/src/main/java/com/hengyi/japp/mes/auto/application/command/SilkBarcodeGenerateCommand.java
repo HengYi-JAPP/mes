@@ -49,4 +49,11 @@ public class SilkBarcodeGenerateCommand implements Serializable {
         @NotNull
         private EntityDTO batch;
     }
+
+    @Data
+    @EqualsAndHashCode
+    public static class BatchAndBatchAndPrint extends BatchAndBatch {
+        @NotNull
+        private MesAutoPrinter mesAutoPrinter;
+    }
 }
