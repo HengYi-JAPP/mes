@@ -1,7 +1,9 @@
 package com.hengyi.japp.mes.auto.application.command;
 
+import com.hengyi.japp.mes.auto.domain.data.MesAutoPrinter;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -9,7 +11,6 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-
 
 /**
  * @author jzb 2018-06-21
@@ -32,5 +33,26 @@ public class SilkBarcodeGenerateCommand implements Serializable {
         @NotNull
         @Size(min = 1)
         private Collection<SilkBarcodeGenerateCommand> commands;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class BatchAndPrint extends Batch {
+        @NotNull
+        private MesAutoPrinter mesAutoPrinter;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class BatchAndBatch extends Batch {
+        @NotNull
+        private EntityDTO batch;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class BatchAndBatchAndPrint extends BatchAndBatch {
+        @NotNull
+        private MesAutoPrinter mesAutoPrinter;
     }
 }
