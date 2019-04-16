@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordByWorkshopQuery;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.Batch;
@@ -62,6 +63,22 @@ public class SilkCarRecordLucene extends BaseLucene<SilkCarRecord> {
                 .map(Date::getTime)
                 .orElse(startL);
         bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
+        return bqBuilder.build();
+    }
+
+    public Query buildRecordByWorkshop(SilkCarRecordByWorkshopQuery silkCarRecordByWorkshopQuery) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        final long startL = J.date(silkCarRecordByWorkshopQuery.getStartDate()).getTime();
+        final long endL = Optional.ofNullable(silkCarRecordByWorkshopQuery.getEndDate())
+                .map(it -> it.plusDays(1))
+                .map(J::date)
+                .map(Date::getTime)
+                .orElse(startL);
+        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
+        final Optional<TermQuery> workshopQuery = Optional.ofNullable(silkCarRecordByWorkshopQuery.getWorkshopId()).filter(J::nonBlank).map(it -> new TermQuery(new Term("workshop", it)));
+        if (workshopQuery.isPresent()) {
+            bqBuilder.add(workshopQuery.get(), BooleanClause.Occur.MUST);
+        }
         return bqBuilder.build();
     }
 

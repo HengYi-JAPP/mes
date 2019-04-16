@@ -4,10 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ReportService;
 import com.hengyi.japp.mes.auto.application.command.ReportCommand;
-import com.hengyi.japp.mes.auto.application.report.MeasurePackageBoxReport;
-import com.hengyi.japp.mes.auto.application.report.MeasureReport;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
-import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
+import com.hengyi.japp.mes.auto.application.report.*;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
@@ -56,6 +53,14 @@ public class ReportResource {
                                                      @QueryParam("startDate") @NotBlank String startLdString,
                                                      @QueryParam("endDate") @NotBlank String endLdString) {
         return reportService.statisticsReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
+    }
+
+    @Path("strippingReport")
+    @GET
+    public Single<StrippingReport> strippingReport(@QueryParam("workshopId") String workshopId,
+                                                   @QueryParam("startDate") @NotBlank String startLdString,
+                                                   @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.strippingReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
     }
 
 //    @Path("dailyDoffingReport")

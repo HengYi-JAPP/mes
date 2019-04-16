@@ -1,12 +1,18 @@
 package com.hengyi.japp.mes.auto.report.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ReportService;
 import com.hengyi.japp.mes.auto.application.command.ReportCommand;
+import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.application.event.EventSourceType;
+import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
 import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordByWorkshopQuery;
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
 import com.hengyi.japp.mes.auto.application.report.*;
 import com.hengyi.japp.mes.auto.domain.Line;
@@ -28,6 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -41,14 +48,16 @@ public class ReportServiceImpl implements ReportService {
     private final LineMachineRepository lineMachineRepository;
     private final PackageBoxRepository packageBoxRepository;
     private final SilkRepository silkRepository;
+    private final SilkCarRecordRepository silkCarRecordRepository;
 
     @Inject
-    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository) {
+    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository) {
         this.workshopRepository = workshopRepository;
         this.lineRepository = lineRepository;
         this.lineMachineRepository = lineMachineRepository;
         this.packageBoxRepository = packageBoxRepository;
         this.silkRepository = silkRepository;
+        this.silkCarRecordRepository = silkCarRecordRepository;
     }
 
     @Override
@@ -102,6 +111,48 @@ public class ReportServiceImpl implements ReportService {
 //                    .toList()
 //                    .map(days -> new StatisticsReport(workshop, startLd, endLd, days));
         });
+    }
+
+    /**
+     * 剥丝报表
+     *
+     * @param workshopId
+     * @param startLd
+     * @param endLd
+     * @return
+     */
+    @Override
+    public Single<StrippingReport> strippingReport(String workshopId, LocalDate startLd, LocalDate endLd) {
+        SilkCarRecordByWorkshopQuery silkCarRecordByWorkshopQuery = SilkCarRecordByWorkshopQuery.builder()
+                .startDate(startLd)
+                .endDate(endLd).build();
+        return silkCarRecordRepository.listByWorkshop(silkCarRecordByWorkshopQuery)
+                .flatMap(id -> silkCarRecordRepository.find(id)
+                        .flatMapPublisher(silkCarRecord -> {
+                            final String eventsJsonString = silkCarRecord.getEventsJsonString();
+                            final String initEventsJsonString = silkCarRecord.getInitEventJsonString();
+                            if (J.isBlank(eventsJsonString)) {
+                                return Flowable.empty();
+                            }
+                            final JsonNode eventsArrayNode = MAPPER.readTree(eventsJsonString);
+                            final JsonNode initEventNode = MAPPER.readTree(initEventsJsonString);
+                            ArrayNode arrayNode = (ArrayNode) eventsArrayNode;
+                            arrayNode.add(initEventNode);
+                            JsonNode jsonNode = arrayNode;
+                            return Flowable.fromIterable(jsonNode)
+                                    .flatMapSingle(EventSource::from);
+                        })).filter(eventSource -> {
+//                    if (EventSourceType.SilkCarRuntimeInitEvent.equals(eventSource.getType())){
+//                        return true;
+//                    } else
+                    if (EventSourceType.ProductProcessSubmitEvent.equals(eventSource.getType())) {
+                        ProductProcessSubmitEvent productProcessSubmitEvent = (ProductProcessSubmitEvent) eventSource;
+                        return "剥丝".equals(productProcessSubmitEvent.getProductProcess().getName());
+                    }
+                    return false;
+                })
+                .toList()
+                .map(list -> new StrippingReport(list));
     }
 
     private Single<StatisticsReportDay> statisticsReportDay(Workshop workshop, LocalDate ld) {

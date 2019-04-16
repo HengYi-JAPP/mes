@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.repository;
 
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordByWorkshopQuery;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import io.reactivex.Completable;
@@ -17,6 +18,8 @@ public interface SilkCarRecordRepository {
     Single<SilkCarRecord> save(SilkCarRecord silkCarRecord);
 
     Single<SilkCarRecordQuery.Result> query(SilkCarRecordQuery query);
+
+    Flowable<String> listByWorkshop(SilkCarRecordByWorkshopQuery silkCarRecordByWorkshopQuery);
 
     Flowable<SilkCarRecord> list();
 
