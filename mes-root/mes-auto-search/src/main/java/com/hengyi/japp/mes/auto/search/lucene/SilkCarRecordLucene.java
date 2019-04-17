@@ -54,7 +54,9 @@ public class SilkCarRecordLucene extends BaseLucene<SilkCarRecord> {
 
     public Query build(SilkCarRecordQuery silkCarRecordQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        bqBuilder.add(new TermQuery(new Term("silkCarCode", silkCarRecordQuery.getSilkCarCode())), BooleanClause.Occur.MUST);
+        Optional.ofNullable(silkCarRecordQuery.getSilkCarCode())
+                .filter(J::nonBlank)
+                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("silkCarCode", it)), BooleanClause.Occur.MUST));
         final long startL = J.date(silkCarRecordQuery.getStartDate()).getTime();
         final long endL = Optional.ofNullable(silkCarRecordQuery.getEndDate())
                 .map(it -> it.plusDays(1))
