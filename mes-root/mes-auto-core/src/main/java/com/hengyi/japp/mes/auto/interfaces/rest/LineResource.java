@@ -7,8 +7,10 @@ import com.hengyi.japp.mes.auto.application.command.LineUpdateCommand;
 import com.hengyi.japp.mes.auto.application.query.LineQuery;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
+import com.hengyi.japp.mes.auto.domain.SilkBarcodeGenerateTemplate;
 import com.hengyi.japp.mes.auto.repository.LineMachineRepository;
 import com.hengyi.japp.mes.auto.repository.LineRepository;
+import com.hengyi.japp.mes.auto.repository.SilkBarcodeGenerateTemplateRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -30,12 +32,14 @@ public class LineResource {
     private final LineService lineService;
     private final LineRepository lineRepository;
     private final LineMachineRepository lineMachineRepository;
+    private final SilkBarcodeGenerateTemplateRepository silkBarcodeGenerateTemplateRepository;
 
     @Inject
-    private LineResource(LineService lineService, LineRepository lineRepository, LineMachineRepository lineMachineRepository) {
+    private LineResource(LineService lineService, LineRepository lineRepository, LineMachineRepository lineMachineRepository, SilkBarcodeGenerateTemplateRepository silkBarcodeGenerateTemplateRepository) {
         this.lineService = lineService;
         this.lineRepository = lineRepository;
         this.lineMachineRepository = lineMachineRepository;
+        this.silkBarcodeGenerateTemplateRepository = silkBarcodeGenerateTemplateRepository;
     }
 
     @Path("lines")
@@ -65,11 +69,16 @@ public class LineResource {
         return lineRepository.find(id);
     }
 
-
     @Path("lines/{id}/lineMachines")
     @GET
     public Flowable<LineMachine> lineMachines(@PathParam("id") @NotBlank String id) {
         return lineMachineRepository.listByLineId(id);
+    }
+
+    @Path("lines/{id}/silkBarcodeGenerateTemplates")
+    @GET
+    public Flowable<SilkBarcodeGenerateTemplate> silkBarcodeGenerateTemplates(@PathParam("id") @NotBlank String id) {
+        return silkBarcodeGenerateTemplateRepository.listByLineId(id);
     }
 
     @Path("lines")

@@ -17,7 +17,6 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
 import io.vertx.core.json.JsonObject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,6 @@ import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -50,30 +48,30 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
         if (J.isBlank(silkBarcode.getCode())) {
             silkBarcode.setCode(silkBarcode.generateCode());
         }
-
-        final LineMachine lineMachine = silkBarcode.getLineMachine();
-        final String doffingNum = silkBarcode.getDoffingNum();
-        final Batch batch = silkBarcode.getBatch();
-        final LocalDate codeLd = J.localDate(silkBarcode.getCodeDate());
-        synchronized (SilkBarcodeRepositoryMongo.class) {
-            final SilkBarcodeQuery silkBarcodeQuery = SilkBarcodeQuery.builder()
-                    .startLd(codeLd)
-                    .endLd(codeLd)
-                    .lineMachineId(lineMachine.getId())
-                    .doffingNum(doffingNum)
-                    .batchId(batch.getId())
-                    .build();
-            final Collection<String> ids = silkBarcodeLucene.query(silkBarcodeQuery);
-            if (J.nonEmpty(ids)) {
-                return find(IterableUtils.get(ids, 0));
-            }
-            final SilkBarcode result = Single.just(silkBarcode)
-                    .subscribeOn(Schedulers.from(es))
-                    .flatMap(super::save)
-                    .doOnSuccess(silkBarcodeLucene::index)
-                    .blockingGet();
-            return Single.just(result);
-        }
+        return super.save(silkBarcode).doOnSuccess(silkBarcodeLucene::index);
+//        final LineMachine lineMachine = silkBarcode.getLineMachine();
+//        final String doffingNum = silkBarcode.getDoffingNum();
+//        final Batch batch = silkBarcode.getBatch();
+//        final LocalDate codeLd = J.localDate(silkBarcode.getCodeDate());
+//        synchronized (SilkBarcodeRepositoryMongo.class) {
+//            final SilkBarcodeQuery silkBarcodeQuery = SilkBarcodeQuery.builder()
+//                    .startLd(codeLd)
+//                    .endLd(codeLd)
+//                    .lineMachineId(lineMachine.getId())
+//                    .doffingNum(doffingNum)
+//                    .batchId(batch.getId())
+//                    .build();
+//            final Collection<String> ids = silkBarcodeLucene.query(silkBarcodeQuery);
+//            if (J.nonEmpty(ids)) {
+//                return find(IterableUtils.get(ids, 0));
+//            }
+//            final SilkBarcode result = Single.just(silkBarcode)
+//                    .subscribeOn(Schedulers.from(es))
+//                    .flatMap(super::save)
+//                    .doOnSuccess(silkBarcodeLucene::index)
+//                    .blockingGet();
+//            return Single.just(result);
+//        }
     }
 
     @Override
@@ -86,7 +84,7 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
     }
 
     @Override
-    synchronized public Maybe<SilkBarcode> find(LocalDate codeLd, LineMachine lineMachine, String doffingNum, Batch batch) {
+    public Maybe<SilkBarcode> find(LocalDate codeLd, LineMachine lineMachine, String doffingNum, Batch batch) {
         final SilkBarcodeQuery silkBarcodeQuery = SilkBarcodeQuery.builder()
                 .startLd(codeLd)
                 .endLd(codeLd)

@@ -36,6 +36,8 @@ public class SilkBarcodeQuery {
     private final String batchId;
     @Getter
     private final String doffingNum;
+    @Getter
+    private final String doffingNumQ;
 
     @Builder
     public static class Result {
