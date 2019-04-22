@@ -213,6 +213,54 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     }
 
     @Override
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.BigSilkCarDoffingCommand command) {
+        final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
+        event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+        final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
+            event.setSilkCar(silkCar);
+            final BigSilkCarModel silkCarModel = new BigSilkCarModel(silkCar, command.getLineMachineCount());
+            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
+        }).flatMap(it -> {
+            event.setSilkRuntimes(it);
+            return gradeRepository.find(command.getGrade().getId());
+        }).flatMap(grade -> {
+            event.setGrade(grade);
+            return operatorRepository.find(principal);
+        }).flatMap(it -> {
+            event.fire(it);
+            return doffing(event, DoffingType.BIG);
+        });
+        final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
+        return checks$.andThen(result$);
+    }
+
+    @Override
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command) {
+        final Single<SilkCarRuntime> result$ = find(command.getSilkCarRecord()).map(silkCarRuntime -> {
+            return silkCarRuntime;
+        });
+        final SilkCarRuntimeAppendEvent event = new SilkCarRuntimeAppendEvent();
+        event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+
+//        final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
+//            event.setSilkCar(silkCar);
+//            final BigSilkCarAppendModel silkCarModel = new BigSilkCarAppendModel(silkCar, command.getLineMachineCount());
+//            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
+//        }).flatMap(it -> {
+//            event.setSilkRuntimes(it);
+//            return gradeRepository.find(command.getGrade().getId());
+//        }).flatMap(grade -> {
+//            event.setGrade(grade);
+//            return operatorRepository.find(principal);
+//        }).flatMap(it -> {
+//            event.fire(it);
+//            return find(command.getSilkCar())
+//        });
+        final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
+        return checks$.andThen(result$);
+    }
+
+    @Override
     public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command) {
         final Single<SilkCar> silkCar$ = silkCarRepository.findByCode(command.getSilkCar().getCode());
         final Single<Workshop> workshop$ = workshopRepository.find(command.getWorkshop().getId());

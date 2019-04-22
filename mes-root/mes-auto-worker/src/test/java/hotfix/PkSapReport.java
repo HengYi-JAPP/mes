@@ -14,8 +14,23 @@ import java.util.stream.Collectors;
  */
 public class PkSapReport {
     public static void main(String[] args) {
-        final Workshop workshop = AAReport.Workshops.A;
-        AAReport.packageBoxes(workshop, LocalDate.of(2019, 3, 1)).forEach(packageBox -> {
+        final Workshop workshop = AAReport.Workshops.F;
+        final List<PackageBox> packageBoxes = AAReport.packageBoxes(workshop, LocalDate.of(2019, 4, 21));
+
+        final long count = packageBoxes.stream()
+                .filter(it -> "GF030701".equals(it.getBatch().getBatchNo()))
+                .filter(it -> {
+                    final double netWeight = it.getNetWeight();
+                    final int silkCount = it.getSilkCount();
+                    final int v = (int) (netWeight / silkCount);
+                    return v != 7;
+                })
+                .peek(it -> {
+                    System.out.println(it.getCode());
+                })
+                .count();
+
+        packageBoxes.forEach(packageBox -> {
             final String code = packageBox.getCode();
             final Batch batch = packageBox.getBatch();
             final Product product = batch.getProduct();
@@ -29,7 +44,7 @@ public class PkSapReport {
             System.out.println(join);
         });
 
-        AAReport.packageBoxes(workshop, LocalDate.of(2019, 2, 13)).parallelStream()
+        packageBoxes.parallelStream()
                 .collect(Collectors.groupingBy(it -> Pair.of(it.getBatch(), it.getGrade())))
                 .entrySet().stream()
                 .sorted((o1, o2) -> {

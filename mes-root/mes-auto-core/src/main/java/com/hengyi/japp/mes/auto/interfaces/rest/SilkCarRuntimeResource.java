@@ -55,11 +55,11 @@ public class SilkCarRuntimeResource {
         return silkCarRuntimeService.physicalInfo(code);
     }
 
-//    @Path("AutoDoffingAdaptEvents")
-//    @POST
-//    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommand command) {
-//        return silkCarRuntimeService.handle(principal, command);
-//    }
+    @Path("BigSilkCarDoffingEvents")
+    @POST
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.BigSilkCarDoffingCommand command) {
+        return silkCarRuntimeService.handle(principal, command);
+    }
 
     @Path("AutoDoffingAdaptCheckSilks")
     @POST

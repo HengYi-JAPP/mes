@@ -21,7 +21,9 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.security.Principal;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author jzb 2018-06-22
@@ -34,7 +36,7 @@ public interface SilkCarRuntimeService {
         final Set<Batch> batches = J.emptyIfNull(silkRuntimes).stream()
                 .map(SilkRuntime::getSilk)
                 .map(Silk::getBatch)
-                .collect(Collectors.toSet());
+                .collect(toSet());
         if (batches.size() > 1) {
             throw new MultiBatchException();
         }
@@ -48,9 +50,8 @@ public interface SilkCarRuntimeService {
         final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
         final SilkCar silkCar = silkCarRecord.getSilkCar();
         Collection<SilkRuntime> result = Lists.newArrayList();
-        final Map<Triple<SilkCarSideType, Integer, Integer>, SilkRuntime> map = silkCarRuntime.getSilkRuntimes()
-                .stream()
-                .collect(Collectors.toMap(it -> Triple.of(it.getSideType(), it.getRow(), it.getCol()), Function.identity()));
+        final Map<Triple<SilkCarSideType, Integer, Integer>, SilkRuntime> map = silkCarRuntime.getSilkRuntimes().stream()
+                .collect(toMap(it -> Triple.of(it.getSideType(), it.getRow(), it.getCol()), Function.identity()));
         for (SilkRuntime.DTO dto : dtos) {
             final Triple<SilkCarSideType, Integer, Integer> triple = Triple.of(dto.getSideType(), dto.getRow(), dto.getCol());
             result.add(map.get(triple));
@@ -64,6 +65,10 @@ public interface SilkCarRuntimeService {
         }
         return result;
     }
+
+    Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.BigSilkCarDoffingCommand command);
+
+    Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command);
 
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command);
 
