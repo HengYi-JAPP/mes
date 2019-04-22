@@ -12,7 +12,9 @@ import org.apache.commons.lang3.CharUtils;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author jzb 2018-06-22
@@ -42,13 +44,12 @@ public interface SilkBarcodeService {
 
     Single<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand command);
 
+    Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.Batch commands);
+
     Flowable<SilkBarcode> generate(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatch commands);
 
-    Completable createAndPrint(MesAutoPrinter mesAutoPrinter, Flowable<SilkBarcode> flowable);
+    Completable print(Principal principal, MesAutoPrinter mesAutoPrinter, List<SilkBarcode> silkBarcodes);
 
-    Completable print(Principal principal, PrintCommand.SilkBarcodePrintCommand command);
+    Completable print(MesAutoPrinter printer, Collection<PrintCommand.Item> silks);
 
-    Completable print(Principal principal, PrintCommand.SilkPrintCommand command);
-
-    Single<SilkBarcode> changeBatch(Principal principal, String id);
 }
