@@ -30,10 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-01-08
@@ -52,10 +52,10 @@ public class AAReport {
         final LocalDate endLd = LocalDate.of(2019, 4, 21);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
-                .map(it -> new AAReportDay(workshop, it)).sorted()
-                .collect(Collectors.toList());
+                .map(it -> new AAReportDay(workshop, it))
+                .collect(toList());
 
-//        days.parallelStream().forEach(AAReport::toExcel);
+        days.parallelStream().forEach(AAReport::toExcel);
         toExcel(new StatisticsReport(workshop, startLd, endLd, days));
 
         final long endL = System.currentTimeMillis();

@@ -54,6 +54,9 @@ public class SilkCarRecordLucene extends BaseLucene<SilkCarRecord> {
 
     public Query build(SilkCarRecordQuery silkCarRecordQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        Optional.ofNullable(silkCarRecordQuery.getWorkShopId())
+                .filter(J::nonBlank)
+                .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("workshop", it)), BooleanClause.Occur.MUST));
         Optional.ofNullable(silkCarRecordQuery.getSilkCarCode())
                 .filter(J::nonBlank)
                 .ifPresent(it -> bqBuilder.add(new TermQuery(new Term("silkCarCode", it)), BooleanClause.Occur.MUST));

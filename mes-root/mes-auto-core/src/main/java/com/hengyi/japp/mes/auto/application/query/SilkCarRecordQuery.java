@@ -25,6 +25,8 @@ public class SilkCarRecordQuery {
     private final LocalDate endDate;//结束日期
     @Getter
     private final String silkCarCode;//丝车编码
+    @Getter
+    private final String workShopId;
 
     @Builder
     public static class Result {
