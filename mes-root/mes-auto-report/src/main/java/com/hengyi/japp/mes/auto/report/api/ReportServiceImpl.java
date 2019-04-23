@@ -10,11 +10,9 @@ import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
-import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
-import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
-import com.hengyi.japp.mes.auto.application.query.SilkCarRecordByWorkshopQuery;
-import com.hengyi.japp.mes.auto.application.query.SilkQuery;
+import com.hengyi.japp.mes.auto.application.query.*;
 import com.hengyi.japp.mes.auto.application.report.*;
+import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.Workshop;
@@ -49,15 +47,17 @@ public class ReportServiceImpl implements ReportService {
     private final PackageBoxRepository packageBoxRepository;
     private final SilkRepository silkRepository;
     private final SilkCarRecordRepository silkCarRecordRepository;
+    private final DyeingPrepareRepository dyeingPrepareRepository;
 
     @Inject
-    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository) {
+    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository, DyeingPrepareRepository dyeingPrepareRepository) {
         this.workshopRepository = workshopRepository;
         this.lineRepository = lineRepository;
         this.lineMachineRepository = lineMachineRepository;
         this.packageBoxRepository = packageBoxRepository;
         this.silkRepository = silkRepository;
         this.silkCarRecordRepository = silkCarRecordRepository;
+        this.dyeingPrepareRepository = dyeingPrepareRepository;
     }
 
     @Override
@@ -155,6 +155,20 @@ public class ReportServiceImpl implements ReportService {
                 .map(list -> new StrippingReport(list));
     }
 
+    @Override
+    public Single<DyeingReport> dyeingReport(String workshopId, long startDateTimestamp, long endDateTimestamp) {
+        final DyeingPrepareReportQuery dyeingPrepareReportQuery = DyeingPrepareReportQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .workshopId(workshopId)
+                .startDateTimestamp(startDateTimestamp)
+                .endDateTimestamp(endDateTimestamp)
+                .build();
+        return dyeingPrepareRepository.query(dyeingPrepareReportQuery).map(it -> {
+            final Collection<DyeingPrepare> dyeingPrepares = it.getDyeingPrepares();
+            return new DyeingReport(dyeingPrepares);
+        });
+    }
+
     private Single<StatisticsReportDay> statisticsReportDay(Workshop workshop, LocalDate ld) {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
@@ -194,6 +208,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Single<DoffingReport> doffingReport(String workshopId, LocalDate ldStart) {
+        return null;
+    }
+
+    @Override
     public Single<PackageBoxReport> packageBoxReport(String workshopId, LocalDate ldStart, LocalDate ldEnd) {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .workshopId(workshopId)
@@ -205,6 +224,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public Single<PackageBoxReport> packageBoxReport(String workshopId, LocalDate ldStart) {
+        return null;
+    }
+
+    @Override
     public Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart, LocalDate ldEnd) {
         final SilkQuery silkQuery = SilkQuery.builder()
                 .workshopId(workshopId)
@@ -213,6 +237,11 @@ public class ReportServiceImpl implements ReportService {
                 .pageSize(Integer.MAX_VALUE)
                 .build();
         return silkRepository.query(silkQuery).map(it -> new SilkExceptionReport(it.getSilks()));
+    }
+
+    @Override
+    public Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
+        return null;
     }
 
 }

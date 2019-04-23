@@ -19,6 +19,8 @@ public interface ReportService {
 
     Single<StrippingReport> strippingReport(String workshopId, LocalDate startLd, LocalDate endLd);
 
+    Single<DyeingReport> dyeingReport(String workshopId, long startDateTimestamp, long endDateTimestamp);
+
     Single<WorkshopProductPlanReport> workshopProductPlanReport(String workshopId, String lineId);
 
     Single<DoffingReport> doffingReport(String workshopId, LocalDate ldStart, LocalDate ldEnd);

@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
+import com.hengyi.japp.mes.auto.application.query.DyeingPrepareReportQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
 import io.reactivex.Flowable;
@@ -22,4 +23,6 @@ public interface DyeingPrepareRepository {
     Single<DyeingPrepareQuery.Result> query(DyeingPrepareQuery dyeingPrepareQuery);
 
     Single<DyeingPrepareResultQuery.Result> query(DyeingPrepareResultQuery dyeingPrepareResultQuery);
+
+    Single<DyeingPrepareReportQuery.Result> query(DyeingPrepareReportQuery dyeingPrepareReportQuery);
 }

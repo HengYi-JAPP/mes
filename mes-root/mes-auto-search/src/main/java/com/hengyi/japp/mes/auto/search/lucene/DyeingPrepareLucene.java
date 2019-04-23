@@ -4,6 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
+import com.hengyi.japp.mes.auto.application.query.DyeingPrepareReportQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
@@ -124,6 +125,18 @@ public class DyeingPrepareLucene extends BaseLucene<DyeingPrepare> {
                 .filter(J::nonBlank)
                 .map(it -> "*" + it)
                 .ifPresent(it -> bqBuilder.add(new WildcardQuery(new Term("creator.hrId", it)), BooleanClause.Occur.MUST));
+        return bqBuilder.build();
+    }
+
+    public Query build(DyeingPrepareReportQuery dyeingPrepareReportQuery) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+
+        addQuery(bqBuilder, "workshop", dyeingPrepareReportQuery.getWorkshopId());
+
+        long startL = dyeingPrepareReportQuery.getStartDateTimestamp();
+        long endL = dyeingPrepareReportQuery.getEndDateTimestamp();
+        bqBuilder.add(LongPoint.newRangeQuery("createDateTime", startL, endL), BooleanClause.Occur.MUST);
+
         return bqBuilder.build();
     }
 

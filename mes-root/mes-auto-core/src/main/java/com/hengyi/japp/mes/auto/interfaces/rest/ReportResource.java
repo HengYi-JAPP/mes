@@ -63,6 +63,14 @@ public class ReportResource {
         return reportService.strippingReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
     }
 
+    @Path("dyeingReport")
+    @GET
+    public Single<DyeingReport> dyeingReport(@QueryParam("workshopId") String workshopId,
+                                             @QueryParam("startDateTimestamp") long startDateTimestamp,
+                                             @QueryParam("endDateTimestamp") long endDateTimestamp) {
+        return reportService.dyeingReport(workshopId, startDateTimestamp, endDateTimestamp);
+    }
+
 //    @Path("dailyDoffingReport")
 //    @GET
 //    public Single<DoffingReport> dailyDoffingReport(@QueryParam("workshopId") @NotBlank String workshopId,
