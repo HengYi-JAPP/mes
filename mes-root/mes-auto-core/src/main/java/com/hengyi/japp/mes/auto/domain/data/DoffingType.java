@@ -23,5 +23,5 @@ public enum DoffingType {
     /**
      * 大丝车落筒
      */
-    BIG,
+    BIG_SILK_CAR,
 }

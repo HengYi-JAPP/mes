@@ -1,18 +1,22 @@
 package com.hengyi.japp.mes.auto.interfaces.warehouse.internal;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.ixtf.japp.core.J;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkCarRuntimeService;
+import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxFlipEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxFlipType;
+import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.exception.MultiBatchException;
 import com.hengyi.japp.mes.auto.exception.MultiGradeException;
+import com.hengyi.japp.mes.auto.exception.SilkCarRuntimePackagedException;
 import com.hengyi.japp.mes.auto.exception.SilkCarStatusException;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent;
@@ -21,14 +25,18 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * 仓库接口
@@ -42,14 +50,18 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final PackageBoxFlipRepository packageBoxFlipRepository;
     private final SilkCarRuntimeRepository silkCarRuntimeRepository;
     private final SilkRepository silkRepository;
+    private final SapT001lRepository sapT001lRepository;
+    private final PackageClassRepository packageClassRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private WarehouseServiceImpl(PackageBoxRepository packageBoxRepository, PackageBoxFlipRepository packageBoxFlipRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, OperatorRepository operatorRepository) {
+    private WarehouseServiceImpl(PackageBoxRepository packageBoxRepository, PackageBoxFlipRepository packageBoxFlipRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, SapT001lRepository sapT001lRepository, PackageClassRepository packageClassRepository, OperatorRepository operatorRepository) {
         this.packageBoxRepository = packageBoxRepository;
         this.packageBoxFlipRepository = packageBoxFlipRepository;
         this.silkCarRuntimeRepository = silkCarRuntimeRepository;
         this.silkRepository = silkRepository;
+        this.sapT001lRepository = sapT001lRepository;
+        this.packageClassRepository = packageClassRepository;
         this.operatorRepository = operatorRepository;
     }
 
@@ -156,6 +168,68 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         final Single<PackageBoxFlip> result$ = packageBoxFlipRepository.save(packageBoxFlip);
         return Completable.merge(addEvents).andThen(result$);
+    }
+
+    @Override
+    public Single<PackageBox> handle(Principal principal, PackageBoxEvent.BigSilkCarCommand command) {
+        final SilkCarRuntimeService silkCarRuntimeService = Jvertx.getProxy(SilkCarRuntimeService.class);
+        final PackageBoxEvent event = new PackageBoxEvent();
+        event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+        return operatorRepository.find(principal).flatMap(operator -> {
+            event.fire(operator);
+            return Flowable.fromIterable(command.getSilkCarRecords()).flatMapSingle(silkCarRuntimeService::find).toList();
+        }).flatMap(silkCarRuntimes -> {
+            final Set<SilkCarRuntime> packagedSilkCarRuntimes = silkCarRuntimes.stream().filter(SilkCarRuntime::hasPackageBoxEvent).collect(toSet());
+            if (J.nonEmpty(packagedSilkCarRuntimes)) {
+                throw new SilkCarRuntimePackagedException(packagedSilkCarRuntimes);
+            }
+
+            final Set<SilkCarRecord> silkCarRecords = silkCarRuntimes.stream().map(SilkCarRuntime::getSilkCarRecord).collect(toSet());
+            final Set<Silk> silks = silkCarRuntimes.stream().map(SilkCarRuntime::getSilkRuntimes).flatMap(Collection::stream).map(SilkRuntime::getSilk).collect(toSet());
+            final Set<Batch> checkBatches = Stream.concat(
+                    silkCarRecords.stream().map(SilkCarRecord::getBatch),
+                    silks.stream().map(Silk::getBatch)
+            ).collect(toSet());
+            if (checkBatches.size() != 1) {
+                throw new MultiBatchException();
+            }
+            final Batch batch = IterableUtils.get(checkBatches, 0);
+
+            final Set<Grade> checkGrades = silkCarRecords.stream().map(SilkCarRecord::getGrade).collect(toSet());
+            if (checkGrades.size() != 1) {
+                throw new MultiGradeException();
+            }
+            final Grade grade = IterableUtils.get(checkGrades, 0);
+
+            return packageBoxRepository.create().flatMap(packageBox -> {
+                packageBox.setType(PackageBoxType.BIG_SILK_CAR);
+                packageBox.log(event.getOperator(), event.getFireDateTime());
+                packageBox.setPrintDate(event.getFireDateTime());
+                packageBox.command(event.getCommand());
+                packageBox.setSilkCarRecords(silkCarRecords);
+                packageBox.setSilks(silks);
+                packageBox.setSilkCount(silks.size());
+                packageBox.setBatch(batch);
+                packageBox.setGrade(grade);
+                packageBox.setSaleType(command.getSaleType());
+                packageBox.setBudat(command.getBudat());
+                packageBox.setNetWeight(command.getNetWeight());
+                packageBox.setGrossWeight(command.getGrossWeight());
+                packageBox.setPipeType(command.getPipeType());
+                return sapT001lRepository.find(command.getSapT001l().getId()).flatMap(sapT001l -> {
+                    packageBox.setSapT001l(sapT001l);
+                    return packageClassRepository.find(command.getBudatClass().getId());
+                }).flatMap(budatClass -> {
+                    packageBox.setBudatClass(budatClass);
+                    return packageBoxRepository.save(packageBox);
+                }).doOnSuccess(it -> {
+                    event.setPackageBox(it);
+                    Flowable.fromIterable(silkCarRecords)
+                            .flatMapCompletable(silkCarRecord -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event))
+                            .subscribe();
+                });
+            });
+        });
     }
 
 }

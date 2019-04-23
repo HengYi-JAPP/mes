@@ -38,5 +38,7 @@ public class Constant extends com.github.ixtf.japp.core.Constant {
         public static final String SILK_DUPLICATE = "E00012";
         // 丝锭重复落筒，提前打印的标签，已经换批
         public static final String BATCH_CHANGED = "E00013";
+        // 丝车已打包
+        public static final String SILK_CAR_RUNTIME_PACKAGED = "E00014";
     }
 }

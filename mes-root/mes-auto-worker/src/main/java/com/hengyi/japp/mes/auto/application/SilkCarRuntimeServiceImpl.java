@@ -228,7 +228,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             return operatorRepository.find(principal);
         }).flatMap(it -> {
             event.fire(it);
-            return doffing(event, DoffingType.BIG);
+            return doffing(event, DoffingType.BIG_SILK_CAR);
         });
         final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
         return checks$.andThen(result$);

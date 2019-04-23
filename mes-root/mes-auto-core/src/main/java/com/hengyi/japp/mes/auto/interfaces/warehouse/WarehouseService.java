@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.interfaces.warehouse;
 
+import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxFlipEvent;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.PackageBoxFlip;
@@ -23,4 +24,6 @@ public interface WarehouseService {
     Completable unFetch(Principal principal, String code);
 
     Single<PackageBoxFlip> handle(Principal principal, PackageBoxFlipEvent.WarehouseCommand command);
+
+    Single<PackageBox> handle(Principal principal, PackageBoxEvent.BigSilkCarCommand command);
 }
