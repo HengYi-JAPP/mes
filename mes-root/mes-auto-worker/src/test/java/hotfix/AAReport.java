@@ -47,7 +47,7 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final Workshop workshop = Workshops.A;
+        final Workshop workshop = Workshops.B;
         final LocalDate startLd = LocalDate.of(2019, 3, 24);
         final LocalDate endLd = LocalDate.of(2019, 3, 24);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
