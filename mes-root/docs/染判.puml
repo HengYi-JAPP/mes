@@ -1,0 +1,37 @@
+@startuml
+autonumber
+hide footbox
+title 染判规则（以下时间均为落筒时间，其中Ai表示落次）
+control A1
+control A2
+control A3
+control B1
+control B2
+control B3
+control C1
+control C2
+control C3
+note over A1: 8:00(正常抽样)
+note over A2: 9:00
+note over A3: 10:00
+note over B1: 11:00（交织）
+note over B2: 12:00
+note over B3: 13:00
+note over C1: 14:00（抽样）
+note over C2: 15:00
+note over C3: 16:00
+A2 ->A1: <font color=blue><b>抽样追溯A1
+A3->A1:<font color=blue><b>抽样追溯A1
+B1->A1:<font color=blue><b>抽样追溯A1
+B1->B1:<font color=green><b>交织追溯B1
+B2->A1:<font color=blue><b>抽样追溯A1
+B2->B1:<font color=green><b>交织追溯B1
+B3->A1:<font color=blue><b>抽样追溯A1
+B3->B1:<font color=green><b>交织追溯B1
+C1->C1:<font color=blue><b>抽样追溯C1
+C1->B1:<font color=green><b>交织追溯B1
+C2->C1:<font color=blue><b>抽样追溯C1
+C2->B1:<font color=green><b>交织追溯B1
+C3->C1:<font color=blue><b>抽样追溯C1
+C3->B1:<font color=green><b>交织追溯B1
+@enduml

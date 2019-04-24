@@ -30,10 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-01-08
@@ -47,16 +47,16 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final Workshop workshop = Workshops.B;
-        final LocalDate startLd = LocalDate.of(2019, 3, 1);
-        final LocalDate endLd = LocalDate.of(2019, 3, 1);
+        final Workshop workshop = Workshops.F;
+        final LocalDate startLd = LocalDate.of(2019, 4, 15);
+        final LocalDate endLd = LocalDate.of(2019, 4, 21);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
-                .map(it -> new AAReportDay(workshop, it)).sorted()
-                .collect(Collectors.toList());
+                .map(it -> new AAReportDay(workshop, it))
+                .collect(toList());
 
         days.parallelStream().forEach(AAReport::toExcel);
-//        toExcel(new StatisticsReport(workshop, startLd, endLd, days));
+        toExcel(new StatisticsReport(workshop, startLd, endLd, days));
 
         final long endL = System.currentTimeMillis();
         System.out.println("用时：" + Duration.ofMillis(endL - startL).getSeconds());
@@ -143,6 +143,9 @@ public class AAReport {
     public static class Workshops {
         public static final Workshop A;
         public static final Workshop B;
+        public static final Workshop C;
+        public static final Workshop D;
+        public static final Workshop F;
 
         static {
             A = new Workshop();
@@ -151,6 +154,15 @@ public class AAReport {
             B = new Workshop();
             B.setId("5bffa63d8857b85a437d1fc5");
             B.setName("B");
+            C = new Workshop();
+            C.setId("5c772ecc26e0ff000148c039");
+            C.setName("C");
+            D = new Workshop();
+            D.setId("5c6d5f353d004500015bf451");
+            D.setName("D");
+            F = new Workshop();
+            F.setId("5c8c22cf8070b400017efdbc");
+            F.setName("F");
         }
     }
 

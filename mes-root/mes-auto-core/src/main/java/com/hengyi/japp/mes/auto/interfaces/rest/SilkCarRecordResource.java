@@ -39,12 +39,14 @@ public class SilkCarRecordResource {
     @GET
     public Single<SilkCarRecordQuery.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
                                                    @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
+                                                   @QueryParam("workShopId") String workShopId,
                                                    @QueryParam("silkCarCode") String silkCarCode,
                                                    @QueryParam("endDate") String endDate,
                                                    @QueryParam("startDate") String startDate) {
         final SilkCarRecordQuery silkCarRecordQuery = SilkCarRecordQuery.builder()
                 .first(first)
                 .pageSize(pageSize)
+                .workShopId(workShopId)
                 .silkCarCode(silkCarCode)
                 .startDate(LocalDate.parse(startDate))
                 .endDate(LocalDate.parse(endDate))

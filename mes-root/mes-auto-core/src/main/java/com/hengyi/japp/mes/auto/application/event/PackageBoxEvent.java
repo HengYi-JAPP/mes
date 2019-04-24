@@ -5,6 +5,7 @@ import com.github.ixtf.japp.core.J;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.application.SilkCarRuntimeService;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.SaleType;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.exception.MultiBatchException;
@@ -23,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -143,6 +145,26 @@ public class PackageBoxEvent extends EventSource {
         private EntityDTO temporaryBox;
         @Min(1)
         private int count;
+    }
+
+    @Data
+    public static class BigSilkCarCommand implements Serializable {
+        @NotNull
+        @Size(min = 1)
+        private Set<SilkCarRecordDTO> silkCarRecords;
+        @NotNull
+        private SaleType saleType;
+        @NotNull
+        private EntityDTO sapT001l;
+        @NotNull
+        private Date budat;
+        @NotNull
+        private EntityDTO budatClass;
+        @Min(1)
+        private double grossWeight;
+        @Min(1)
+        private double netWeight;
+        private double pipeType;
     }
 
 }

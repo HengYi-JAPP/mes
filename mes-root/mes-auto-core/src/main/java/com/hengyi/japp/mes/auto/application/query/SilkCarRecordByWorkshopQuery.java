@@ -11,31 +11,17 @@ import java.util.Collection;
  * @author jzb 2018-10-19
  */
 @Builder
-public class SilkCarRecordQuery {
-    @Getter
-    @Builder.Default
-    private final int first = 0;
-    @Getter
-    @Builder.Default
-    private final int pageSize = 50;
+public class SilkCarRecordByWorkshopQuery {
     @Getter
     @Builder.Default
     private final LocalDate startDate = LocalDate.now();//开始日期
     @Getter
     private final LocalDate endDate;//结束日期
     @Getter
-    private final String silkCarCode;//丝车编码
-    @Getter
-    private final String workShopId;
+    private final String workshopId;//车间
 
     @Builder
     public static class Result {
-        @Getter
-        private final int first;
-        @Getter
-        private final int pageSize;
-        @Getter
-        private final long count;
         @Getter
         private final Collection<SilkCarRecord> silkCarRecords;
     }
