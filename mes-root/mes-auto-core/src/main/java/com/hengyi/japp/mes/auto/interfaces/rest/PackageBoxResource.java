@@ -111,6 +111,12 @@ public class PackageBoxResource {
         return packageBoxService.update(principal, id, command);
     }
 
+    @Path("packageBoxes/{id}/inWarehouse")
+    @DELETE
+    public Completable unInWarehouse(Principal principal, @PathParam("id") String id) {
+        return packageBoxService.unInWarehouse(principal, id);
+    }
+
     /**
      * 已入库
      */
