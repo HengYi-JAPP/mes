@@ -218,7 +218,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
         final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
             event.setSilkCar(silkCar);
-            final BigSilkCarModel silkCarModel = new BigSilkCarModel(silkCar, command.getLineMachineCount());
+            final BigSilkCarModel silkCarModel = new BigSilkCarModel(silkCar);
             return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
         }).flatMap(it -> {
             event.setSilkRuntimes(it);
