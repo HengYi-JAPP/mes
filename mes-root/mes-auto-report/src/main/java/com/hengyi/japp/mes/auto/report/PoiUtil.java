@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.ixtf.japp.poi.Jpoi.cell;
 import static java.util.stream.Collectors.*;
 import static org.apache.poi.ss.usermodel.CellType.BLANK;
 import static org.apache.poi.ss.usermodel.CellType.FORMULA;
@@ -30,10 +31,6 @@ import static org.apache.poi.ss.util.CellUtil.getRow;
  * @author jzb 2019-01-21
  */
 public class PoiUtil {
-
-    private static final Cell cell(Row row, char c) {
-        return getCell(row, c - 'A');
-    }
 
     public static void fillData(Workbook wb, Sheet sheet, Collection<StatisticsReport.Item> items) {
         final var xlsxItems = aaCollect(items).parallelStream()
