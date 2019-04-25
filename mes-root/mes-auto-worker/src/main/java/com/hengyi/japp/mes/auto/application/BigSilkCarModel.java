@@ -59,7 +59,7 @@ public class BigSilkCarModel {
                         if (!Objects.equals(silkBarcodeBatch, batch)) {
                             throw new BatchChangedException();
                         }
-                        return Flowable.range(1, lineMachine.getItem()).flatMapSingle(spindle -> {
+                        return Flowable.range(1, lineMachine.getSpindleNum()).flatMapSingle(spindle -> {
                             final String silkCode = silkBarcode.generateSilkCode(spindle);
                             return silkRepository.create().map(silk -> {
                                 final SilkRuntime silkRuntime = new SilkRuntime();
