@@ -247,10 +247,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).flatMap(it -> {
                 event.setSilkRuntimes(it);
                 return operatorRepository.find(principal);
-            }).flatMapCompletable(operator -> {
+            }).flatMapPublisher(operator -> {
                 event.fire(operator);
-                return checkSilkDuplicate(event.getSilkRuntimes());
-            }).andThen(Flowable.fromIterable(event.getSilkRuntimes()).flatMapSingle(silkRuntime -> {
+                final Flowable<SilkRuntime> silkRuntimes$ = Flowable.fromIterable(event.getSilkRuntimes());
+                return checkSilkDuplicate(event.getSilkRuntimes()).andThen(silkRuntimes$);
+            }).flatMapSingle(silkRuntime -> {
                 final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silkCarRecord);
                 final Silk silk = silkRuntime.getSilk();
                 silk.setSilkCarRecords(silkCarRecords);
@@ -266,7 +267,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 silkCarRuntime.setSilkRuntimes(silkRuntimes);
                 return silkCarRuntimeRepository.addEventSource(silkCarRecord, event)
                         .andThen(Single.fromCallable(() -> silkCarRuntime));
-            }));
+            });
         });
         final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
         return checks$.andThen(result$);
@@ -571,6 +572,9 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Completable handle(SilkCarRuntime silkCarRuntime, SilkRuntimeDetachEvent event) {
+        if (silkCarRuntime.isBigSilkCar()) {
+            return Completable.error(new RuntimeException("大丝车无法解绑"));
+        }
         final String code = silkCarRuntime.getSilkCarRecord().getSilkCar().getCode();
         final Completable completable = Flowable.fromIterable(event.getSilkRuntimes()).map(SilkRuntime::getSilk).flatMapCompletable(silk -> {
             silk.setDetached(true);
