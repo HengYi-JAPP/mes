@@ -14,7 +14,7 @@ import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.RoleType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.exception.*;
 import com.hengyi.japp.mes.auto.repository.*;
@@ -24,14 +24,18 @@ import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.application.SilkCarRuntimeService.checkAndGetBatch;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -249,12 +253,13 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 return operatorRepository.find(principal);
             }).flatMapPublisher(operator -> {
                 event.fire(operator);
-                final Flowable<SilkRuntime> silkRuntimes$ = Flowable.fromIterable(event.getSilkRuntimes());
-                return checkSilkDuplicate(event.getSilkRuntimes()).andThen(silkRuntimes$);
+                final Collection<SilkRuntime> silkRuntimes = event.getSilkRuntimes();
+                return checkSilkDuplicate(silkRuntimes).andThen(Flowable.fromIterable(silkRuntimes));
             }).flatMapSingle(silkRuntime -> {
                 final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silkCarRecord);
                 final Silk silk = silkRuntime.getSilk();
                 silk.setSilkCarRecords(silkCarRecords);
+                silk.setDoffingType(silkCarRecord.getDoffingType());
                 silk.setDoffingDateTime(event.getFireDateTime());
                 silk.setDoffingOperator(event.getOperator());
                 silk.setGrade(silkCarRecord.getGrade());
@@ -277,25 +282,40 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     public Completable handle(Principal principal, BigSilkCarSilkChangeEvent.Command command) {
         final BigSilkCarSilkChangeEvent event = new BigSilkCarSilkChangeEvent();
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
-        final Function<Collection<EntityByCodeDTO>, Flowable<SilkRuntime>> silkRuntimesFun = dtos -> Flowable.fromIterable(dtos)
-                .map(EntityByCodeDTO::getCode)
-                .flatMapSingle(code -> {
-                    final SilkRuntime silkRuntime = new SilkRuntime();
-                    return silkRepository.findByCode(code).toSingle().map(silk -> {
-                        silkRuntime.setSilk(silk);
-                        return silkRuntime;
-                    });
-                });
-        final Completable result$ = operatorRepository.find(principal).flatMap(it -> {
-            event.fire(it);
-            return silkRuntimesFun.apply(command.getInSilks()).toList();
-        }).flatMap(inSilkRuntimes -> {
-            event.setInSilkRuntimes(inSilkRuntimes);
-            return silkRuntimesFun.apply(command.getOutSilks()).toList();
-        }).flatMap(it -> {
-            event.setOutSilkRuntimes(it);
+        final BiFunction<SilkCarRuntime, Collection<SilkRuntime.DTO>, Collection<SilkRuntime>> silkRuntimesFun = (silkCarRuntime, dtos) -> {
+            final var map = silkCarRuntime.getSilkRuntimes().parallelStream()
+                    .collect(toMap(it -> {
+                        final Silk silk = it.getSilk();
+                        return silk.getId();
+                    }, Function.identity()));
+            return command.getOutSilks().parallelStream()
+                    .map(SilkRuntime.DTO::getSilk)
+                    .map(EntityDTO::getId)
+                    .map(map::get)
+                    .collect(toSet());
+        };
+        final Completable result$ = operatorRepository.find(principal).flatMap(operator -> {
+            event.fire(operator);
             return find(command.getSilkCarRecord());
-        }).flatMapCompletable(silkCarRuntime -> silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
+        }).flatMapCompletable(silkCarRuntime -> {
+            final Collection<SilkRuntime> outSilkRuntimes = silkRuntimesFun.apply(silkCarRuntime, command.getOutSilks());
+            event.setOutSilkRuntimes(outSilkRuntimes);
+            return Flowable.fromIterable(command.getInItems()).flatMapSingle(item -> find(item.getSilkCarRecord()).map(inSilkCarRuntime -> {
+                final Collection<SilkRuntime> inSilkRuntimes = silkRuntimesFun.apply(inSilkCarRuntime, item.getSilks());
+                final SilkRuntimeDetachEvent detachEvent = new SilkRuntimeDetachEvent();
+                detachEvent.setCommand(event.getCommand());
+                detachEvent.fire(event.getOperator(), event.getFireDateTime());
+                detachEvent.setSilkRuntimes(inSilkRuntimes);
+                return Pair.of(inSilkCarRuntime, detachEvent);
+            })).toList().flatMap(pairs -> {
+                final Set<SilkRuntime> inSilkRuntimes = pairs.parallelStream().map(Pair::getValue).flatMap(it -> it.getSilkRuntimes().stream()).collect(toSet());
+                event.setInSilkRuntimes(inSilkRuntimes);
+                return Flowable.fromIterable(pairs).map(pair -> silkCarRuntimeRepository.addEventSource(pair.getKey(), pair.getValue())).toList();
+            }).flatMapCompletable(events -> {
+                events.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
+                return Flowable.fromIterable(events).flatMapCompletable(it -> it);
+            });
+        });
         return result$;
     }
 
@@ -597,11 +617,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         if (J.isEmpty(silks)) {
             return Completable.error(new SilkCarStatusException(silkCar));
         }
-        final Set<Grade> grades = silks.stream().map(Silk::getGrade).collect(Collectors.toSet());
+        final Set<Grade> grades = silks.stream().map(Silk::getGrade).collect(toSet());
         if (grades.size() != 1) {
             return Completable.error(new MultiGradeException());
         }
-        final Set<Batch> batches = silks.stream().map(Silk::getBatch).collect(Collectors.toSet());
+        final Set<Batch> batches = silks.stream().map(Silk::getBatch).collect(toSet());
         if (batches.size() != 1) {
             return Completable.error(new MultiBatchException());
         }

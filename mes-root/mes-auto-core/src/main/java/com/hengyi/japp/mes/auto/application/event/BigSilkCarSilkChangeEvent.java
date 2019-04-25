@@ -5,7 +5,6 @@ import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
-import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -106,9 +105,18 @@ public class BigSilkCarSilkChangeEvent extends EventSource {
         private SilkCarRecordDTO silkCarRecord;
         @NotNull
         @Size(min = 1)
-        private List<EntityByCodeDTO> inSilks;
+        private List<SilkRuntime.DTO> outSilks;
         @NotNull
         @Size(min = 1)
-        private List<EntityByCodeDTO> outSilks;
+        private List<Item> inItems;
+    }
+
+    @Data
+    public static class Item implements Serializable {
+        @NotNull
+        private SilkCarRecordDTO silkCarRecord;
+        @NotNull
+        @Size(min = 1)
+        private List<SilkRuntime.DTO> silks;
     }
 }

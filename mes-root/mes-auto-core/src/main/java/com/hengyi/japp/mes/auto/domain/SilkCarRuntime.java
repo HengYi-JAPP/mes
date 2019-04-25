@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
@@ -58,7 +59,8 @@ public class SilkCarRuntime implements Serializable {
                 .findAny().isPresent();
     }
 
+    @JsonIgnore
     public boolean isBigSilkCar() {
-        return getSilkCarRecord().getDoffingType() == DoffingType.BIG_SILK_CAR;
+        return DoffingType.BIG_SILK_CAR == getSilkCarRecord().getDoffingType();
     }
 }
