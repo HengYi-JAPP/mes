@@ -288,7 +288,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                         final Silk silk = it.getSilk();
                         return silk.getId();
                     }, Function.identity()));
-            return command.getOutSilks().parallelStream()
+            return dtos.parallelStream()
                     .map(SilkRuntime.DTO::getSilk)
                     .map(EntityDTO::getId)
                     .map(map::get)
