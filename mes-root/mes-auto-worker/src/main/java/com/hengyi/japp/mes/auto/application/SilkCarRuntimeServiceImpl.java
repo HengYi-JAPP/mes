@@ -303,18 +303,39 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
             event.setInSilkRuntimes(inSilkRuntimes);
             return Flowable.fromIterable(command.getInItems()).flatMapSingle(item -> find(item.getSilkCarRecord()).map(inSilkCarRuntime -> {
-                final SilkRuntimeDetachEvent detachEvent = new SilkRuntimeDetachEvent();
-                detachEvent.setCommand(event.getCommand());
-                detachEvent.fire(event.getOperator(), event.getFireDateTime());
-                detachEvent.setSilkRuntimes(silkRuntimesFun.apply(inSilkCarRuntime, item.getSilks()));
-                inSilkRuntimes.addAll(detachEvent.getSilkRuntimes());
-                return silkCarRuntimeRepository.addEventSource(inSilkCarRuntime, detachEvent);
-            })).toList().flatMapCompletable(events$ -> {
+                if (inSilkCarRuntime.isBigSilkCar()) {
+                    throw new RuntimeException("大丝车与大丝车无法进行丝锭交换");
+                }
+                final Collection<SilkRuntime> itemSilkRuntimes = silkRuntimesFun.apply(inSilkCarRuntime, item.getSilks());
+                final BigSilkCarSilkChangeEvent subEvent = new BigSilkCarSilkChangeEvent();
+                subEvent.setCommand(event.getCommand());
+                subEvent.fire(event.getOperator(), event.getFireDateTime());
+                subEvent.setOutSilkRuntimes(itemSilkRuntimes);
+                inSilkRuntimes.addAll(itemSilkRuntimes);
+                return silkCarRuntimeRepository.addEventSource(inSilkCarRuntime, subEvent);
+            })).toList().flatMapCompletable(actions$ -> {
                 if (inSilkRuntimes.size() != outSilkRuntimes.size()) {
                     throw new RuntimeException("交换数量不等");
                 }
-                events$.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
-                return Flowable.fromIterable(events$).flatMapCompletable(it -> it);
+
+                final Completable saveOutSilks$ = Flowable.fromIterable(outSilkRuntimes).flatMapSingle(silkRuntime -> {
+                    final Silk silk = silkRuntime.getSilk();
+                    silk.setDetached(true);
+                    return silkRepository.save(silk);
+                }).ignoreElements();
+                actions$.add(saveOutSilks$);
+
+                final Completable saveInSilks$ = Flowable.fromIterable(inSilkRuntimes).flatMapSingle(silkRuntime -> {
+                    final Silk silk = silkRuntime.getSilk();
+                    final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silk.getSilkCarRecords());
+                    silkCarRecords.add(silkCarRuntime.getSilkCarRecord());
+                    silk.setSilkCarRecords(silkCarRecords);
+                    return silkRepository.save(silk);
+                }).ignoreElements();
+                actions$.add(saveInSilks$);
+
+                actions$.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
+                return Completable.merge(actions$);
             });
         });
         return result$;
@@ -560,9 +581,28 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Completable handle(SilkCarRuntime silkCarRuntime, ProductProcessSubmitEvent event) {
-        final String code = silkCarRuntime.getSilkCarRecord().getSilkCar().getCode();
+        final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+        final Batch batch = silkCarRecord.getBatch();
+        final Product product = batch.getProduct();
+        final ProductProcess productProcess = event.getProductProcess();
+        if (!Objects.equals(product, productProcess.getProduct())) {
+            throw new RuntimeException("产品选择错误");
+        }
+        if (productProcess.isAtMostOnce()) {
+            final boolean present = silkCarRuntime.getEventSources().parallelStream()
+                    .filter(it -> !it.isDeleted())
+                    .filter(it -> event.getType() == it.getType())
+                    .filter(eventSource -> {
+                        final ProductProcessSubmitEvent oldEvent = (ProductProcessSubmitEvent) eventSource;
+                        return Objects.equals(productProcess, oldEvent.getProductProcess());
+                    })
+                    .findFirst().isPresent();
+            if (present) {
+                throw new RuntimeException("工序[" + productProcess.getName() + "]已处理");
+            }
+        }
         final Completable checks$ = authService.checkProductProcessSubmit(event.getOperator(), event.getProductProcess());
-        return checks$.andThen(silkCarRuntimeRepository.addEventSource(code, event));
+        return checks$.andThen(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
     }
 
     @Override
