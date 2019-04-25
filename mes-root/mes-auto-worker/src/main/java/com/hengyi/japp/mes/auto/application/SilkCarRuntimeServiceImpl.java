@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.application;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.ixtf.japp.core.J;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeDeleteCommand;
@@ -13,6 +14,7 @@ import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.RoleType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.exception.*;
 import com.hengyi.japp.mes.auto.repository.*;
@@ -25,6 +27,7 @@ import org.apache.commons.collections4.IterableUtils;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -219,7 +222,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
             event.setSilkCar(silkCar);
             final BigSilkCarModel silkCarModel = new BigSilkCarModel(silkCar, command.getLineMachineCount());
-            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
+            return silkCarModel.generateSilkRuntimes(command.getCheckSilks());
         }).flatMap(it -> {
             event.setSilkRuntimes(it);
             return gradeRepository.find(command.getGrade().getId());
@@ -236,28 +239,63 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command) {
-        final Single<SilkCarRuntime> result$ = find(command.getSilkCarRecord()).map(silkCarRuntime -> {
-            final BigSilkCarAppendModel silkCarModel = new BigSilkCarAppendModel(silkCarRuntime, command.getLineMachineCount());
-            return silkCarRuntime;
-        });
         final SilkCarRuntimeAppendEvent event = new SilkCarRuntimeAppendEvent();
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
-
-//        final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
-//            event.setSilkCar(silkCar);
-//            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
-//        }).flatMap(it -> {
-//            event.setSilkRuntimes(it);
-//            return gradeRepository.find(command.getGrade().getId());
-//        }).flatMap(grade -> {
-//            event.setGrade(grade);
-//            return operatorRepository.find(principal);
-//        }).flatMap(it -> {
-//            event.fire(it);
-//            return find(command.getSilkCar())
-//        });
+        final Single<SilkCarRuntime> result$ = find(command.getSilkCarRecord()).flatMap(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            final BigSilkCarAppendModel silkCarModel = new BigSilkCarAppendModel(silkCarRuntime, command.getLineMachineCount());
+            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).flatMap(it -> {
+                event.setSilkRuntimes(it);
+                return operatorRepository.find(principal);
+            }).flatMapCompletable(operator -> {
+                event.fire(operator);
+                return checkSilkDuplicate(event.getSilkRuntimes());
+            }).andThen(Flowable.fromIterable(event.getSilkRuntimes()).flatMapSingle(silkRuntime -> {
+                final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silkCarRecord);
+                final Silk silk = silkRuntime.getSilk();
+                silk.setSilkCarRecords(silkCarRecords);
+                silk.setDoffingDateTime(event.getFireDateTime());
+                silk.setDoffingOperator(event.getOperator());
+                silk.setGrade(silkCarRecord.getGrade());
+                return silkRepository.save(silk).map(it -> {
+                    silkRuntime.setSilk(it);
+                    return silkRuntime;
+                });
+            }).toList().flatMap(silkRuntimes -> {
+                silkRuntimes.addAll(silkCarRuntime.getSilkRuntimes());
+                silkCarRuntime.setSilkRuntimes(silkRuntimes);
+                return silkCarRuntimeRepository.addEventSource(silkCarRecord, event)
+                        .andThen(Single.fromCallable(() -> silkCarRuntime));
+            }));
+        });
         final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
         return checks$.andThen(result$);
+    }
+
+    @Override
+    public Completable handle(Principal principal, BigSilkCarSilkChangeEvent.Command command) {
+        final BigSilkCarSilkChangeEvent event = new BigSilkCarSilkChangeEvent();
+        event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+        final Function<Collection<EntityByCodeDTO>, Flowable<SilkRuntime>> silkRuntimesFun = dtos -> Flowable.fromIterable(dtos)
+                .map(EntityByCodeDTO::getCode)
+                .flatMapSingle(code -> {
+                    final SilkRuntime silkRuntime = new SilkRuntime();
+                    return silkRepository.findByCode(code).toSingle().map(silk -> {
+                        silkRuntime.setSilk(silk);
+                        return silkRuntime;
+                    });
+                });
+        final Completable result$ = operatorRepository.find(principal).flatMap(it -> {
+            event.fire(it);
+            return silkRuntimesFun.apply(command.getInSilks()).toList();
+        }).flatMap(inSilkRuntimes -> {
+            event.setInSilkRuntimes(inSilkRuntimes);
+            return silkRuntimesFun.apply(command.getOutSilks()).toList();
+        }).flatMap(it -> {
+            event.setOutSilkRuntimes(it);
+            return find(command.getSilkCarRecord());
+        }).flatMapCompletable(silkCarRuntime -> silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
+        return result$;
     }
 
     @Override

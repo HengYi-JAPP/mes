@@ -20,6 +20,12 @@ public enum EventSourceType {
             return com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeAppendEvent.DTO.from(jsonNode).toEvent();
         }
     },
+    BigSilkCarSilkChangeEvent {
+        @Override
+        public Single<BigSilkCarSilkChangeEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.application.event.BigSilkCarSilkChangeEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
 
     SilkCarRuntimeGradeEvent {
         @Override

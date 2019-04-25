@@ -70,6 +70,8 @@ public interface SilkCarRuntimeService {
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command);
 
+    Completable handle(Principal principal, BigSilkCarSilkChangeEvent.Command command);
+
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command);
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommand command);
