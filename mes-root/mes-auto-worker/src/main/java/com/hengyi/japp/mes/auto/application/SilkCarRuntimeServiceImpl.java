@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeDeleteCommand;
@@ -307,13 +308,17 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 detachEvent.fire(event.getOperator(), event.getFireDateTime());
                 detachEvent.setSilkRuntimes(inSilkRuntimes);
                 return Pair.of(inSilkCarRuntime, detachEvent);
-            })).toList().flatMap(pairs -> {
-                final Set<SilkRuntime> inSilkRuntimes = pairs.parallelStream().map(Pair::getValue).flatMap(it -> it.getSilkRuntimes().stream()).collect(toSet());
+            })).toList().flatMapCompletable(pairs -> {
+                final Collection<Completable> events$ = Lists.newArrayList();
+                final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
                 event.setInSilkRuntimes(inSilkRuntimes);
-                return Flowable.fromIterable(pairs).map(pair -> silkCarRuntimeRepository.addEventSource(pair.getKey(), pair.getValue())).toList();
-            }).flatMapCompletable(events -> {
-                events.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
-                return Flowable.fromIterable(events).flatMapCompletable(it -> it);
+                pairs.forEach(pair -> {
+                    final SilkRuntimeDetachEvent detachEvent = pair.getRight();
+                    inSilkRuntimes.addAll(detachEvent.getSilkRuntimes());
+                    events$.add(silkCarRuntimeRepository.addEventSource(pair.getKey(), detachEvent));
+                });
+                events$.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
+                return Flowable.fromIterable(events$).flatMapCompletable(it -> it);
             });
         });
         return result$;
