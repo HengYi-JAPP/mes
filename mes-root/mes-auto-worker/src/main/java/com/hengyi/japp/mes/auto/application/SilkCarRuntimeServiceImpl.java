@@ -25,7 +25,6 @@ import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.security.Principal;
 import java.util.*;
@@ -301,22 +300,19 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         }).flatMapCompletable(silkCarRuntime -> {
             final Collection<SilkRuntime> outSilkRuntimes = silkRuntimesFun.apply(silkCarRuntime, command.getOutSilks());
             event.setOutSilkRuntimes(outSilkRuntimes);
+            final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
+            event.setInSilkRuntimes(inSilkRuntimes);
             return Flowable.fromIterable(command.getInItems()).flatMapSingle(item -> find(item.getSilkCarRecord()).map(inSilkCarRuntime -> {
-                final Collection<SilkRuntime> inSilkRuntimes = silkRuntimesFun.apply(inSilkCarRuntime, item.getSilks());
                 final SilkRuntimeDetachEvent detachEvent = new SilkRuntimeDetachEvent();
                 detachEvent.setCommand(event.getCommand());
                 detachEvent.fire(event.getOperator(), event.getFireDateTime());
-                detachEvent.setSilkRuntimes(inSilkRuntimes);
-                return Pair.of(inSilkCarRuntime, detachEvent);
-            })).toList().flatMapCompletable(pairs -> {
-                final Collection<Completable> events$ = Lists.newArrayList();
-                final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
-                event.setInSilkRuntimes(inSilkRuntimes);
-                pairs.forEach(pair -> {
-                    final SilkRuntimeDetachEvent detachEvent = pair.getRight();
-                    inSilkRuntimes.addAll(detachEvent.getSilkRuntimes());
-                    events$.add(silkCarRuntimeRepository.addEventSource(pair.getKey(), detachEvent));
-                });
+                detachEvent.setSilkRuntimes(silkRuntimesFun.apply(inSilkCarRuntime, item.getSilks()));
+                inSilkRuntimes.addAll(detachEvent.getSilkRuntimes());
+                return silkCarRuntimeRepository.addEventSource(inSilkCarRuntime, detachEvent);
+            })).toList().flatMapCompletable(events$ -> {
+                if (inSilkRuntimes.size() != outSilkRuntimes.size()) {
+                    throw new RuntimeException("交换数量不等");
+                }
                 events$.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
                 return Flowable.fromIterable(events$).flatMapCompletable(it -> it);
             });
