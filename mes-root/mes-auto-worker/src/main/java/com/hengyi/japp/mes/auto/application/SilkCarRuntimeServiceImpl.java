@@ -298,6 +298,12 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             event.fire(operator);
             return find(command.getSilkCarRecord());
         }).flatMapCompletable(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            final SilkCar silkCar = silkCarRecord.getSilkCar();
+            if (silkCarRuntime.hasPackageBoxEvent()) {
+                throw new SilkCarRuntimePackagedException(silkCarRuntime);
+            }
+
             final Collection<SilkRuntime> outSilkRuntimes = silkRuntimesFun.apply(silkCarRuntime, command.getOutSilks());
             event.setOutSilkRuntimes(outSilkRuntimes);
             final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
@@ -328,7 +334,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 final Completable saveInSilks$ = Flowable.fromIterable(inSilkRuntimes).flatMapSingle(silkRuntime -> {
                     final Silk silk = silkRuntime.getSilk();
                     final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silk.getSilkCarRecords());
-                    silkCarRecords.add(silkCarRuntime.getSilkCarRecord());
+                    silkCarRecords.add(silkCarRecord);
                     silk.setSilkCarRecords(silkCarRecords);
                     return silkRepository.save(silk);
                 }).ignoreElements();
