@@ -20,10 +20,10 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
@@ -52,14 +52,14 @@ public class BigSilkCarSilkChangeEvent extends EventSource {
 
     @Override
     public Collection<SilkRuntime> _calcSilkRuntimes(Collection<SilkRuntime> data) {
-        final var outSilkIds = outSilkRuntimes.parallelStream().map(SilkRuntime::getSilk).map(Silk::getId).collect(toSet());
+        final var outSilkIds = J.emptyIfNull(outSilkRuntimes).parallelStream().map(SilkRuntime::getSilk).map(Silk::getId).collect(toSet());
         final Stream<SilkRuntime> oldStream = J.emptyIfNull(data).stream().filter(silkRuntime -> {
             final Silk silk = silkRuntime.getSilk();
             @NotBlank final String id = silk.getId();
             return !outSilkIds.contains(id);
         });
-        final Stream<SilkRuntime> appendStream = J.emptyIfNull(inSilkRuntimes).stream();
-        return Stream.concat(oldStream, appendStream).collect(Collectors.toList());
+        final Stream<SilkRuntime> appendStream = J.emptyIfNull(inSilkRuntimes).parallelStream();
+        return Stream.concat(oldStream, appendStream).collect(toList());
     }
 
     @Override
@@ -86,11 +86,11 @@ public class BigSilkCarSilkChangeEvent extends EventSource {
 
         public Single<BigSilkCarSilkChangeEvent> toEvent() {
             final BigSilkCarSilkChangeEvent event = new BigSilkCarSilkChangeEvent();
-            return Flowable.fromIterable(inSilkRuntimes)
+            return Flowable.fromIterable(J.emptyIfNull(inSilkRuntimes))
                     .flatMapSingle(SilkRuntime.DTO::rxToSilkRuntime).toList()
                     .flatMap(it -> {
                         event.setInSilkRuntimes(it);
-                        return Flowable.fromIterable(outSilkRuntimes)
+                        return Flowable.fromIterable(J.emptyIfNull(outSilkRuntimes))
                                 .flatMapSingle(SilkRuntime.DTO::rxToSilkRuntime).toList();
                     }).flatMap(it -> {
                         event.setOutSilkRuntimes(it);
