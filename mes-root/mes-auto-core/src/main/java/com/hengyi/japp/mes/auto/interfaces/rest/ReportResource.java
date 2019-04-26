@@ -71,6 +71,13 @@ public class ReportResource {
         return reportService.dyeingReport(workshopId, startDateTimestamp, endDateTimestamp);
     }
 
+    @Path("measureFiberReport")
+    @GET
+    public Single<MeasureFiberReport> measureFiberReport(@QueryParam("workshopId") String workshopId,
+                                                         @QueryParam("startDate") @NotBlank String startLdString,
+                                                         @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.measureFiberReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
+    }
 //    @Path("dailyDoffingReport")
 //    @GET
 //    public Single<DoffingReport> dailyDoffingReport(@QueryParam("workshopId") @NotBlank String workshopId,

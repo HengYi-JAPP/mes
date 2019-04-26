@@ -169,6 +169,50 @@ public class ReportServiceImpl implements ReportService {
         });
     }
 
+    @Override
+    public Single<MeasureFiberReport> measureFiberReport(String workshopId, LocalDate startLd, LocalDate endLd) {
+        SilkCarRecordQuery silkCarRecordQuery = SilkCarRecordQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .workShopId(workshopId)
+                .startDate(startLd.minusWeeks(1))
+                .endDate(endLd)
+                .build();
+        silkCarRecordRepository
+                .query(silkCarRecordQuery)
+                .flatMap(result -> Single.just(result.getSilkCarRecords()))
+                .flatMapPublisher(Flowable::fromIterable)
+                .flatMap(silkCarRecord -> {
+                    final String eventsJsonString = silkCarRecord.getEventsJsonString();
+                    final String initEventsJsonString = silkCarRecord.getInitEventJsonString();
+                    if (J.isBlank(eventsJsonString)) {
+                        return Flowable.empty();
+                    }
+                    final JsonNode eventsArrayNode = MAPPER.readTree(eventsJsonString);
+                    final JsonNode initEventNode = MAPPER.readTree(initEventsJsonString);
+                    ArrayNode arrayNode = (ArrayNode) eventsArrayNode;
+                    arrayNode.add(initEventNode);
+                    JsonNode jsonNode = arrayNode;
+                    return Flowable.fromIterable(jsonNode)
+                            .flatMapSingle(EventSource::from)
+                            .toList()
+                            .map(list -> new MeasureFiberReport.Item(list, silkCarRecord))
+                            .flatMapPublisher(Flowable::just);
+                })
+                .filter(item -> {
+                    return item.getEventSources().stream().anyMatch(eventSource -> {
+                        ProductProcessSubmitEvent productProcessSubmitEvent = (ProductProcessSubmitEvent) eventSource;
+                        return EventSourceType.ProductProcessSubmitEvent.equals(eventSource.getType())
+                                && "落筒异常".equals(productProcessSubmitEvent.getProductProcess().getName());
+//                        if (EventSourceType.ProductProcessSubmitEvent.equals(eventSource.getType())) {
+//                            ProductProcessSubmitEvent productProcessSubmitEvent = (ProductProcessSubmitEvent) eventSource;
+//                            return "测纤".equals(productProcessSubmitEvent.getProductProcess().getName());
+//                        }
+//                        return false;
+                    });
+                });
+        return null;
+    }
+
     private Single<StatisticsReportDay> statisticsReportDay(Workshop workshop, LocalDate ld) {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
