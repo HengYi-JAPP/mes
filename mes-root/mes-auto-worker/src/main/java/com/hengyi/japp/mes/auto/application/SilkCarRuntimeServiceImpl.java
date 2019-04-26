@@ -31,11 +31,11 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.application.SilkCarRuntimeService.checkAndGetBatch;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 
 /**
@@ -178,7 +178,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             final List<EventSource> eventSourceList = J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
                     .filter(it -> !it.isDeleted())
                     .filter(it -> !it.getOperator().getId().equals(principal.getName()))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             if (J.nonEmpty(eventSourceList)) {
                 throw new RuntimeException("已经有其他人对丝车操作，无法删除");
             }
@@ -197,7 +197,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         return find(command.getSilkCarRecord()).flatMap(silkCarRuntime -> {
             final List<EventSource> eventSourceList = J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
                     .filter(it -> !it.isDeleted())
-                    .collect(Collectors.toList());
+                    .collect(toList());
             if (J.nonEmpty(eventSourceList)) {
                 throw new RuntimeException("已经有其他人对丝车操作，无法删除");
             }
@@ -298,12 +298,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             event.fire(operator);
             return find(command.getSilkCarRecord());
         }).flatMapCompletable(silkCarRuntime -> {
-            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
-            final SilkCar silkCar = silkCarRecord.getSilkCar();
             if (silkCarRuntime.hasPackageBoxEvent()) {
                 throw new SilkCarRuntimePackagedException(silkCarRuntime);
             }
 
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
             final Collection<SilkRuntime> outSilkRuntimes = silkRuntimesFun.apply(silkCarRuntime, command.getOutSilks());
             event.setOutSilkRuntimes(outSilkRuntimes);
             final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
@@ -323,6 +322,8 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 if (inSilkRuntimes.size() != outSilkRuntimes.size()) {
                     throw new RuntimeException("交换数量不等");
                 }
+                final List<SilkRuntime> checkSilkRuntimes = Stream.concat(inSilkRuntimes.parallelStream(), outSilkRuntimes.parallelStream()).collect(toList());
+                SilkCarRuntimeService.checkAndGetBatch(checkSilkRuntimes);
 
                 final Completable saveOutSilks$ = Flowable.fromIterable(outSilkRuntimes).flatMapSingle(silkRuntime -> {
                     final Silk silk = silkRuntime.getSilk();
@@ -660,7 +661,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                     silk.setGrade(silkRuntime.getGrade());
                     silk.setExceptions(silkRuntime.getExceptions());
                     return silk;
-                }).collect(Collectors.toList());
+                }).collect(toList());
         if (J.isEmpty(silks)) {
             return Completable.error(new SilkCarStatusException(silkCar));
         }
