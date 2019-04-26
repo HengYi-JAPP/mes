@@ -37,7 +37,7 @@ public interface SilkCarRuntimeService {
                 .map(SilkRuntime::getSilk)
                 .map(Silk::getBatch)
                 .collect(toSet());
-        if (batches.size() > 1) {
+        if (batches.size() != 1) {
             throw new MultiBatchException();
         }
         return IterableUtils.get(batches, 0);
