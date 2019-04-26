@@ -47,5 +47,6 @@ public class ProductProcess extends LoggableMongoEntity {
     private Collection<SilkNote> notes;
     private FormConfig formConfig;
     private boolean mustProcess;
+    private boolean atMostOnce;
 
 }

@@ -61,6 +61,18 @@ public class SilkCarRuntimeResource {
         return silkCarRuntimeService.handle(principal, command);
     }
 
+    @Path("BigSilkCarDoffingAppendEvents")
+    @POST
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command) {
+        return silkCarRuntimeService.handle(principal, command);
+    }
+
+    @Path("BigSilkCarSilkChangeEvents")
+    @POST
+    public Completable handle(Principal principal, BigSilkCarSilkChangeEvent.Command command) {
+        return silkCarRuntimeService.handle(principal, command);
+    }
+
     @Path("AutoDoffingAdaptCheckSilks")
     @POST
     public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command) {

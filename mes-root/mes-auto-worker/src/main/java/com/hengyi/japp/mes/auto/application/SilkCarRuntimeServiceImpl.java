@@ -3,6 +3,8 @@ package com.hengyi.japp.mes.auto.application;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.ixtf.japp.core.J;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.SilkCarRuntimeDeleteCommand;
@@ -13,6 +15,7 @@ import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.RoleType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.exception.*;
 import com.hengyi.japp.mes.auto.repository.*;
@@ -25,10 +28,14 @@ import org.apache.commons.collections4.IterableUtils;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.application.SilkCarRuntimeService.checkAndGetBatch;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -218,8 +225,8 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
         final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
             event.setSilkCar(silkCar);
-            final BigSilkCarModel silkCarModel = new BigSilkCarModel(silkCar);
-            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
+            final BigSilkCarModel silkCarModel = new BigSilkCarModel(silkCar, command.getLineMachineCount());
+            return silkCarModel.generateSilkRuntimes(command.getCheckSilks());
         }).flatMap(it -> {
             event.setSilkRuntimes(it);
             return gradeRepository.find(command.getGrade().getId());
@@ -236,28 +243,102 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command) {
-        final Single<SilkCarRuntime> result$ = find(command.getSilkCarRecord()).map(silkCarRuntime -> {
-            return silkCarRuntime;
-        });
         final SilkCarRuntimeAppendEvent event = new SilkCarRuntimeAppendEvent();
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
-
-//        final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
-//            event.setSilkCar(silkCar);
-//            final BigSilkCarAppendModel silkCarModel = new BigSilkCarAppendModel(silkCar, command.getLineMachineCount());
-//            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).toList();
-//        }).flatMap(it -> {
-//            event.setSilkRuntimes(it);
-//            return gradeRepository.find(command.getGrade().getId());
-//        }).flatMap(grade -> {
-//            event.setGrade(grade);
-//            return operatorRepository.find(principal);
-//        }).flatMap(it -> {
-//            event.fire(it);
-//            return find(command.getSilkCar())
-//        });
+        final Single<SilkCarRuntime> result$ = find(command.getSilkCarRecord()).flatMap(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            final BigSilkCarAppendModel silkCarModel = new BigSilkCarAppendModel(silkCarRuntime, command.getLineMachineCount());
+            return silkCarModel.generateSilkRuntimes(command.getCheckSilks()).flatMap(it -> {
+                event.setSilkRuntimes(it);
+                return operatorRepository.find(principal);
+            }).flatMapPublisher(operator -> {
+                event.fire(operator);
+                final Collection<SilkRuntime> silkRuntimes = event.getSilkRuntimes();
+                return checkSilkDuplicate(silkRuntimes).andThen(Flowable.fromIterable(silkRuntimes));
+            }).flatMapSingle(silkRuntime -> {
+                final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silkCarRecord);
+                final Silk silk = silkRuntime.getSilk();
+                silk.setSilkCarRecords(silkCarRecords);
+                silk.setDoffingType(silkCarRecord.getDoffingType());
+                silk.setDoffingDateTime(event.getFireDateTime());
+                silk.setDoffingOperator(event.getOperator());
+                silk.setGrade(silkCarRecord.getGrade());
+                return silkRepository.save(silk).map(it -> {
+                    silkRuntime.setSilk(it);
+                    return silkRuntime;
+                });
+            }).toList().flatMap(silkRuntimes -> {
+                silkRuntimes.addAll(silkCarRuntime.getSilkRuntimes());
+                silkCarRuntime.setSilkRuntimes(silkRuntimes);
+                return silkCarRuntimeRepository.addEventSource(silkCarRecord, event)
+                        .andThen(Single.fromCallable(() -> silkCarRuntime));
+            });
+        });
         final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
         return checks$.andThen(result$);
+    }
+
+    @Override
+    public Completable handle(Principal principal, BigSilkCarSilkChangeEvent.Command command) {
+        final BigSilkCarSilkChangeEvent event = new BigSilkCarSilkChangeEvent();
+        event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+        final BiFunction<SilkCarRuntime, Collection<SilkRuntime.DTO>, Collection<SilkRuntime>> silkRuntimesFun = (silkCarRuntime, dtos) -> {
+            final var map = silkCarRuntime.getSilkRuntimes().parallelStream()
+                    .collect(toMap(it -> {
+                        final Silk silk = it.getSilk();
+                        return silk.getId();
+                    }, Function.identity()));
+            return dtos.parallelStream()
+                    .map(SilkRuntime.DTO::getSilk)
+                    .map(EntityDTO::getId)
+                    .map(map::get)
+                    .collect(toSet());
+        };
+        final Completable result$ = operatorRepository.find(principal).flatMap(operator -> {
+            event.fire(operator);
+            return find(command.getSilkCarRecord());
+        }).flatMapCompletable(silkCarRuntime -> {
+            final Collection<SilkRuntime> outSilkRuntimes = silkRuntimesFun.apply(silkCarRuntime, command.getOutSilks());
+            event.setOutSilkRuntimes(outSilkRuntimes);
+            final Set<SilkRuntime> inSilkRuntimes = Sets.newHashSet();
+            event.setInSilkRuntimes(inSilkRuntimes);
+            return Flowable.fromIterable(command.getInItems()).flatMapSingle(item -> find(item.getSilkCarRecord()).map(inSilkCarRuntime -> {
+                if (inSilkCarRuntime.isBigSilkCar()) {
+                    throw new RuntimeException("大丝车与大丝车无法进行丝锭交换");
+                }
+                final Collection<SilkRuntime> itemSilkRuntimes = silkRuntimesFun.apply(inSilkCarRuntime, item.getSilks());
+                final BigSilkCarSilkChangeEvent subEvent = new BigSilkCarSilkChangeEvent();
+                subEvent.setCommand(event.getCommand());
+                subEvent.fire(event.getOperator(), event.getFireDateTime());
+                subEvent.setOutSilkRuntimes(itemSilkRuntimes);
+                inSilkRuntimes.addAll(itemSilkRuntimes);
+                return silkCarRuntimeRepository.addEventSource(inSilkCarRuntime, subEvent);
+            })).toList().flatMapCompletable(actions$ -> {
+                if (inSilkRuntimes.size() != outSilkRuntimes.size()) {
+                    throw new RuntimeException("交换数量不等");
+                }
+
+                final Completable saveOutSilks$ = Flowable.fromIterable(outSilkRuntimes).flatMapSingle(silkRuntime -> {
+                    final Silk silk = silkRuntime.getSilk();
+                    silk.setDetached(true);
+                    return silkRepository.save(silk);
+                }).ignoreElements();
+                actions$.add(saveOutSilks$);
+
+                final Completable saveInSilks$ = Flowable.fromIterable(inSilkRuntimes).flatMapSingle(silkRuntime -> {
+                    final Silk silk = silkRuntime.getSilk();
+                    final Collection<SilkCarRecord> silkCarRecords = Lists.newArrayList(silk.getSilkCarRecords());
+                    silkCarRecords.add(silkCarRuntime.getSilkCarRecord());
+                    silk.setSilkCarRecords(silkCarRecords);
+                    return silkRepository.save(silk);
+                }).ignoreElements();
+                actions$.add(saveInSilks$);
+
+                actions$.add(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
+                return Completable.merge(actions$);
+            });
+        });
+        return result$;
     }
 
     @Override
@@ -500,9 +581,28 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Completable handle(SilkCarRuntime silkCarRuntime, ProductProcessSubmitEvent event) {
-        final String code = silkCarRuntime.getSilkCarRecord().getSilkCar().getCode();
+        final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+        final Batch batch = silkCarRecord.getBatch();
+        final Product product = batch.getProduct();
+        final ProductProcess productProcess = event.getProductProcess();
+        if (!Objects.equals(product, productProcess.getProduct())) {
+            throw new RuntimeException("产品选择错误");
+        }
+        if (productProcess.isAtMostOnce()) {
+            final boolean present = silkCarRuntime.getEventSources().parallelStream()
+                    .filter(it -> !it.isDeleted())
+                    .filter(it -> event.getType() == it.getType())
+                    .filter(eventSource -> {
+                        final ProductProcessSubmitEvent oldEvent = (ProductProcessSubmitEvent) eventSource;
+                        return Objects.equals(productProcess, oldEvent.getProductProcess());
+                    })
+                    .findFirst().isPresent();
+            if (present) {
+                throw new RuntimeException("工序[" + productProcess.getName() + "]已处理");
+            }
+        }
         final Completable checks$ = authService.checkProductProcessSubmit(event.getOperator(), event.getProductProcess());
-        return checks$.andThen(silkCarRuntimeRepository.addEventSource(code, event));
+        return checks$.andThen(silkCarRuntimeRepository.addEventSource(silkCarRuntime, event));
     }
 
     @Override
@@ -533,6 +633,9 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Completable handle(SilkCarRuntime silkCarRuntime, SilkRuntimeDetachEvent event) {
+        if (silkCarRuntime.isBigSilkCar()) {
+            return Completable.error(new RuntimeException("大丝车无法解绑"));
+        }
         final String code = silkCarRuntime.getSilkCarRecord().getSilkCar().getCode();
         final Completable completable = Flowable.fromIterable(event.getSilkRuntimes()).map(SilkRuntime::getSilk).flatMapCompletable(silk -> {
             silk.setDetached(true);
@@ -555,11 +658,11 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         if (J.isEmpty(silks)) {
             return Completable.error(new SilkCarStatusException(silkCar));
         }
-        final Set<Grade> grades = silks.stream().map(Silk::getGrade).collect(Collectors.toSet());
+        final Set<Grade> grades = silks.stream().map(Silk::getGrade).collect(toSet());
         if (grades.size() != 1) {
             return Completable.error(new MultiGradeException());
         }
-        final Set<Batch> batches = silks.stream().map(Silk::getBatch).collect(Collectors.toSet());
+        final Set<Batch> batches = silks.stream().map(Silk::getBatch).collect(toSet());
         if (batches.size() != 1) {
             return Completable.error(new MultiBatchException());
         }

@@ -49,7 +49,7 @@ public interface SilkCarRuntimeService {
     static Collection<SilkRuntime> checkAndGetSilkRuntimes(SilkCarRuntime silkCarRuntime, Collection<SilkRuntime.DTO> dtos) throws Exception {
         final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
         final SilkCar silkCar = silkCarRecord.getSilkCar();
-        Collection<SilkRuntime> result = Lists.newArrayList();
+        final Collection<SilkRuntime> result = Lists.newArrayList();
         final Map<Triple<SilkCarSideType, Integer, Integer>, SilkRuntime> map = silkCarRuntime.getSilkRuntimes().stream()
                 .collect(toMap(it -> Triple.of(it.getSideType(), it.getRow(), it.getCol()), Function.identity()));
         for (SilkRuntime.DTO dto : dtos) {
@@ -69,6 +69,8 @@ public interface SilkCarRuntimeService {
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.BigSilkCarDoffingCommand command);
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeAppendEvent.BigSilkCarDoffingAppendCommand command);
+
+    Completable handle(Principal principal, BigSilkCarSilkChangeEvent.Command command);
 
     Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command);
 
