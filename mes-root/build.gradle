@@ -53,14 +53,13 @@ subprojects {
      */
     shadowJar {
         dependsOn clean
-//        baseName "${project.name}-fat.jar"
         archiveName "${project.name}-fat.jar"
     }
     docker {
         dependsOn shadowJar
         name "hengyi/${project.name}"
-        noCache true
         files tasks.shadowJar.outputs
+        noCache true
     }
     jar.manifest {
         attributes(
