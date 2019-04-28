@@ -196,7 +196,7 @@ public class ReportServiceImpl implements ReportService {
                     return Flowable.fromIterable(jsonNode)
                             .flatMapSingle(EventSource::from)
                             .toList()
-                            .map(list -> new MeasureFiberReport.Item(list, silkCarRecord))
+                            .map(list -> new MeasureFiberReport.Item(list, silkCarRecord, silkCarRecord.getBatch().getProduct()))
                             .flatMapPublisher(Flowable::just);
                 })
                 .filter(item -> item.getEventSources().parallelStream().anyMatch(eventSource ->

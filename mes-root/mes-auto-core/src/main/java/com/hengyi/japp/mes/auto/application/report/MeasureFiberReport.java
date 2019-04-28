@@ -1,7 +1,7 @@
 package com.hengyi.japp.mes.auto.application.report;
 
 import com.hengyi.japp.mes.auto.application.event.EventSource;
-import com.hengyi.japp.mes.auto.domain.Operator;
+import com.hengyi.japp.mes.auto.domain.Product;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import lombok.Data;
 
@@ -17,8 +17,6 @@ public class MeasureFiberReport implements Serializable {
     private final Collection<Item> items;
 
     public MeasureFiberReport(Collection<Item> items) {
-        items.parallelStream().map(item -> {
-        })
         this.items = items;
     }
 
@@ -26,6 +24,6 @@ public class MeasureFiberReport implements Serializable {
     public static class Item implements Serializable {
         private final List<EventSource> eventSources;
         private final SilkCarRecord silkCarRecord;
-        private final Operator operator;
+        private final Product product;
     }
 }
