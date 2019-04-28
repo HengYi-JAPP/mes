@@ -10,6 +10,7 @@ import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
+import com.hengyi.japp.mes.auto.application.event.SilkNoteFeedbackEvent;
 import com.hengyi.japp.mes.auto.application.query.*;
 import com.hengyi.japp.mes.auto.application.report.*;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
@@ -174,10 +175,10 @@ public class ReportServiceImpl implements ReportService {
         SilkCarRecordQuery silkCarRecordQuery = SilkCarRecordQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
                 .workShopId(workshopId)
-                .startDate(startLd.minusWeeks(1))
+                .startDate(startLd)
                 .endDate(endLd)
                 .build();
-        silkCarRecordRepository
+        return silkCarRecordRepository
                 .query(silkCarRecordQuery)
                 .flatMap(result -> Single.just(result.getSilkCarRecords()))
                 .flatMapPublisher(Flowable::fromIterable)
@@ -198,19 +199,10 @@ public class ReportServiceImpl implements ReportService {
                             .map(list -> new MeasureFiberReport.Item(list, silkCarRecord))
                             .flatMapPublisher(Flowable::just);
                 })
-                .filter(item -> {
-                    return item.getEventSources().stream().anyMatch(eventSource -> {
-                        ProductProcessSubmitEvent productProcessSubmitEvent = (ProductProcessSubmitEvent) eventSource;
-                        return EventSourceType.ProductProcessSubmitEvent.equals(eventSource.getType())
-                                && "落筒异常".equals(productProcessSubmitEvent.getProductProcess().getName());
-//                        if (EventSourceType.ProductProcessSubmitEvent.equals(eventSource.getType())) {
-//                            ProductProcessSubmitEvent productProcessSubmitEvent = (ProductProcessSubmitEvent) eventSource;
-//                            return "测纤".equals(productProcessSubmitEvent.getProductProcess().getName());
-//                        }
-//                        return false;
-                    });
-                });
-        return null;
+                .filter(item -> item.getEventSources().parallelStream().anyMatch(eventSource ->
+                        EventSourceType.SilkNoteFeedbackEvent.equals(eventSource.getType()) && "测纤".equals(((SilkNoteFeedbackEvent) eventSource).getSilkNote().getName())))
+                .toList()
+                .map(MeasureFiberReport::new);
     }
 
     private Single<StatisticsReportDay> statisticsReportDay(Workshop workshop, LocalDate ld) {
