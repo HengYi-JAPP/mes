@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.exception;
 
 import com.github.ixtf.japp.core.exception.JException;
+import com.google.common.collect.Sets;
 import com.hengyi.japp.mes.auto.Constant;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
@@ -15,6 +16,10 @@ public class SilkCarRuntimePackagedException extends JException {
     public SilkCarRuntimePackagedException(Set<SilkCarRuntime> silkCarRuntimes) {
         super(Constant.ErrorCode.SILK_CAR_RUNTIME_PACKAGED);
         this.silkCarRuntimes = silkCarRuntimes;
+    }
+
+    public SilkCarRuntimePackagedException(SilkCarRuntime silkCarRuntime) {
+        this(Sets.newHashSet(silkCarRuntime));
     }
 
     @Override
