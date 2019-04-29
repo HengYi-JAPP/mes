@@ -49,9 +49,10 @@ public class ReportServiceImpl implements ReportService {
     private final SilkRepository silkRepository;
     private final SilkCarRecordRepository silkCarRecordRepository;
     private final DyeingPrepareRepository dyeingPrepareRepository;
+    private final SilkCarRuntimeRepository silkCarRuntimeRepository;
 
     @Inject
-    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository, DyeingPrepareRepository dyeingPrepareRepository) {
+    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository, DyeingPrepareRepository dyeingPrepareRepository, SilkCarRuntimeRepository silkCarRuntimeRepository) {
         this.workshopRepository = workshopRepository;
         this.lineRepository = lineRepository;
         this.lineMachineRepository = lineMachineRepository;
@@ -59,6 +60,7 @@ public class ReportServiceImpl implements ReportService {
         this.silkRepository = silkRepository;
         this.silkCarRecordRepository = silkCarRecordRepository;
         this.dyeingPrepareRepository = dyeingPrepareRepository;
+        this.silkCarRuntimeRepository = silkCarRuntimeRepository;
     }
 
     @Override
@@ -182,23 +184,28 @@ public class ReportServiceImpl implements ReportService {
                 .query(silkCarRecordQuery)
                 .flatMap(result -> Single.just(result.getSilkCarRecords()))
                 .flatMapPublisher(Flowable::fromIterable)
-                .flatMap(silkCarRecord -> {
-                    final String eventsJsonString = silkCarRecord.getEventsJsonString();
-                    final String initEventsJsonString = silkCarRecord.getInitEventJsonString();
-                    if (J.isBlank(eventsJsonString)) {
-                        return Flowable.empty();
-                    }
-                    final JsonNode eventsArrayNode = MAPPER.readTree(eventsJsonString);
-                    final JsonNode initEventNode = MAPPER.readTree(initEventsJsonString);
-                    ArrayNode arrayNode = (ArrayNode) eventsArrayNode;
-                    arrayNode.add(initEventNode);
-                    JsonNode jsonNode = arrayNode;
-                    return Flowable.fromIterable(jsonNode)
-                            .flatMapSingle(EventSource::from)
-                            .toList()
-                            .map(list -> new MeasureFiberReport.Item(list, silkCarRecord, silkCarRecord.getBatch().getProduct()))
-                            .flatMapPublisher(Flowable::just);
-                })
+                .flatMap(silkCarRecord -> silkCarRuntimeRepository.findByCode(silkCarRecord.getSilkCar().getCode())
+                        .flatMapPublisher(silkCarRuntime -> {
+                            if (silkCarRuntime.getSilkCarRecord() != null && silkCarRecord.getId().equals(silkCarRuntime.getSilkCarRecord().getId())) {
+                                return Flowable.fromIterable(silkCarRuntime.getEventSources())
+                                        .toList()
+                                        .map(list -> new MeasureFiberReport.Item(list, silkCarRecord, silkCarRecord.getBatch().getProduct()))
+                                        .flatMapPublisher(Flowable::just);
+
+                            } else {
+                                final String eventsJsonString = silkCarRecord.getEventsJsonString();
+                                if (J.isBlank(eventsJsonString)) {
+                                    return Flowable.empty();
+                                }
+                                final JsonNode jsonNode = MAPPER.readTree(eventsJsonString);
+                                return Flowable.fromIterable(jsonNode)
+                                        .flatMapSingle(EventSource::from)
+                                        .toList()
+                                        .map(list -> new MeasureFiberReport.Item(list, silkCarRecord, silkCarRecord.getBatch().getProduct()))
+                                        .flatMapPublisher(Flowable::just);
+                            }
+                        })
+                )
                 .filter(item -> item.getEventSources().parallelStream().anyMatch(eventSource ->
                         EventSourceType.SilkNoteFeedbackEvent.equals(eventSource.getType()) && "测纤".equals(((SilkNoteFeedbackEvent) eventSource).getSilkNote().getName())))
                 .toList()
