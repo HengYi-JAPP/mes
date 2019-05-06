@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.search.lucene;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
@@ -10,9 +11,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 
@@ -106,9 +109,12 @@ public class SilkLucene extends BaseLucene<Silk> {
 
     public Query build(SilkQuery silkQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        final long startL = J.date(silkQuery.getLdStart()).getTime();
+        final long endL = J.date(silkQuery.getLdEnd()).getTime();
         addQuery(bqBuilder, "dyeingSample", silkQuery.isDyeingSample());
         addQuery(bqBuilder, "workshop", silkQuery.getWorkshopId());
         addQuery(bqBuilder, "batch", silkQuery.getBatchId());
+        bqBuilder.add(LongPoint.newRangeQuery("doffingDateTime", startL, endL), BooleanClause.Occur.MUST);
         return bqBuilder.build();
     }
 }

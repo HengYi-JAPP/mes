@@ -279,7 +279,8 @@ public class ReportServiceImpl implements ReportService {
                 .ldEnd(ldEnd)
                 .pageSize(Integer.MAX_VALUE)
                 .build();
-        return silkRepository.query(silkQuery).map(it -> new SilkExceptionReport(it.getSilks()));
+        return silkRepository.query(silkQuery)
+                .map(it -> new SilkExceptionReport(it.getSilks()));
     }
 
     @Override

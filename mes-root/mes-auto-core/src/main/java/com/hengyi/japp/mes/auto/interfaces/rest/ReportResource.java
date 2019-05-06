@@ -102,12 +102,12 @@ public class ReportResource {
 //        return reportService.packageBoxReport(workshopId, ldStart, ldEnd);
 //    }
 //
-//    @Path("dailySilkExceptionReport")
-//    @GET
-//    public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                                @QueryParam("date") @NotBlank String dateString) {
-//        return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString));
-//    }
+@Path("dailySilkExceptionReport")
+@GET
+public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
+                                                            @QueryParam("date") @NotBlank String dateString) {
+    return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString), LocalDate.parse(dateString).plusDays(1));
+}
 //
 //    @Path("monthSilkExceptionReport")
 //    @GET
