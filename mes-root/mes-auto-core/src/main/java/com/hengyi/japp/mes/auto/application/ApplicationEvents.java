@@ -19,4 +19,6 @@ public interface ApplicationEvents {
 
     void fire(Silk silk, Operator operator);
 
+    void fire(SilkCarRuntime silkCarRuntime);
+
 }

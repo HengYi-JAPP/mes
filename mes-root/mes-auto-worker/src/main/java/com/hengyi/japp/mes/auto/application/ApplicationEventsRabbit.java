@@ -47,6 +47,14 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
 
     @SneakyThrows
     @Override
+    public void fire(SilkCarRuntime silkCarRuntime) {
+        final ImmutableMap<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime);
+        final String message = MAPPER.writeValueAsString(map);
+        vertx.eventBus().publish("mes-auto://websocket/boards/JikonAdapterSilkCarInfo", message);
+    }
+
+    @SneakyThrows
+    @Override
     public void fire(Silk silk, Operator operator) {
         final LineMachine lineMachine = silk.getLineMachine();
         final Line line = lineMachine.getLine();
