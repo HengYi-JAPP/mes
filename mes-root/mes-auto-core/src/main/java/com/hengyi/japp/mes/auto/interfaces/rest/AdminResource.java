@@ -36,6 +36,12 @@ public class AdminResource {
         return adminService.handle(principal, command);
     }
 
+    @Path("AutoDoffingAdaptEvents")
+    @POST
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminAutoDoffingAdaptCommand command) {
+        return adminService.handle(principal, command);
+    }
+
     @Path("silkBarcodes/{id}/lucence")
     @PUT
     public Completable handle(Principal principal, @PathParam("id") String id) {

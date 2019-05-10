@@ -14,5 +14,7 @@ public interface AdminService {
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminManualDoffingCommand command);
 
+    Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminAutoDoffingAdaptCommand command);
+
     Completable unlockSilkBarcodeRepositoryMongo(Principal principal);
 }
