@@ -29,10 +29,10 @@ public class SilkExceptionReport implements Serializable {
                     String[] temp = key.split("-");
                     Map<SilkException, Long> silkExceptionMap = J.emptyIfNull(groupMap.get(key)).parallelStream()
                             .filter(silk -> silk.getException() != null)
-                            .filter(silk -> silk.getGrade() != null || silk.getGrade().getSortBy() < 100)
+                            .filter(silk -> silk.getGrade() != null && silk.getGrade().getSortBy() < 100)
                             .collect(Collectors.groupingBy(silk -> silk.getException(), Collectors.counting()));
                     Map<Grade, Long> gradeMap = J.emptyIfNull(groupMap.get(key)).parallelStream()
-                            .filter(silk -> silk.getGrade() != null || silk.getGrade().getSortBy() < 100)
+                            .filter(silk -> silk.getGrade() != null && silk.getGrade().getSortBy() < 100)
                             .collect(Collectors.groupingBy(silk -> silk.getGrade(), Collectors.counting()));
                     Collection<ExceptionGroup> exceptionGroups = silkExceptionMap.keySet()
                             .stream()
