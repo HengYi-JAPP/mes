@@ -37,7 +37,11 @@ public abstract class AbstractSilkCarModel implements SilkCarModel {
     protected AbstractSilkCarModel(SilkCar silkCar) {
         this.silkCar = silkCar;
         int capacity = silkCar.getRow() * silkCar.getCol() * 2;
-        this.silkCarCapacity = silkCar.getType() == SilkCarType.BIG_SILK_CAR ? capacity * 2 : capacity;
+        if (capacity == 32) {
+            this.silkCarCapacity = capacity;
+        } else {
+            this.silkCarCapacity = silkCar.getType() == SilkCarType.BIG_SILK_CAR ? capacity * 2 : capacity;
+        }
     }
 
     protected Single<List<SilkRuntime>> addAll(List<Single<SilkRuntime>> silkRuntime$List) {
