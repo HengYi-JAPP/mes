@@ -34,6 +34,10 @@ public class SilkCar extends LoggableMongoEntity {
     private String code;
     private int row;
     private int col;
+    /**
+     * 丝车层数（有的丝车会放两层丝锭，尤其是大丝车）
+     */
+    private int pliesNum;
 
     public List<CheckSilkDTO> checkSilks(SilkCarSideType silkCarSideType) {
         final ImmutableList.Builder<CheckSilkDTO> builder = ImmutableList.builder();
