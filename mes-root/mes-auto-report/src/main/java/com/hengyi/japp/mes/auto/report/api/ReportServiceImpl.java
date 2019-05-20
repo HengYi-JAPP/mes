@@ -10,6 +10,7 @@ import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
+import com.hengyi.japp.mes.auto.application.event.SilkNoteFeedbackEvent;
 import com.hengyi.japp.mes.auto.application.query.*;
 import com.hengyi.japp.mes.auto.application.report.*;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
@@ -48,9 +49,10 @@ public class ReportServiceImpl implements ReportService {
     private final SilkRepository silkRepository;
     private final SilkCarRecordRepository silkCarRecordRepository;
     private final DyeingPrepareRepository dyeingPrepareRepository;
+    private final SilkCarRuntimeRepository silkCarRuntimeRepository;
 
     @Inject
-    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository, DyeingPrepareRepository dyeingPrepareRepository) {
+    private ReportServiceImpl(WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, SilkRepository silkRepository, SilkCarRecordRepository silkCarRecordRepository, DyeingPrepareRepository dyeingPrepareRepository, SilkCarRuntimeRepository silkCarRuntimeRepository) {
         this.workshopRepository = workshopRepository;
         this.lineRepository = lineRepository;
         this.lineMachineRepository = lineMachineRepository;
@@ -58,6 +60,7 @@ public class ReportServiceImpl implements ReportService {
         this.silkRepository = silkRepository;
         this.silkCarRecordRepository = silkCarRecordRepository;
         this.dyeingPrepareRepository = dyeingPrepareRepository;
+        this.silkCarRuntimeRepository = silkCarRuntimeRepository;
     }
 
     @Override
@@ -169,6 +172,46 @@ public class ReportServiceImpl implements ReportService {
         });
     }
 
+    @Override
+    public Single<MeasureFiberReport> measureFiberReport(String workshopId, LocalDate startLd, LocalDate endLd) {
+        SilkCarRecordQuery silkCarRecordQuery = SilkCarRecordQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .workShopId(workshopId)
+                .startDate(startLd)
+                .endDate(endLd)
+                .build();
+        return silkCarRecordRepository
+                .query(silkCarRecordQuery)
+                .flatMap(result -> Single.just(result.getSilkCarRecords()))
+                .flatMapPublisher(Flowable::fromIterable)
+                .flatMap(silkCarRecord -> silkCarRuntimeRepository.findByCode(silkCarRecord.getSilkCar().getCode())
+                        .flatMapPublisher(silkCarRuntime -> {
+                            if (silkCarRuntime.getSilkCarRecord() != null && silkCarRecord.getId().equals(silkCarRuntime.getSilkCarRecord().getId())) {
+                                return Flowable.fromIterable(silkCarRuntime.getEventSources())
+                                        .toList()
+                                        .map(list -> new MeasureFiberReport.Item(list, silkCarRecord, silkCarRecord.getBatch().getProduct()))
+                                        .flatMapPublisher(Flowable::just);
+
+                            } else {
+                                final String eventsJsonString = silkCarRecord.getEventsJsonString();
+                                if (J.isBlank(eventsJsonString)) {
+                                    return Flowable.empty();
+                                }
+                                final JsonNode jsonNode = MAPPER.readTree(eventsJsonString);
+                                return Flowable.fromIterable(jsonNode)
+                                        .flatMapSingle(EventSource::from)
+                                        .toList()
+                                        .map(list -> new MeasureFiberReport.Item(list, silkCarRecord, silkCarRecord.getBatch().getProduct()))
+                                        .flatMapPublisher(Flowable::just);
+                            }
+                        })
+                )
+                .filter(item -> item.getEventSources().parallelStream().anyMatch(eventSource ->
+                        EventSourceType.SilkNoteFeedbackEvent.equals(eventSource.getType()) && "测纤".equals(((SilkNoteFeedbackEvent) eventSource).getSilkNote().getName())))
+                .toList()
+                .map(MeasureFiberReport::new);
+    }
+
     private Single<StatisticsReportDay> statisticsReportDay(Workshop workshop, LocalDate ld) {
         final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
                 .pageSize(Integer.MAX_VALUE)
@@ -236,7 +279,8 @@ public class ReportServiceImpl implements ReportService {
                 .ldEnd(ldEnd)
                 .pageSize(Integer.MAX_VALUE)
                 .build();
-        return silkRepository.query(silkQuery).map(it -> new SilkExceptionReport(it.getSilks()));
+        return silkRepository.query(silkQuery)
+                .map(it -> new SilkExceptionReport(it.getSilks()));
     }
 
     @Override

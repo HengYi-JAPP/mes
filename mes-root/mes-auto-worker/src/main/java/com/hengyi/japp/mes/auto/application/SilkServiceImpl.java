@@ -19,13 +19,15 @@ import java.security.Principal;
 @Slf4j
 @Singleton
 public class SilkServiceImpl implements SilkService {
+    private final ApplicationEvents applicationEvents;
     private final SilkRepository silkRepository;
     private final SilkExceptionRepository silkExceptionRepository;
     private final GradeRepository gradeRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private SilkServiceImpl(SilkRepository silkRepository, SilkExceptionRepository silkExceptionRepository, GradeRepository gradeRepository, OperatorRepository operatorRepository) {
+    private SilkServiceImpl(ApplicationEvents applicationEvents, SilkRepository silkRepository, SilkExceptionRepository silkExceptionRepository, GradeRepository gradeRepository, OperatorRepository operatorRepository) {
+        this.applicationEvents = applicationEvents;
         this.silkRepository = silkRepository;
         this.silkExceptionRepository = silkExceptionRepository;
         this.gradeRepository = gradeRepository;
@@ -38,7 +40,10 @@ public class SilkServiceImpl implements SilkService {
             silk.setException(it);
             return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
                 silk.setGrade(grade);
-                return silkRepository.save(silk);
+                return  operatorRepository.find(principal).flatMap(operator -> {
+                        applicationEvents.fire(silk,operator);
+                    return silkRepository.save(silk);
+                 });
             });
         }));
     }

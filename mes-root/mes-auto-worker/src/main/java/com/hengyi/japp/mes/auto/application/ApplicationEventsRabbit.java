@@ -3,10 +3,7 @@ package com.hengyi.japp.mes.auto.application;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hengyi.japp.mes.auto.domain.Line;
-import com.hengyi.japp.mes.auto.domain.LineMachine;
-import com.hengyi.japp.mes.auto.domain.LineMachineProductPlan;
-import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
+import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.interfaces.jikon.dto.GetSilkSpindleInfoDTO;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.rabbitmq.RabbitMQClient;
@@ -46,5 +43,23 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
         final ImmutableMap<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime, "reasons", reasons);
         final String message = MAPPER.writeValueAsString(map);
         vertx.eventBus().publish("mes-auto://websocket/boards/JikonAdapterSilkCarInfoFetchReasons", message);
+    }
+
+    @SneakyThrows
+    @Override
+    public void fire(SilkCarRuntime silkCarRuntime) {
+        final ImmutableMap<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime);
+        final String message = MAPPER.writeValueAsString(map);
+        vertx.eventBus().publish("mes-auto://websocket/boards/JikonAdapterSilkCarInfo", message);
+    }
+
+    @SneakyThrows
+    @Override
+    public void fire(Silk silk, Operator operator) {
+        final LineMachine lineMachine = silk.getLineMachine();
+        final Line line = lineMachine.getLine();
+        final ImmutableMap<String, Object> map = ImmutableMap.of("silk", silk, "operator", operator);
+        final String message = MAPPER.writeValueAsString(map);
+        vertx.eventBus().publish("mes-auto://websocket/boards/workshopSilkExceptionReport/lines/" + line.getId(), message);
     }
 }

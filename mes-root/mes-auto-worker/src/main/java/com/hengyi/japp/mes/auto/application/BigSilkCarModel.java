@@ -37,7 +37,7 @@ public class BigSilkCarModel {
     protected BigSilkCarModel(SilkCar silkCar, float count) {
         Validate.isTrue(SilkCarType.BIG_SILK_CAR == silkCar.getType());
         this.silkCar = silkCar;
-        this.silkCarCapacity = silkCar.getRow() * silkCar.getCol() * 2 * 2;
+        this.silkCarCapacity = silkCar.getRow() * silkCar.getCol() * 2 * silkCar.getPliesNum();
         this.count = count;
     }
 

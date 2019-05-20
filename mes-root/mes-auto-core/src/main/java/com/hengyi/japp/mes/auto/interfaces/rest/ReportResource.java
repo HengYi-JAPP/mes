@@ -71,6 +71,13 @@ public class ReportResource {
         return reportService.dyeingReport(workshopId, startDateTimestamp, endDateTimestamp);
     }
 
+    @Path("measureFiberReport")
+    @GET
+    public Single<MeasureFiberReport> measureFiberReport(@QueryParam("workshopId") String workshopId,
+                                                         @QueryParam("startDate") @NotBlank String startLdString,
+                                                         @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.measureFiberReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
+    }
 //    @Path("dailyDoffingReport")
 //    @GET
 //    public Single<DoffingReport> dailyDoffingReport(@QueryParam("workshopId") @NotBlank String workshopId,
@@ -95,12 +102,12 @@ public class ReportResource {
 //        return reportService.packageBoxReport(workshopId, ldStart, ldEnd);
 //    }
 //
-//    @Path("dailySilkExceptionReport")
-//    @GET
-//    public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                                @QueryParam("date") @NotBlank String dateString) {
-//        return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString));
-//    }
+@Path("dailySilkExceptionReport")
+@GET
+public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
+                                                            @QueryParam("date") @NotBlank String dateString) {
+    return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString), LocalDate.parse(dateString).plusDays(1));
+}
 //
 //    @Path("monthSilkExceptionReport")
 //    @GET

@@ -64,7 +64,18 @@ public class SilkCarRepositoryMongo extends MongoEntityRepository<SilkCar> imple
         final int pageSize = silkCarQuery.getPageSize();
         final SilkCarQuery.Result.ResultBuilder builder = SilkCarQuery.Result.builder().first(first).pageSize(pageSize);
         final FindOptions findOptions = new FindOptions().setSort(MongoUtil.ascendingQuery("code")).setSkip(first).setLimit(pageSize);
-
+        final Bson typeFilter = Optional.ofNullable(silkCarQuery.getType())
+                .filter(StringUtils::isNotBlank)
+                .map(it -> Filters.eq("type", it))
+                .orElse(null);
+        final Bson rowFilter = Optional.ofNullable(silkCarQuery.getRow())
+                .filter(row -> row > 0)
+                .map(it -> Filters.eq("row", it))
+                .orElse(null);
+        final Bson colFilter = Optional.ofNullable(silkCarQuery.getCol())
+                .filter(col -> col > 0)
+                .map(it -> Filters.eq("col", it))
+                .orElse(null);
         final Bson qFilter = Optional.ofNullable(silkCarQuery.getQ())
                 .filter(StringUtils::isNotBlank)
                 .map(q -> {
@@ -72,7 +83,7 @@ public class SilkCarRepositoryMongo extends MongoEntityRepository<SilkCar> imple
                     return Filters.regex("code", pattern);
                 })
                 .orElse(null);
-        final JsonObject query = unDeletedQuery(qFilter);
+        final JsonObject query = unDeletedQuery(typeFilter, qFilter, rowFilter, colFilter);
 
         final Completable count$ = mongoClient.rxCount(collectionName, query)
                 .doOnSuccess(builder::count)

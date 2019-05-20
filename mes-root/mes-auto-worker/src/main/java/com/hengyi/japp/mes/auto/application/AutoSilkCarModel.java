@@ -46,7 +46,7 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
                 .map(it -> checkPosition(it, checkSilks));
     }
 
-    private Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodes(List<SilkBarcode> silkBarcodes) {
+    protected Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodes(List<SilkBarcode> silkBarcodes) {
         final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
         final ImmutableList.Builder<Single<SilkRuntime>> builder = ImmutableList.builder();
         for (int orderBy = 0; orderBy < silkBarcodes.size(); orderBy++) {

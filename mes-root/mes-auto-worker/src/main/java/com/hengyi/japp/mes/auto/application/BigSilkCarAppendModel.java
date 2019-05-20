@@ -35,7 +35,7 @@ public class BigSilkCarAppendModel {
         this.count = count;
         final SilkCar silkCar = silkCarRuntime.getSilkCarRecord().getSilkCar();
         Validate.isTrue(SilkCarType.BIG_SILK_CAR == silkCar.getType());
-        this.silkCarCapacity = silkCar.getRow() * silkCar.getCol() * 2 * 2;
+        this.silkCarCapacity = silkCar.getRow() * silkCar.getCol() * 2 * silkCar.getPliesNum();
     }
 
     public Single<Collection<SilkRuntime>> generateSilkRuntimes(Collection<EntityByCodeDTO> checkSilks) {

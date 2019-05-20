@@ -9,6 +9,7 @@ import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.domain.Workshop;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.GradeRepository;
@@ -75,6 +76,27 @@ public class AdminServiceImpl implements AdminService {
         return rxCheckAdmin(principal).andThen(result$);
     }
 
+    @Override
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminAutoDoffingAdaptCommand command) {
+        final SilkCarRuntimeInitEvent event = new SilkCarRuntimeInitEvent();
+        event.setCommand(MAPPER.convertValue(command, JsonNode.class));
+        final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
+            event.setSilkCar(silkCar);
+            final AdminAutoSilkCarModel silkCarModel = new AdminAutoSilkCarModel(silkCar, command.getWorkshop());
+            return silkCarModel.generateSilkRuntimes(command.getCheckSilks());
+        }).flatMap(silkRuntimes -> {
+            event.setSilkRuntimes(silkRuntimes);
+            return gradeRepository.find(command.getGrade().getId());
+        }).flatMap(grade -> {
+            event.setGrade(grade);
+            return operatorRepository.find(principal);
+        }).flatMap(operator -> {
+            event.fire(operator);
+            return silkCarRuntimeService.doffing(event, DoffingType.AUTO);
+        });
+        return rxCheckAdmin(principal).andThen(result$);
+    }
+
     private class AdminManualSilkCarModel extends ManualSilkCarModel {
         private AdminManualSilkCarModel(SilkCar silkCar, float count) {
             super(silkCar, count);
@@ -88,6 +110,18 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    private class AdminAutoSilkCarModel extends AutoSilkCarModel {
+        private AdminAutoSilkCarModel(SilkCar silkCar, Workshop workshop) {
+            super(silkCar, workshop);
+        }
+
+        @Override
+        public Single<List<SilkRuntime>> generateSilkRuntimes(List<CheckSilkDTO> checkSilks) {
+            return toSilkBarcodes(checkSilks)
+                    .flatMap(this::generateSilkRuntimesBySilkBarcodes)
+                    .map(it -> checkPosition(it, checkSilks));
+        }
+    }
     @Override
     public Completable unlockSilkBarcodeRepositoryMongo(Principal principal) {
 //        SilkBarcodeRepositoryMongo.semaphore.release();

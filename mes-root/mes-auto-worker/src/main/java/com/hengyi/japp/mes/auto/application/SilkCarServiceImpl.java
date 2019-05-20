@@ -39,6 +39,7 @@ public class SilkCarServiceImpl implements SilkCarService {
         silkCar.setRow(command.getRow());
         silkCar.setCol(command.getCol());
         silkCar.setType(command.getType());
+        silkCar.setPliesNum(command.getPliesNum());
         return operatorRepository.find(principal)
                 .flatMap(operator -> {
                     silkCar.log(operator);
