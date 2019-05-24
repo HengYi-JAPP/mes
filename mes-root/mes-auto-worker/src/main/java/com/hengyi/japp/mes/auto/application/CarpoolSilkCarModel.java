@@ -2,10 +2,10 @@ package com.hengyi.japp.mes.auto.application;
 
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.ImmutableList;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Single;
@@ -66,21 +66,8 @@ public class CarpoolSilkCarModel extends AbstractSilkCarModel {
 
     @Override
     public List<SilkCarPosition> getOrderedSilkPositions() {
-        final ImmutableList.Builder<SilkCarPosition> builder = ImmutableList.builder();
-        final int silkCarRow = silkCar.getRow();
-        final int silkCarCol = silkCar.getCol();
-        for (SilkCarSideType sideType : SilkCarSideType.values()) {
-            for (int silkRow = 1; silkRow <= silkCarRow; silkRow++) {
-                for (int silkCol = 1; silkCol <= silkCarCol; silkCol++) {
-                    final SilkCarPosition silkPosition = new SilkCarPosition();
-                    silkPosition.setSideType(sideType);
-                    silkPosition.setRow(silkRow);
-                    silkPosition.setCol(silkCol);
-                    builder.add(silkPosition);
-                }
-            }
-        }
-        return builder.build();
+        final MesAutoConfig mesAutoConfig = Jvertx.getProxy(MesAutoConfig.class);
+        return mesAutoConfig.getCarpoolSilkCarModelOrderType().getOrderedSilkPositions(silkCar);
     }
 
     @Override
