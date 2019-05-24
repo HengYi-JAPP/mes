@@ -49,4 +49,6 @@ public interface PackageBoxService {
     Single<PackageBox> handle(Principal principal, PackageBoxAppendCommand command);
 
     Flowable<PackageBox> handle(Principal principal, SmallPackageBoxEvent.BatchCommand command);
+
+    Completable unInWarehouse(Principal principal, String id);
 }

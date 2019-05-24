@@ -71,11 +71,17 @@ public class SilkCarResource {
     @GET
     public Single<SilkCarQuery.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
                                              @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
-                                             @QueryParam("q") String q) {
+                                             @QueryParam("q") String q,
+                                             @QueryParam("type") String type,
+                                             @QueryParam("row") int row,
+                                             @QueryParam("col") int col) {
         final SilkCarQuery silkCarQuery = SilkCarQuery.builder()
                 .first(first)
                 .pageSize(pageSize)
                 .q(q)
+                .row(row)
+                .col(col)
+                .type(type)
                 .build();
         return silkCarRepository.query(silkCarQuery);
     }

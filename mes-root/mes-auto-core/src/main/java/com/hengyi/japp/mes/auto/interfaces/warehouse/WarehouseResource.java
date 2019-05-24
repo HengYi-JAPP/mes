@@ -3,7 +3,9 @@ package com.hengyi.japp.mes.auto.interfaces.warehouse;
 import com.github.ixtf.japp.vertx.annotations.ApmTrace;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxFlipEvent;
+import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -67,5 +69,11 @@ public class WarehouseResource {
         final PackageBoxFlipEvent.WarehouseCommand command = MAPPER.readValue(request, PackageBoxFlipEvent.WarehouseCommand.class);
         return warehouseService.handle(PRINCIPAL, command).ignoreElement()
                 .doOnComplete(() -> log.info(sb.append("\n").append("OK").toString()));
+    }
+
+    @Path("bigSilkCarPackageBoxes")
+    @POST
+    public Single<PackageBox> handle(PackageBoxEvent.BigSilkCarCommand command) {
+        return warehouseService.handle(PRINCIPAL, command);
     }
 }

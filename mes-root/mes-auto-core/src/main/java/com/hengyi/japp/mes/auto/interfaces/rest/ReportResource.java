@@ -4,10 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.ReportService;
 import com.hengyi.japp.mes.auto.application.command.ReportCommand;
-import com.hengyi.japp.mes.auto.application.report.MeasurePackageBoxReport;
-import com.hengyi.japp.mes.auto.application.report.MeasureReport;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
-import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
+import com.hengyi.japp.mes.auto.application.report.*;
 import io.reactivex.Single;
 
 import javax.validation.constraints.NotBlank;
@@ -58,6 +55,29 @@ public class ReportResource {
         return reportService.statisticsReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
     }
 
+    @Path("strippingReport")
+    @GET
+    public Single<StrippingReport> strippingReport(@QueryParam("workshopId") String workshopId,
+                                                   @QueryParam("startDate") @NotBlank String startLdString,
+                                                   @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.strippingReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
+    }
+
+    @Path("dyeingReport")
+    @GET
+    public Single<DyeingReport> dyeingReport(@QueryParam("workshopId") String workshopId,
+                                             @QueryParam("startDateTimestamp") long startDateTimestamp,
+                                             @QueryParam("endDateTimestamp") long endDateTimestamp) {
+        return reportService.dyeingReport(workshopId, startDateTimestamp, endDateTimestamp);
+    }
+
+    @Path("measureFiberReport")
+    @GET
+    public Single<MeasureFiberReport> measureFiberReport(@QueryParam("workshopId") String workshopId,
+                                                         @QueryParam("startDate") @NotBlank String startLdString,
+                                                         @QueryParam("endDate") @NotBlank String endLdString) {
+        return reportService.measureFiberReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
+    }
 //    @Path("dailyDoffingReport")
 //    @GET
 //    public Single<DoffingReport> dailyDoffingReport(@QueryParam("workshopId") @NotBlank String workshopId,
@@ -82,12 +102,12 @@ public class ReportResource {
 //        return reportService.packageBoxReport(workshopId, ldStart, ldEnd);
 //    }
 //
-//    @Path("dailySilkExceptionReport")
-//    @GET
-//    public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                                @QueryParam("date") @NotBlank String dateString) {
-//        return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString));
-//    }
+@Path("dailySilkExceptionReport")
+@GET
+public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
+                                                            @QueryParam("date") @NotBlank String dateString) {
+    return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString), LocalDate.parse(dateString).plusDays(1));
+}
 //
 //    @Path("monthSilkExceptionReport")
 //    @GET

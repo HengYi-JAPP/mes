@@ -1,6 +1,6 @@
 package com.hengyi.japp.mes.auto.application.query;
 
-import com.hengyi.japp.mes.auto.domain.SilkCar;
+import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,7 +10,7 @@ import java.util.Collection;
  * @author jzb 2018-07-01
  */
 @Builder
-public class SilkCarQuery {
+public class DyeingPrepareReportQuery {
     @Getter
     @Builder.Default
     private final int first = 0;
@@ -18,13 +18,13 @@ public class SilkCarQuery {
     @Builder.Default
     private final int pageSize = 50;
     @Getter
-    private final String q;
+    private final boolean submitted;
     @Getter
-    private final String type;
+    private final String workshopId;
     @Getter
-    private final int row;
+    private final long startDateTimestamp;
     @Getter
-    private final int col;
+    private final long endDateTimestamp;
 
     @Builder
     public static class Result {
@@ -35,7 +35,6 @@ public class SilkCarQuery {
         @Getter
         private final long count;
         @Getter
-        private final Collection<SilkCar> silkCars;
+        private final Collection<DyeingPrepare> dyeingPrepares;
     }
-
 }

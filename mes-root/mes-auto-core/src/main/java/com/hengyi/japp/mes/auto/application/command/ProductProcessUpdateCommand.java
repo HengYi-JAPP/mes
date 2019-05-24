@@ -29,5 +29,6 @@ public class ProductProcessUpdateCommand implements Serializable {
     private int sortBy;
     private EntityDTO formConfig;
     private boolean mustProcess;
+    private boolean atMostOnce;
 
 }

@@ -2,13 +2,10 @@ package com.hengyi.japp.mes.auto.application.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
-import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.domain.Operator;
+import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
-import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
-import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -17,17 +14,17 @@ import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.ToString;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -37,13 +34,14 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
  */
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-public class SilkCarRuntimeAppendEvent extends EventSource {
-    private Collection<SilkRuntime> silkRuntimes;
+public class BigSilkCarSilkChangeEvent extends EventSource {
+    private Collection<SilkRuntime> inSilkRuntimes;
+    private Collection<SilkRuntime> outSilkRuntimes;
     private JsonNode command;
 
     @Override
     public EventSourceType getType() {
-        return EventSourceType.SilkCarRuntimeAppendEvent;
+        return EventSourceType.BigSilkCarSilkChangeEvent;
     }
 
     @Override
@@ -54,9 +52,14 @@ public class SilkCarRuntimeAppendEvent extends EventSource {
 
     @Override
     public Collection<SilkRuntime> _calcSilkRuntimes(Collection<SilkRuntime> data) {
-        final Stream<SilkRuntime> oldStream = J.emptyIfNull(data).stream();
-        final Stream<SilkRuntime> appendStream = J.emptyIfNull(silkRuntimes).stream();
-        return Stream.concat(oldStream, appendStream).collect(Collectors.toList());
+        final var outSilkIds = J.emptyIfNull(outSilkRuntimes).parallelStream().map(SilkRuntime::getSilk).map(Silk::getId).collect(toSet());
+        final Stream<SilkRuntime> oldStream = J.emptyIfNull(data).stream().filter(silkRuntime -> {
+            final Silk silk = silkRuntime.getSilk();
+            @NotBlank final String id = silk.getId();
+            return !outSilkIds.contains(id);
+        });
+        final Stream<SilkRuntime> appendStream = J.emptyIfNull(inSilkRuntimes).parallelStream();
+        return Stream.concat(oldStream, appendStream).collect(toList());
     }
 
     @Override
@@ -68,7 +71,8 @@ public class SilkCarRuntimeAppendEvent extends EventSource {
     @ToString(onlyExplicitlyIncluded = true)
     @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
     public static class DTO extends EventSource.DTO {
-        private Collection<SilkRuntime.DTO> silkRuntimes;
+        private Collection<SilkRuntime.DTO> inSilkRuntimes;
+        private Collection<SilkRuntime.DTO> outSilkRuntimes;
         private JsonNode command;
 
         @SneakyThrows
@@ -80,55 +84,39 @@ public class SilkCarRuntimeAppendEvent extends EventSource {
             return MAPPER.convertValue(jsonNode, DTO.class);
         }
 
-        public Single<SilkCarRuntimeAppendEvent> toEvent() {
-            final SilkCarRuntimeAppendEvent event = new SilkCarRuntimeAppendEvent();
-            return Flowable.fromIterable(silkRuntimes)
+        public Single<BigSilkCarSilkChangeEvent> toEvent() {
+            final BigSilkCarSilkChangeEvent event = new BigSilkCarSilkChangeEvent();
+            return Flowable.fromIterable(J.emptyIfNull(inSilkRuntimes))
                     .flatMapSingle(SilkRuntime.DTO::rxToSilkRuntime).toList()
-                    .flatMap(silkRuntimes -> {
-                        event.setSilkRuntimes(silkRuntimes);
+                    .flatMap(it -> {
+                        event.setInSilkRuntimes(it);
+                        return Flowable.fromIterable(J.emptyIfNull(outSilkRuntimes))
+                                .flatMapSingle(SilkRuntime.DTO::rxToSilkRuntime).toList();
+                    }).flatMap(it -> {
+                        event.setOutSilkRuntimes(it);
                         return toEvent(event);
                     });
         }
     }
 
     @Data
-    public static class CheckSilksCommand implements Serializable {
-        @NotNull
-        private SilkCarRecordDTO silkCarRecord;
-        @Min(1)
-        private float lineMachineCount;
-    }
-
-    @Data
     public static class Command implements Serializable {
         @NotNull
         private SilkCarRecordDTO silkCarRecord;
-        @Min(1)
-        private float lineMachineCount;
         @NotNull
         @Size(min = 1)
-        private List<CheckSilkDTO> checkSilks;
-
-        public Single<SilkCarRuntimeAppendEvent> toEvent(Principal principal) {
-            final OperatorRepository operatorRepository = Jvertx.getProxy(OperatorRepository.class);
-
-            final SilkCarRuntimeAppendEvent event = new SilkCarRuntimeAppendEvent();
-            event.setCommand(MAPPER.convertValue(this, JsonNode.class));
-            return operatorRepository.find(principal).map(it -> {
-                event.fire(it);
-                return event;
-            });
-        }
+        private List<SilkRuntime.DTO> outSilks;
+        @NotNull
+        @Size(min = 1)
+        private List<Item> inItems;
     }
 
     @Data
-    public static class BigSilkCarDoffingAppendCommand implements Serializable {
+    public static class Item implements Serializable {
         @NotNull
         private SilkCarRecordDTO silkCarRecord;
-        @Min(1)
-        private float lineMachineCount;
         @NotNull
         @Size(min = 1)
-        private List<EntityByCodeDTO> checkSilks;
+        private List<SilkRuntime.DTO> silks;
     }
 }

@@ -8,7 +8,6 @@ import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import com.hengyi.japp.mes.auto.domain.SilkCar;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
-import com.hengyi.japp.mes.auto.domain.data.SilkCarType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.exception.BatchChangedException;
 import com.hengyi.japp.mes.auto.exception.DoffingCapacityException;
@@ -36,8 +35,7 @@ public abstract class AbstractSilkCarModel implements SilkCarModel {
 
     protected AbstractSilkCarModel(SilkCar silkCar) {
         this.silkCar = silkCar;
-        int capacity = silkCar.getRow() * silkCar.getCol() * 2;
-        this.silkCarCapacity = silkCar.getType() == SilkCarType.BIG_SILK_CAR ? capacity * 2 : capacity;
+        this.silkCarCapacity = silkCar.getRow() * silkCar.getCol() * 2 * silkCar.getPliesNum();
     }
 
     protected Single<List<SilkRuntime>> addAll(List<Single<SilkRuntime>> silkRuntime$List) {

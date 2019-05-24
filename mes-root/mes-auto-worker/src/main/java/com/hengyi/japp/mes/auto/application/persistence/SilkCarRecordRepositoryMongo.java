@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordByWorkshopQuery;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
@@ -49,6 +50,16 @@ public class SilkCarRecordRepositoryMongo extends MongoEntityRepository<SilkCarR
                 .flatMapPublisher(Flowable::fromIterable)
                 .flatMapSingle(this::find).toList()
                 .map(silkBarcodes -> builder.silkCarRecords(silkBarcodes).build());
+    }
+
+    @Override
+    public Flowable<String> listByWorkshop(SilkCarRecordByWorkshopQuery silkCarRecordByWorkshopQuery) {
+        return Single.just(silkCarRecordByWorkshopQuery)
+                .map(lucene::buildRecordByWorkshop)
+                .map(it -> lucene.baseQuery(it))
+                .flatMapPublisher(Flowable::fromIterable)
+                .flatMapSingle(this::find)
+                .map(silkCarRecord -> silkCarRecord.getId());
     }
 
     @SneakyThrows

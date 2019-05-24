@@ -22,10 +22,10 @@ public class BatchUpdateCommand implements Serializable {
     private String batchNo;
     @Min(1)
     private double silkWeight;
-    @Min(1)
+    @Min(0)
     private double centralValue;
     @NotNull
-    @Min(1)
+    @Min(0)
     private int holeNum;
     @NotBlank
     private String spec;

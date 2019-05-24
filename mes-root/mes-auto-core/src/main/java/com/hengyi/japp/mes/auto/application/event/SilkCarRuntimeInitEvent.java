@@ -2,10 +2,7 @@ package com.hengyi.japp.mes.auto.application.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.vertx.Jvertx;
-import com.hengyi.japp.mes.auto.domain.Grade;
-import com.hengyi.japp.mes.auto.domain.Operator;
-import com.hengyi.japp.mes.auto.domain.SilkCar;
-import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
@@ -101,6 +98,19 @@ public class SilkCarRuntimeInitEvent extends EventSource {
     }
 
     @Data
+    public static class BigSilkCarDoffingCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        private EntityDTO grade;
+        @Min(1)
+        private float lineMachineCount;
+        @NotNull
+        @Size(min = 1)
+        private List<EntityByCodeDTO> checkSilks;
+    }
+
+    @Data
     public static class AutoDoffingCommand implements Serializable {
         @NotNull
         private EntityByCodeDTO silkCar;
@@ -137,6 +147,19 @@ public class SilkCarRuntimeInitEvent extends EventSource {
         private EntityByCodeDTO silkCar;
         @NotNull
         private EntityDTO workshop;
+        @NotNull
+        @Size(min = 1)
+        private List<CheckSilkDTO> checkSilks;
+        @NotNull
+        private EntityDTO grade;
+    }
+
+    @Data
+    public static class AdminAutoDoffingAdaptCommand implements Serializable {
+        @NotNull
+        private EntityByCodeDTO silkCar;
+        @NotNull
+        private Workshop workshop;
         @NotNull
         @Size(min = 1)
         private List<CheckSilkDTO> checkSilks;

@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Data
 public class StatisticsReportDay_Batch implements Serializable {
+    private final Collection<PackageBox> packageBoxes;
     private final Batch batch;
     // 各等级， 多少颗， 多少重
     private final Map<Grade, Pair<Integer, BigDecimal>> GRADE_MAP = Maps.newConcurrentMap();
@@ -31,13 +33,23 @@ public class StatisticsReportDay_Batch implements Serializable {
 
     public StatisticsReportDay_Batch(Batch batch, Collection<PackageBox> packageBoxes) {
         this.batch = batch;
+        this.packageBoxes = packageBoxes;
         J.emptyIfNull(packageBoxes).forEach(this::collect);
     }
 
     public Stream<StatisticsReport.Item> lineDiff() {
         final int lineCount = LINE_MAP.keySet().size();
         if (lineCount < 1) {
-            log.error("全部为补充唛头，无法分配！");
+            final String batchNo = batch.getBatchNo();
+            final String join = getGRADE_MAP().keySet().parallelStream()
+                    .map(grade -> {
+                        final String gradeName = grade.getName();
+                        final Pair<Integer, BigDecimal> pair = GRADE_MAP.get(grade);
+                        final BigDecimal bigDecimal = pair.getRight();
+                        return gradeName + "=" + bigDecimal;
+                    })
+                    .collect(Collectors.joining(";"));
+            log.error(batchNo + "[" + join + "]全部为补充唛头，无法分配！");
             return Stream.empty();
         }
         if (lineCount == 1) {

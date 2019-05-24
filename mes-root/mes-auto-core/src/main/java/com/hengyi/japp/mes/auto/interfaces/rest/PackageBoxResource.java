@@ -111,6 +111,12 @@ public class PackageBoxResource {
         return packageBoxService.update(principal, id, command);
     }
 
+    @Path("packageBoxes/{id}/inWarehouse")
+    @DELETE
+    public Completable unInWarehouse(Principal principal, @PathParam("id") String id) {
+        return packageBoxService.unInWarehouse(principal, id);
+    }
+
     /**
      * 已入库
      */
@@ -171,6 +177,7 @@ public class PackageBoxResource {
                                                                  @QueryParam("gradeId") String gradeId,
                                                                  @QueryParam("batchId") String batchId,
                                                                  @QueryParam("productId") String productId,
+                                                                 @QueryParam("automaticPackeLine") String automaticPackeLine,
                                                                  @QueryParam("creatorId") String creatorId) {
         final LocalDate startLd = Optional.ofNullable(startDate)
                 .filter(J::nonBlank)
@@ -193,6 +200,7 @@ public class PackageBoxResource {
                 .workshopId(workshopId)
                 .gradeId(gradeId)
                 .batchId(batchId)
+                .automaticPackeLine(automaticPackeLine)
                 .productId(productId)
                 .creatorId(creatorId)
                 .netWeight(netWeight)
