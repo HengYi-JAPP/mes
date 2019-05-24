@@ -52,7 +52,7 @@ subprojects {
      * 打包 docker 准备
      */
     shadowJar {
-        dependsOn clean
+//        dependsOn clean
         archiveName "${project.name}-fat.jar"
     }
     docker {
