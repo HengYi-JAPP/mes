@@ -17,4 +17,6 @@ public interface DoffingSpecService {
     List<CheckSilkDTO> checkSilks(DoffingType doffingType, Line line, SilkCar silkCar);
 
     Flowable<SilkRuntime> generateSilkRuntimes(DoffingType doffingType, Line line, SilkCar silkCar, List<CheckSilkDTO> checkSilks);
+
+    List<CheckSilkDTO> checkSilks(DoffingType doffingType, Line line, SilkCar silkCar, int lineMachineCount);
 }

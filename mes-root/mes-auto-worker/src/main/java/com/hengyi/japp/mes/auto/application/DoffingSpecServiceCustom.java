@@ -227,4 +227,13 @@ public class DoffingSpecServiceCustom implements DoffingSpecService {
         return builder.build();
     }
 
+    @Override
+    public List<CheckSilkDTO> checkSilks(DoffingType doffingType, Line line, SilkCar silkCar, int lineMachineCount) {
+        final List<CheckSilkDTO> checkSilks_full = checkSilks(doffingType, line, silkCar);
+        if (lineMachineCount > checkSilks_full.size()) {
+            throw new RuntimeException("没有落筒规则");
+        }
+        return checkSilks_full.stream().limit(lineMachineCount).collect(toList());
+    }
+
 }
