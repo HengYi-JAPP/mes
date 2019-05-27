@@ -50,6 +50,12 @@ public class StatisticsReportDay_Batch implements Serializable {
                     })
                     .collect(Collectors.joining(";"));
             log.error(batchNo + "[" + join + "]全部为补充唛头，无法分配！");
+            packageBoxes.forEach(packageBox -> {
+                final Batch batch = packageBox.getBatch();
+                final Grade grade = packageBox.getGrade();
+                final String packageInfo = String.join("\t", packageBox.getCode(), batch.getBatchNo(), grade.getName(), "" + packageBox.getNetWeight(), "" + packageBox.getSilkCount());
+                System.out.println(packageInfo);
+            });
             return Stream.empty();
         }
         if (lineCount == 1) {
