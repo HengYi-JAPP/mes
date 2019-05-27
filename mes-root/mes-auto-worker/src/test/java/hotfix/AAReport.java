@@ -48,8 +48,8 @@ public class AAReport {
         final long startL = System.currentTimeMillis();
 
         final Workshop workshop = Workshops.B;
-        final LocalDate startLd = LocalDate.of(2019, 4, 24);
-        final LocalDate endLd = LocalDate.of(2019, 4, 24);
+        final LocalDate startLd = LocalDate.of(2019, 5, 1);
+        final LocalDate endLd = LocalDate.of(2019, 5, 1);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(it -> new AAReportDay(workshop, it))
