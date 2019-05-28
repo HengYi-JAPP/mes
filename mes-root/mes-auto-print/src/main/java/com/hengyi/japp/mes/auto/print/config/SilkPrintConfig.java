@@ -18,6 +18,8 @@ public class SilkPrintConfig implements Serializable {
     private BarcodeConfig barcodeConfig;
     @NotNull
     private ZxingConfig zxingConfig;
+//    @NotNull
+//    private PrinterConfig printerConfig;
 
 
 }
