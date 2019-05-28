@@ -10,6 +10,7 @@ import io.reactivex.Single;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -105,8 +106,9 @@ public class ReportResource {
 @Path("dailySilkExceptionReport")
 @GET
 public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-                                                            @QueryParam("date") @NotBlank String dateString) {
-    return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString), LocalDate.parse(dateString).plusDays(1));
+                                                            @QueryParam("startDateTime") @NotBlank long startDL,
+                                                            @QueryParam("endDateTime") @NotBlank long endDL) {
+    return reportService.silkExceptionReport(workshopId, startDL, endDL);
 }
 //
 //    @Path("monthSilkExceptionReport")

@@ -5,6 +5,7 @@ import com.hengyi.japp.mes.auto.application.report.*;
 import io.reactivex.Single;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author jzb 2018-06-22
@@ -37,9 +38,9 @@ public interface ReportService {
         return packageBoxReport(workshopId, ldStart, ldStart.plusDays(1));
     }
 
-    Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart, LocalDate ldEnd);
+    Single<SilkExceptionReport> silkExceptionReport(String workshopId, long ldStart, long ldEnd);
 
-    default Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
-        return silkExceptionReport(workshopId, ldStart, ldStart.plusDays(1));
-    }
+//    default Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
+//        return silkExceptionReport(workshopId, ldStart, ldStart.plusDays(1));
+//    }
 }

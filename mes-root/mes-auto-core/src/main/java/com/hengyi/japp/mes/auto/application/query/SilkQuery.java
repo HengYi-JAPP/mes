@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 /**
@@ -28,6 +29,10 @@ public class SilkQuery {
     private final LocalDate ldStart;
     @Getter
     private final LocalDate ldEnd;
+    @Getter
+    private final long ldtStart;
+    @Getter
+    private final long ldtEnd;
 
     @Builder
     public static class Result {
