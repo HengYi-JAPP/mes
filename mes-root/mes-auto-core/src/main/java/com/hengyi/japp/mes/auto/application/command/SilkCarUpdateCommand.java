@@ -26,6 +26,8 @@ public class SilkCarUpdateCommand implements Serializable {
     private int row;
     @Min(1)
     private int col;
+    @Min(1)
+    private int pliesNum;
 
     @Data
     public static class Batch implements Serializable {

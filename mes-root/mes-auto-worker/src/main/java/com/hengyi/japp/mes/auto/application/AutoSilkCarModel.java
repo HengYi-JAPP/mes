@@ -75,6 +75,35 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
         return Flowable.fromIterable(builder.build()).flatMapSingle(it -> it).toList();
     }
 
+    protected Single<List<SilkRuntime>> adminGenerateSilkRuntimesBySilkBarcodes(List<SilkBarcode> silkBarcodes) {
+        final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
+        final ImmutableList.Builder<Single<SilkRuntime>> builder = ImmutableList.builder();
+        for (int orderBy = 0; orderBy < silkBarcodes.size(); orderBy++) {
+            final SilkBarcode silkBarcode = silkBarcodes.get(orderBy);
+            final LineMachine lineMachine = silkBarcode.getLineMachine();
+            final LineMachineSpec lineMachineSpec = config.getLineMachineSpecs().get(orderBy);
+            for (int spindle : lineMachine.getSpindleSeq()) {
+                final SilkRuntime silkRuntime = new SilkRuntime();
+                final Single<SilkRuntime> silkRuntime$ = silkRepository.create().map(silk -> {
+                    silkRuntime.setSilk(silk);
+                    silk.setCode(silkBarcode.generateSilkCode(spindle));
+                    silk.setDoffingNum(silkBarcode.getDoffingNum());
+                    silk.setSpindle(spindle);
+                    silk.setLineMachine(lineMachine);
+                    silk.setBatch(silk.getBatch());
+
+                    final LineMachineSilkSpec lineMachineSilkSpec = lineMachineSpec.findSilkSpecBySpindle(spindle);
+                    silkRuntime.setSideType(lineMachineSilkSpec.getSideType());
+                    silkRuntime.setRow(lineMachineSilkSpec.getRow());
+                    silkRuntime.setCol(lineMachineSilkSpec.getCol());
+                    return silkRuntime;
+                });
+                builder.add(silkRuntime$);
+            }
+        }
+        return Flowable.fromIterable(builder.build()).flatMapSingle(it -> it).toList();
+    }
+
     @Override
     public Single<List<CheckSilkDTO>> checkSilks() {
         return Single.fromCallable(() -> config.checkSilks());
