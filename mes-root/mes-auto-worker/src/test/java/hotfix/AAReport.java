@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
 import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import com.hengyi.japp.mes.auto.report.PoiUtil;
 import init.UserImport;
 import lombok.Cleanup;
@@ -26,10 +27,7 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -47,9 +45,9 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final Workshop workshop = Workshops.B;
-        final LocalDate startLd = LocalDate.of(2019, 5, 1);
-        final LocalDate endLd = LocalDate.of(2019, 5, 1);
+        final Workshop workshop = Workshops.F;
+        final LocalDate startLd = LocalDate.of(2019, 5, 20);
+        final LocalDate endLd = LocalDate.of(2019, 5, 26);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(it -> new AAReportDay(workshop, it))
@@ -94,6 +92,9 @@ public class AAReport {
         final List<PackageBox> result = Lists.newArrayList();
         for (JsonNode node : MAPPER.readTree(is).get("packageBoxes")) {
             final PackageBox packageBox = MAPPER.convertValue(node, PackageBox.class);
+            if (Objects.equals(packageBox.getType(), PackageBoxType.BIG_SILK_CAR)) {
+                continue;
+            }
             result.add(packageBox);
         }
         return result;
