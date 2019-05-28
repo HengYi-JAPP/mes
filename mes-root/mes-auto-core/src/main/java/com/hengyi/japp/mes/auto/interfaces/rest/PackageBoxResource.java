@@ -63,6 +63,7 @@ public class PackageBoxResource {
         return packageBoxRepository.query(query).flattenAsFlowable(it -> it.getPackageBoxes());
     }
 
+
     @Path("packageBoxAppend")
     @POST
     public Single<PackageBox> handle(Principal principal, PackageBoxAppendCommand command) {
@@ -87,6 +88,11 @@ public class PackageBoxResource {
         return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecords()));
     }
 
+    @Path("packageBoxes/{id}/silkCarRecordsSmall")
+    @GET
+    public Flowable<SilkCarRecord> silkCarRecordsSmall(@PathParam("id") String id) {
+        return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecordsSmall()));
+    }
     @Path("packageBoxes/{id}")
     @DELETE
     public Completable delete(Principal principal, @PathParam("id") String id) {
