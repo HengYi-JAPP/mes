@@ -32,9 +32,7 @@ public class PkBatchReport {
                                 final double v = CHECK_BD.subtract(bd).doubleValue();
                                 return v > 0;
                             })
-                            .peek(it -> {
-                                System.out.println(it.getCode());
-                            })
+                            .peek(it -> System.out.println(it.getCode()))
                             .count();
                 });
     }

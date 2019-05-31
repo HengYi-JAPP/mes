@@ -50,7 +50,11 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
                 .ifPresent(it -> doc.add(new StringField("code", it, Field.Store.NO)));
         doc.add(new StringField("type", packageBox.getType().name(), Field.Store.NO));
         doc.add(new StringField("palletCode", J.defaultString(packageBox.getPalletCode()), Field.Store.NO));
-        doc.add(new StringField("automaticPackeLine", packageBox.getAutomaticPackeLine(),Field.Store.NO));
+        Optional.ofNullable(packageBox.getAutomaticPackeLine())
+                //  .filter(J::nonBlank)
+                .ifPresent(it -> {
+                    doc.add(new StringField("automaticPackeLine", it, Field.Store.NO));
+                });
         doc.add(new DoublePoint("netWeight", packageBox.getNetWeight()));
         doc.add(new DoublePoint("grossWeight", packageBox.getGrossWeight()));
 

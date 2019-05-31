@@ -13,6 +13,7 @@ import com.hengyi.japp.mes.auto.print.config.PaperConfig;
 import com.hengyi.japp.mes.auto.print.config.SilkPrintConfig;
 import com.hengyi.japp.mes.auto.print.config.ZxingConfig;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
@@ -32,6 +33,7 @@ import static com.github.ixtf.japp.print.Jprint.mmToPix;
 /**
  * @author jzb 2018-08-18
  */
+@Slf4j
 public class SilkPrintable implements Printable {
     private final SilkPrintConfig config;
     private final SilkPrintCommand command;
@@ -120,6 +122,17 @@ public class SilkPrintable implements Printable {
         g2d.drawString(s, (float) codeX, codeY);
     }
 
+    private static PrintService findPrintService(String printerName) {
+        PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
+
+        for (PrintService printService : printServices) {
+            if (printService.getName().trim().equals(printerName)) {
+                return printService;
+            }
+        }
+        return null;
+    }
+
     public void PrintLabel() throws Exception {
         Book book = new Book();
         PageFormat pf = new PageFormat();
@@ -133,6 +146,13 @@ public class SilkPrintable implements Printable {
         pf.setPaper(p);
         book.append(this, pf, numPages);
         PrintService printService = PrintServiceLookup.lookupDefaultPrintService();
+        if (printService != null) {
+            log.info("检查到默认打印服務:" + printService.toString());
+        } else {
+            //printService = SilkPrintable.findPrintService(this.config.getPrinterConfig().getLocalname());
+            printService = SilkPrintable.findPrintService("MES_PRINT");//找不到默认打印机名字的时候
+            log.info("没有找到默认打印机使用定义标签打印机名字：" + printService.toString());
+        }
         PrinterJob job = PrinterJob.getPrinterJob();
         job.setPrintService(printService);
         job.setPageable(book);

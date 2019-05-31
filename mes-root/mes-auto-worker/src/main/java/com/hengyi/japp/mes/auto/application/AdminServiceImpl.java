@@ -118,7 +118,7 @@ public class AdminServiceImpl implements AdminService {
         @Override
         public Single<List<SilkRuntime>> generateSilkRuntimes(List<CheckSilkDTO> checkSilks) {
             return toSilkBarcodes(checkSilks)
-                    .flatMap(this::generateSilkRuntimesBySilkBarcodes)
+                    .flatMap(this::adminGenerateSilkRuntimesBySilkBarcodes)
                     .map(it -> checkPosition(it, checkSilks));
         }
     }

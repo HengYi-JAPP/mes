@@ -45,9 +45,9 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final Workshop workshop = Workshops.F;
-        final LocalDate startLd = LocalDate.of(2019, 5, 20);
-        final LocalDate endLd = LocalDate.of(2019, 5, 26);
+        final Workshop workshop = Workshops.D;
+        final LocalDate startLd = LocalDate.of(2019, 5, 28);
+        final LocalDate endLd = LocalDate.of(2019, 5, 28);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(it -> new AAReportDay(workshop, it))
@@ -92,7 +92,7 @@ public class AAReport {
         final List<PackageBox> result = Lists.newArrayList();
         for (JsonNode node : MAPPER.readTree(is).get("packageBoxes")) {
             final PackageBox packageBox = MAPPER.convertValue(node, PackageBox.class);
-            if (Objects.equals(packageBox.getType(), PackageBoxType.BIG_SILK_CAR)) {
+            if (Objects.equals(PackageBoxType.BIG_SILK_CAR, packageBox.getType())) {
                 continue;
             }
             result.add(packageBox);

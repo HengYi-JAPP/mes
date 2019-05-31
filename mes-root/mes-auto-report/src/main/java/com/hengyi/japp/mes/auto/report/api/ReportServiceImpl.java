@@ -272,20 +272,20 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart, LocalDate ldEnd) {
+    public Single<SilkExceptionReport> silkExceptionReport(String workshopId, long ldStart, long ldEnd) {
         final SilkQuery silkQuery = SilkQuery.builder()
                 .workshopId(workshopId)
-                .ldStart(ldStart)
-                .ldEnd(ldEnd)
+                .ldtStart(ldStart)
+                .ldtEnd(ldEnd)
                 .pageSize(Integer.MAX_VALUE)
                 .build();
-        return silkRepository.query(silkQuery)
+        return silkRepository.queryReport(silkQuery)
                 .map(it -> new SilkExceptionReport(it.getSilks()));
     }
 
-    @Override
-    public Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
-        return null;
-    }
+//    @Override
+//    public Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
+//        return null;
+//    }
 
 }

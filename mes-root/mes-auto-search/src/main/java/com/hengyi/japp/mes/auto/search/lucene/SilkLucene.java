@@ -117,4 +117,15 @@ public class SilkLucene extends BaseLucene<Silk> {
         bqBuilder.add(LongPoint.newRangeQuery("doffingDateTime", startL, endL), BooleanClause.Occur.MUST);
         return bqBuilder.build();
     }
+
+    public Query buildReport(SilkQuery silkQuery) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        final long startL = silkQuery.getLdtStart();
+        final long endL = silkQuery.getLdtEnd();
+        addQuery(bqBuilder, "dyeingSample", silkQuery.isDyeingSample());
+        addQuery(bqBuilder, "workshop", silkQuery.getWorkshopId());
+        addQuery(bqBuilder, "batch", silkQuery.getBatchId());
+        bqBuilder.add(LongPoint.newRangeQuery("doffingDateTime", startL, endL), BooleanClause.Occur.MUST);
+        return bqBuilder.build();
+    }
 }
