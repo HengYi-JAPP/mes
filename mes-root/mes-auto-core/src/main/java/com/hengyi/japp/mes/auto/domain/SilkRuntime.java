@@ -35,15 +35,11 @@ public class SilkRuntime extends SilkCarPosition {
     private Grade grade;
     @JsonIgnore
     private DyeingResultCalcModel dyeingResultCalcModel = new DyeingResultCalcModel();
-    @JsonIgnore
     private DyeingResultInfo selfDyeingResultInfo;
-    @JsonIgnore
     private DyeingResultInfo firstDyeingResultInfo;
-    @JsonIgnore
     private DyeingResultInfo crossDyeingResultInfo;
-    @JsonIgnore
     private DyeingResultInfo multiDyeingResultInfo;
-    private DyeingResultInfo finalDyeingResultInfo;
+//    private DyeingResultInfo finalDyeingResultInfo;
 
     public void addExceptions(Collection<SilkException> silkExceptions) {
         exceptions = Sets.newHashSet(J.emptyIfNull(exceptions));
