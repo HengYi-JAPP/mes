@@ -6,7 +6,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.DyeingService;
+import com.hengyi.japp.mes.auto.application.event.DyeingPrepareEvent;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
 import com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository;
@@ -103,10 +105,18 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
                             final Grade grade = silkCarRecord.getGrade();
                             silkRuntime.setGrade(grade);
                         });
+
+                        final Collection<DyeingResult> selfDyeingResults = Lists.newArrayList();
                         for (EventSource eventSource : eventSources) {
                             silkRuntimes = eventSource.calcSilkRuntimes(silkRuntimes);
+                            if (eventSource.getType() == EventSourceType.DyeingPrepareEvent) {
+                                final DyeingPrepareEvent dyeingPrepareEvent = (DyeingPrepareEvent) eventSource;
+                                final DyeingPrepare dyeingPrepare = dyeingPrepareEvent.getDyeingPrepare();
+                                selfDyeingResults.addAll(J.emptyIfNull(dyeingPrepare.getDyeingResults()));
+                            }
                         }
                         J.emptyIfNull(silkRuntimes).forEach(silkRuntime -> {
+                            silkRuntime.getDyeingResultCalcModel().setSelfDyeingResults(selfDyeingResults);
                             if (silkRuntime.getGrade() == null) {
                                 // 拼车没有预设等级，沿用丝车的等级
                                 final Grade grade = silkCarRecord.getGrade();
@@ -127,6 +137,7 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
                         } else {
                             silkRuntimeFlowable = Flowable.fromIterable(silkRuntimes);
                         }
+
                         return silkRuntimeFlowable.doOnNext(silkRuntime -> {
                             if (silkRuntime.getGrade() == null) {
                                 // 拼车没有预设等级，沿用丝车的等级
@@ -142,7 +153,10 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
     }
 
     private Single<SilkRuntime> calcTimelineDyeingException(SilkRuntime silkRuntime) {
-        // 这辆丝车发生过织袜
+        // 这丝本身发生过织袜
+        if (silkRuntime.getDyeingResultCalcModel().getSelfDyeingResults() != null) {
+            return Single.just(silkRuntime);
+        }
         if (J.nonEmpty(silkRuntime.getDyeingResultCalcModel().getDyeingResults())) {
             return Single.just(silkRuntime);
         }

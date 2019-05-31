@@ -155,10 +155,15 @@ public class JikonAdapterImpl implements JikonAdapter {
                 final SilkRuntime.DyeingResultInfo multiDyeingResultInfo = silkRuntime.getMultiDyeingResultInfo();
                 item.accept(multiDyeingResultInfo);
             } else {
-                final SilkRuntime.DyeingResultInfo firstDyeingResultInfo = silkRuntime.getFirstDyeingResultInfo();
-                item.accept(firstDyeingResultInfo);
-                final SilkRuntime.DyeingResultInfo crossDyeingResultInfo = silkRuntime.getCrossDyeingResultInfo();
-                item.accept(crossDyeingResultInfo);
+                final SilkRuntime.DyeingResultInfo selfDyeingResultInfo = silkRuntime.getSelfDyeingResultInfo();
+                if (selfDyeingResultInfo!=null) {
+                    item.accept(selfDyeingResultInfo);
+                }else {
+                    final SilkRuntime.DyeingResultInfo firstDyeingResultInfo = silkRuntime.getFirstDyeingResultInfo();
+                    item.accept(firstDyeingResultInfo);
+                    final SilkRuntime.DyeingResultInfo crossDyeingResultInfo = silkRuntime.getCrossDyeingResultInfo();
+                    item.accept(crossDyeingResultInfo);
+                }
             }
             if (J.nonEmpty(item.getDyeingExceptionStrings())) {
                 item.setEliminateFlage(eliminateFlage_YES);
