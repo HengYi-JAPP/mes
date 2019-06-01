@@ -40,10 +40,10 @@ public class SilkServiceImpl implements SilkService {
             silk.setException(it);
             return gradeRepository.find(command.getGrade().getId()).flatMap(grade -> {
                 silk.setGrade(grade);
-                return  operatorRepository.find(principal).flatMap(operator -> {
-                        applicationEvents.fire(silk,operator);
+                return operatorRepository.find(principal).flatMap(operator -> {
+                    applicationEvents.fire(silk, operator);
                     return silkRepository.save(silk);
-                 });
+                });
             });
         }));
     }

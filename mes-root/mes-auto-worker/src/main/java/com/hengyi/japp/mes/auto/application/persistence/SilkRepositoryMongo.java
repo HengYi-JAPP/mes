@@ -77,6 +77,31 @@ public class SilkRepositoryMongo extends MongoEntityRepository<Silk> implements 
                 .map(silks -> builder.silks(silks).build());
     }
 
+    @Override
+    public Single<SilkQuery.Result> queryReport(SilkQuery silkQuery) {
+        final int first = silkQuery.getFirst();
+        final int pageSize = silkQuery.getPageSize();
+        final SilkQuery.Result.ResultBuilder builder = SilkQuery.Result.builder().first(first).pageSize(pageSize);
+
+        return Single.just(silkQuery)
+                .map(silkLucene::buildReport)
+                .map(it -> silkLucene.baseQuery(it, first, pageSize))
+                .doOnSuccess(it -> builder.count(it.getKey()))
+                .map(Pair::getValue)
+                .flatMapPublisher(Flowable::fromIterable)
+                .flatMapSingle(this::find)
+                .onErrorReturn(ex -> {
+                    if (ex instanceof JJsonEntityNotExsitException) {
+                        final JJsonEntityNotExsitException entityNotExsitException = (JJsonEntityNotExsitException) ex;
+                        silkLucene.delete(entityNotExsitException.getId());
+                        return new Silk();
+                    }
+                    throw new RuntimeException(ex);
+                })
+                .toList()
+                .map(silks -> builder.silks(silks).build());
+    }
+
     @SneakyThrows
     @Override
     public void index(Silk silk) {

@@ -97,6 +97,12 @@ public class AdminServiceImpl implements AdminService {
         return rxCheckAdmin(principal).andThen(result$);
     }
 
+    @Override
+    public Completable unlockSilkBarcodeRepositoryMongo(Principal principal) {
+//        SilkBarcodeRepositoryMongo.semaphore.release();
+        return Completable.complete();
+    }
+
     private class AdminManualSilkCarModel extends ManualSilkCarModel {
         private AdminManualSilkCarModel(SilkCar silkCar, float count) {
             super(silkCar, count);
@@ -118,13 +124,8 @@ public class AdminServiceImpl implements AdminService {
         @Override
         public Single<List<SilkRuntime>> generateSilkRuntimes(List<CheckSilkDTO> checkSilks) {
             return toSilkBarcodes(checkSilks)
-                    .flatMap(this::generateSilkRuntimesBySilkBarcodes)
+                    .flatMap(this::adminGenerateSilkRuntimesBySilkBarcodes)
                     .map(it -> checkPosition(it, checkSilks));
         }
-    }
-    @Override
-    public Completable unlockSilkBarcodeRepositoryMongo(Principal principal) {
-//        SilkBarcodeRepositoryMongo.semaphore.release();
-        return Completable.complete();
     }
 }

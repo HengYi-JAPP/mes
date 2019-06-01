@@ -78,7 +78,8 @@ public class ReportResource {
                                                          @QueryParam("endDate") @NotBlank String endLdString) {
         return reportService.measureFiberReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
     }
-//    @Path("dailyDoffingReport")
+
+    //    @Path("dailyDoffingReport")
 //    @GET
 //    public Single<DoffingReport> dailyDoffingReport(@QueryParam("workshopId") @NotBlank String workshopId,
 //                                                    @QueryParam("date") @NotBlank String dateString) {
@@ -102,12 +103,13 @@ public class ReportResource {
 //        return reportService.packageBoxReport(workshopId, ldStart, ldEnd);
 //    }
 //
-@Path("dailySilkExceptionReport")
-@GET
-public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-                                                            @QueryParam("date") @NotBlank String dateString) {
-    return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString), LocalDate.parse(dateString).plusDays(1));
-}
+    @Path("dailySilkExceptionReport")
+    @GET
+    public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
+                                                                @QueryParam("startDateTime") @NotBlank long startDL,
+                                                                @QueryParam("endDateTime") @NotBlank long endDL) {
+        return reportService.silkExceptionReport(workshopId, startDL, endDL);
+    }
 //
 //    @Path("monthSilkExceptionReport")
 //    @GET

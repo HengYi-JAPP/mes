@@ -11,7 +11,7 @@ dependencies {
             "commons-beanutils:commons-beanutils",
             "javax.cache:cache-api:1.1.0"
 
-    testCompile "com.squareup.okhttp3:okhttp:3.11.0"
+    testCompile "com.squareup.okhttp3:okhttp:3.14.1"
 }
 
 mainClassName = "com.hengyi.japp.mes.auto.worker.Worker"

@@ -37,9 +37,9 @@ public interface ReportService {
         return packageBoxReport(workshopId, ldStart, ldStart.plusDays(1));
     }
 
-    Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart, LocalDate ldEnd);
+    Single<SilkExceptionReport> silkExceptionReport(String workshopId, long ldStart, long ldEnd);
 
-    default Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
-        return silkExceptionReport(workshopId, ldStart, ldStart.plusDays(1));
-    }
+//    default Single<SilkExceptionReport> silkExceptionReport(String workshopId, LocalDate ldStart) {
+//        return silkExceptionReport(workshopId, ldStart, ldStart.plusDays(1));
+//    }
 }
