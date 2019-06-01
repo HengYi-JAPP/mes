@@ -154,12 +154,12 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
 
     private Single<SilkRuntime> calcTimelineDyeingException(SilkRuntime silkRuntime) {
         // 这丝本身发生过织袜
-        if (silkRuntime.getDyeingResultCalcModel().getSelfDyeingResults() != null) {
-            return Single.just(silkRuntime);
-        }
-        if (J.nonEmpty(silkRuntime.getDyeingResultCalcModel().getDyeingResults())) {
-            return Single.just(silkRuntime);
-        }
+//        if (silkRuntime.getSelfDyeingResultInfo() != null) {
+//            return Single.just(silkRuntime);
+//        }
+//        if (J.nonEmpty(silkRuntime.getDyeingResultCalcModel().getDyeingResults())) {
+//            return Single.just(silkRuntime);
+//        }
         final Silk silk = silkRuntime.getSilk();
         final LineMachine lineMachine = silk.getLineMachine();
         final int spindle = silk.getSpindle();
