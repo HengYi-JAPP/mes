@@ -93,6 +93,7 @@ public class PackageBoxResource {
     public Flowable<SilkCarRecord> silkCarRecordsSmall(@PathParam("id") String id) {
         return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecordsSmall()));
     }
+
     @Path("packageBoxes/{id}")
     @DELETE
     public Completable delete(Principal principal, @PathParam("id") String id) {

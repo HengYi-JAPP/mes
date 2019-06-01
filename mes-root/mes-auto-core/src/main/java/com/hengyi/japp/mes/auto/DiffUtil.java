@@ -34,7 +34,7 @@ public class DiffUtil {
         if (lineCount == 0) {
             // 总数量分
             final String join = String.join("-", batch.getBatchNo(), grade.getName(), "全部为补充唛头，无法分配，尝试按总量分！");
-            System.out.println(join);
+//            System.out.println(join);
 
             final Map<Line, Integer> sumDiffLineMap = LINE_MAP.entrySet().parallelStream().collect(Collectors.toMap(Map.Entry::getKey, entry -> {
                 final Map<Grade, Integer> gradeMap = J.emptyIfNull(entry.getValue());

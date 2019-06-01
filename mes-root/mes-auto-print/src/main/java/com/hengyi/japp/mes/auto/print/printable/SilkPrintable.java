@@ -48,6 +48,17 @@ public class SilkPrintable implements Printable {
         this.numPages = (int) Math.ceil(pages);
     }
 
+    private static PrintService findPrintService(String printerName) {
+        PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
+
+        for (PrintService printService : printServices) {
+            if (printService.getName().trim().equals(printerName)) {
+                return printService;
+            }
+        }
+        return null;
+    }
+
     @Override
     public int print(Graphics g, PageFormat pf, int pageIndex) {
         if (pageIndex < numPages) {
@@ -120,17 +131,6 @@ public class SilkPrintable implements Printable {
         final Rectangle2D rect = font.getStringBounds(s, frc);
         final double codeX = (mmToPix(25) / 2) - (rect.getWidth() / 2) + x;
         g2d.drawString(s, (float) codeX, codeY);
-    }
-
-    private static PrintService findPrintService(String printerName) {
-        PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
-
-        for (PrintService printService : printServices) {
-            if (printService.getName().trim().equals(printerName)) {
-                return printService;
-            }
-        }
-        return null;
     }
 
     public void PrintLabel() throws Exception {

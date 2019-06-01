@@ -45,15 +45,15 @@ public class AAReport {
     public static void main(String[] args) {
         final long startL = System.currentTimeMillis();
 
-        final Workshop workshop = Workshops.D;
-        final LocalDate startLd = LocalDate.of(2019, 5, 28);
-        final LocalDate endLd = LocalDate.of(2019, 5, 28);
+        final Workshop workshop = Workshops.A;
+        final LocalDate startLd = LocalDate.of(2019, 5, 1);
+        final LocalDate endLd = LocalDate.of(2019, 5, 31);
         final Collection<StatisticsReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(it -> new AAReportDay(workshop, it))
                 .collect(toList());
 
-        days.parallelStream().forEach(AAReport::toExcel);
+//        days.parallelStream().forEach(AAReport::toExcel);
         toExcel(new StatisticsReport(workshop, startLd, endLd, days));
 
         final long endL = System.currentTimeMillis();

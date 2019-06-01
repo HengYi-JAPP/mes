@@ -156,9 +156,9 @@ public class JikonAdapterImpl implements JikonAdapter {
                 item.accept(multiDyeingResultInfo);
             } else {
                 final SilkRuntime.DyeingResultInfo selfDyeingResultInfo = silkRuntime.getSelfDyeingResultInfo();
-                if (selfDyeingResultInfo!=null) {
+                if (selfDyeingResultInfo != null) {
                     item.accept(selfDyeingResultInfo);
-                }else {
+                } else {
                     final SilkRuntime.DyeingResultInfo firstDyeingResultInfo = silkRuntime.getFirstDyeingResultInfo();
                     item.accept(firstDyeingResultInfo);
                     final SilkRuntime.DyeingResultInfo crossDyeingResultInfo = silkRuntime.getCrossDyeingResultInfo();
