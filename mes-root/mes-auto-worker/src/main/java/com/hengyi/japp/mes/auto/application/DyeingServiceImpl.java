@@ -48,7 +48,7 @@ public class DyeingServiceImpl implements DyeingService {
         this.silkExceptionRepository = silkExceptionRepository;
         this.silkNoteRepository = silkNoteRepository;
         this.lineMachineRepository = lineMachineRepository;
-//        dyeingTimeLineUpdateSubject.subscribe(this)
+        dyeingTimeLineUpdateSubject.subscribe(this::updateTimeLine);
     }
 
     @Override
@@ -64,10 +64,13 @@ public class DyeingServiceImpl implements DyeingService {
     }
 
     private void updateTimeLine(DyeingPrepare dyeingPrepare) {
-        Flowable.fromIterable(dyeingPrepare.getDyeingResults()).flatMapCompletable(this::updateTimeLine).subscribe();
+        Optional.ofNullable(dyeingPrepare)
+                .map(DyeingPrepare::getDyeingResults)
+                .orElse(Collections.emptyList())
+                .forEach(dyeingTimeLineUpdateSubject::onNext);
     }
 
-    private Completable updateTimeLine(DyeingResult dyeingResult) {
+    private void updateTimeLine(DyeingResult dyeingResult) {
         final LineMachine lineMachine = dyeingResult.getLineMachine();
         final int spindle = dyeingResult.getSpindle();
         final DyeingPrepare dyeingPrepare = dyeingResult.getDyeingPrepare();
@@ -81,10 +84,10 @@ public class DyeingServiceImpl implements DyeingService {
                 key = DyeingService.crossDyeingKey(lineMachine, spindle);
                 break;
             default:
-                return Completable.complete();
+                return;
         }
 
-        return redisClient.rxHgetall(key).flatMapCompletable(it -> {
+        redisClient.rxHgetall(key).flatMapCompletable(it -> {
             if (it.isEmpty()) {
                 final JsonObject redisJson = dyeingResult.toRedisJsonObject();
                 return redisClient.rxHmset(key, redisJson).ignoreElement();
@@ -101,7 +104,7 @@ public class DyeingServiceImpl implements DyeingService {
                 }
                 return Completable.mergeArray(timeLine$, updateRedis$);
             });
-        });
+        }).subscribe();
     }
 
     private Single<List<DyeingResult>> createDyeingResults(DyeingPrepare dyeingPrepare, Collection<SilkRuntime> silkRuntimes) {
