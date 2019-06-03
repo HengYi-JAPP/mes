@@ -12,6 +12,7 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.reactivex.subjects.UnicastSubject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class DyeingServiceImpl implements DyeingService {
     private final SilkExceptionRepository silkExceptionRepository;
     private final SilkNoteRepository silkNoteRepository;
     private final LineMachineRepository lineMachineRepository;
+    private final UnicastSubject<DyeingResult> dyeingTimeLineUpdateSubject = UnicastSubject.create();
 
     @Inject
     private DyeingServiceImpl(RedisClient redisClient, DyeingPrepareRepository dyeingPrepareRepository, DyeingResultRepository dyeingResultRepository, OperatorRepository operatorRepository, GradeRepository gradeRepository, SilkExceptionRepository silkExceptionRepository, SilkNoteRepository silkNoteRepository, LineMachineRepository lineMachineRepository) {
@@ -46,6 +48,7 @@ public class DyeingServiceImpl implements DyeingService {
         this.silkExceptionRepository = silkExceptionRepository;
         this.silkNoteRepository = silkNoteRepository;
         this.lineMachineRepository = lineMachineRepository;
+//        dyeingTimeLineUpdateSubject.subscribe(this)
     }
 
     @Override
