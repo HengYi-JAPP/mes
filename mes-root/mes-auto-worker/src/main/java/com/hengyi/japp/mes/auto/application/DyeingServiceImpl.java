@@ -12,6 +12,7 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.UnicastSubject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.redis.RedisClient;
@@ -19,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +39,7 @@ public class DyeingServiceImpl implements DyeingService {
     private final SilkExceptionRepository silkExceptionRepository;
     private final SilkNoteRepository silkNoteRepository;
     private final LineMachineRepository lineMachineRepository;
+    private static final Executor exe = Executors.newSingleThreadExecutor();
     private final UnicastSubject<DyeingResult> dyeingTimeLineUpdateSubject = UnicastSubject.create();
 
     @Inject
@@ -48,7 +52,7 @@ public class DyeingServiceImpl implements DyeingService {
         this.silkExceptionRepository = silkExceptionRepository;
         this.silkNoteRepository = silkNoteRepository;
         this.lineMachineRepository = lineMachineRepository;
-        dyeingTimeLineUpdateSubject.subscribe(this::updateTimeLine);
+        dyeingTimeLineUpdateSubject.subscribeOn(Schedulers.from(exe)).subscribe(this::updateTimeLine);
     }
 
     @Override
