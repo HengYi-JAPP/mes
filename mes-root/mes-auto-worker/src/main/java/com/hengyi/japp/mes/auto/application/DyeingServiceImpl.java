@@ -13,7 +13,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.UnicastSubject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.redis.RedisClient;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +38,8 @@ public class DyeingServiceImpl implements DyeingService {
     private final SilkExceptionRepository silkExceptionRepository;
     private final SilkNoteRepository silkNoteRepository;
     private final LineMachineRepository lineMachineRepository;
-    private static final Executor exe = Executors.newSingleThreadExecutor();
-    private final UnicastSubject<DyeingResult> dyeingTimeLineUpdateSubject = UnicastSubject.create();
+    private static final Executor es = Executors.newSingleThreadExecutor();
+//    private final UnicastSubject<DyeingResult> dyeingTimeLineUpdateSubject = UnicastSubject.create();
 
     @Inject
     private DyeingServiceImpl(RedisClient redisClient, DyeingPrepareRepository dyeingPrepareRepository, DyeingResultRepository dyeingResultRepository, OperatorRepository operatorRepository, GradeRepository gradeRepository, SilkExceptionRepository silkExceptionRepository, SilkNoteRepository silkNoteRepository, LineMachineRepository lineMachineRepository) {
@@ -52,7 +51,6 @@ public class DyeingServiceImpl implements DyeingService {
         this.silkExceptionRepository = silkExceptionRepository;
         this.silkNoteRepository = silkNoteRepository;
         this.lineMachineRepository = lineMachineRepository;
-        dyeingTimeLineUpdateSubject.subscribeOn(Schedulers.from(exe)).subscribe(this::updateTimeLine);
     }
 
     @Override
@@ -68,13 +66,12 @@ public class DyeingServiceImpl implements DyeingService {
     }
 
     private void updateTimeLine(DyeingPrepare dyeingPrepare) {
-        Optional.ofNullable(dyeingPrepare)
-                .map(DyeingPrepare::getDyeingResults)
-                .orElse(Collections.emptyList())
-                .forEach(dyeingTimeLineUpdateSubject::onNext);
+        dyeingPrepare.getDyeingResults().forEach(this::updateTimeLine);
     }
 
-    private void updateTimeLine(DyeingResult dyeingResult) {
+    private synchronized void updateTimeLine(DyeingResult dyeingResult) {
+        System.out.println(dyeingResult.getSilk().getCode());
+
         final LineMachine lineMachine = dyeingResult.getLineMachine();
         final int spindle = dyeingResult.getSpindle();
         final DyeingPrepare dyeingPrepare = dyeingResult.getDyeingPrepare();
@@ -91,7 +88,7 @@ public class DyeingServiceImpl implements DyeingService {
                 return;
         }
 
-        redisClient.rxHgetall(key).flatMapCompletable(it -> {
+        redisClient.rxHgetall(key).subscribeOn(Schedulers.from(es)).flatMapCompletable(it -> {
             if (it.isEmpty()) {
                 final JsonObject redisJson = dyeingResult.toRedisJsonObject();
                 return redisClient.rxHmset(key, redisJson).ignoreElement();
@@ -108,7 +105,7 @@ public class DyeingServiceImpl implements DyeingService {
                 }
                 return Completable.mergeArray(timeLine$, updateRedis$);
             });
-        }).subscribe();
+        }).blockingGet();
     }
 
     private Single<List<DyeingResult>> createDyeingResults(DyeingPrepare dyeingPrepare, Collection<SilkRuntime> silkRuntimes) {
