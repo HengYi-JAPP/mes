@@ -26,4 +26,6 @@ public enum PackageBoxType {
     WORK_FETCH,
 
     FOREIGN,
+
+    BIG,
 }

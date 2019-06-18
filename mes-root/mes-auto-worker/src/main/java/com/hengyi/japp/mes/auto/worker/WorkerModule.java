@@ -41,7 +41,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Optional;
 
-import static io.vertx.config.yaml.YamlProcessor.YAML_MAPPER;
+import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
+
 
 /**
  * @author jzb 2018-03-21
@@ -83,6 +84,7 @@ public class WorkerModule extends AbstractModule {
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
         bind(DoffingSpecService.class).to(DoffingSpecServiceCustom.class);
+        bind(SilkBarcodeGenerateTemplateService.class).to(SilkBarcodeGenerateTemplateServiceImpl.class);
 
         bind(DictionaryService.class).to(DictionaryServiceImpl.class);
         bind(DictionaryRepository.class).to(DictionaryRepositoryMongo.class);
@@ -120,6 +122,7 @@ public class WorkerModule extends AbstractModule {
         bind(SapT001lRepository.class).to(SapT001lRepositoryMongo.class);
         bind(TemporaryBoxRecordRepository.class).to(TemporaryBoxRecordRepositoryMongo.class);
         bind(LoginRepository.class).to(LoginRepositoryMongo.class);
+        bind(SilkBarcodeGenerateTemplateRepository.class).to(SilkBarcodeGenerateTemplateRepositoryMongo.class);
 
         bind(RuiguanService.class).to(RuiguanServiceImpl.class);
         bind(RiambService.class).to(RiambServiceImpl.class);

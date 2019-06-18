@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -143,6 +144,15 @@ public class PackageBoxEvent extends EventSource {
         private EntityDTO temporaryBox;
         @Min(1)
         private int count;
+    }
+
+    @Data
+    public static class BigCommand implements Serializable {
+        @NotNull
+        @Size(min = 1)
+        private Set<SilkCarRecordDTO> silkCarRecords;
+        @NotNull
+        private Date budat;
     }
 
 }

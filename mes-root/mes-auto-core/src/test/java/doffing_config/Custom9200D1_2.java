@@ -263,7 +263,7 @@ public class Custom9200D1_2 {
         }).collect(toList());
         doffingSpec.setSilkCarPositionCheckSpecs(silkCarPositionCheckSpecs);
 
-        YAML_MAPPER.writeValue(FileUtils.getFile("/home/mes/auto/auto_doffing_config", doffingSpec.fileName()), doffingSpec);
+        YAML_MAPPER.writeValue(FileUtils.getFile("/home/mes/auto/doffing_spec", doffingSpec.fileName()), doffingSpec);
         return doffingSpec;
     }
 

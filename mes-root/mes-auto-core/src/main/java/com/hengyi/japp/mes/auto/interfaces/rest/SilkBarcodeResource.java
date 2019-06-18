@@ -3,13 +3,11 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkBarcodeService;
-import com.hengyi.japp.mes.auto.application.command.SilkBarcodeCreateAndPrintCommand;
 import com.hengyi.japp.mes.auto.application.command.SilkBarcodeGenerateCommand;
 import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import io.reactivex.Completable;
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,10 +46,7 @@ public class SilkBarcodeResource {
     @Path("batchSilkBarcodes")
     @POST
     public Completable create(Principal principal, SilkBarcodeGenerateCommand.Batch commands) {
-        return Flowable.fromIterable(commands.getCommands())
-                .flatMapSingle(command -> silkBarcodeService.generate(principal, command))
-                .toList()
-                .ignoreElement();
+        return silkBarcodeService.generate(principal, commands).toList().ignoreElement();
     }
 
     @Path("batchSilkBarcodesAndBatch")
@@ -60,12 +55,18 @@ public class SilkBarcodeResource {
         return silkBarcodeService.generate(principal, commands).toList().ignoreElement();
     }
 
+    @Path("batchSilkBarcodesAndBatchAndPrint")
+    @POST
+    public Completable create(Principal principal, SilkBarcodeGenerateCommand.BatchAndBatchAndPrint commands) {
+        return silkBarcodeService.generate(principal, commands).toList()
+                .flatMapCompletable(it -> silkBarcodeService.print(principal, commands.getMesAutoPrinter(), it));
+    }
+
     @Path("silkBarcodes/createAndPrint")
     @POST
-    public Completable createAndPrint(Principal principal, SilkBarcodeCreateAndPrintCommand.Batch commands) {
-        Flowable<SilkBarcode> flowable = Flowable.fromIterable(commands.getCommands())
-                .flatMapSingle(command -> silkBarcodeService.generate(principal, command));
-        return silkBarcodeService.createAndPrint(commands.getMesAutoPrinter(), flowable);
+    public Completable createAndPrint(Principal principal, SilkBarcodeGenerateCommand.BatchAndPrint commands) {
+        return silkBarcodeService.generate(principal, commands).toList()
+                .flatMapCompletable(silkBarcodes -> silkBarcodeService.print(principal, commands.getMesAutoPrinter(), silkBarcodes));
     }
 
     @Path("silkBarcodes/{id}")
