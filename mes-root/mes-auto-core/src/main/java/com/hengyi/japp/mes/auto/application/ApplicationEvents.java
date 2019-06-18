@@ -17,4 +17,6 @@ public interface ApplicationEvents {
     void fire(SilkCarRuntime silkCarRuntime, GetSilkSpindleInfoDTO dto, List<String> reasons);
 
     void fire(SilkCarRuntime silkCarRuntime, RiambFetchSilkCarRecordResultDTO dto, List<String> reasons);
+
+    void fire(SilkCarRuntime silkCarRuntime);
 }
