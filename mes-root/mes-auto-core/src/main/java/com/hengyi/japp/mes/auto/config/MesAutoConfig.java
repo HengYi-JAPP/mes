@@ -25,6 +25,7 @@ public class MesAutoConfig {
     @Getter
     private final Path rootPath;
     private final JsonObject rootConfig;
+    @Getter
     private final CarpoolSilkCarModelOrderType carpoolSilkCarModelOrderType;
     @Getter
     private final JsonObject pdaConfig;
@@ -98,7 +99,4 @@ public class MesAutoConfig {
         return rootPath.resolve("doffing_spec");
     }
 
-    public CarpoolSilkCarModelOrderType getCarpoolSilkCarModelOrderType() {
-        return null;
-    }
 }

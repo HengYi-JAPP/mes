@@ -164,8 +164,9 @@ public class RiambServiceImpl implements RiambService {
         if (J.nonEmpty(checkFeedbackSilkNotes)) {
             dto.setPackeFlage(packeFlage_NO);
         }
+
+        final List<String> reasons = Lists.newArrayList();
         if (packeFlage_NO.equals(dto.getPackeFlage())) {
-            final List<String> reasons = Lists.newArrayList();
             if (J.nonEmpty(dyeingUnSubmitteds)) {
                 reasons.add("染判结果未出");
             }
@@ -175,8 +176,8 @@ public class RiambServiceImpl implements RiambService {
                     reasons.add(name + "未处理");
                 });
             }
-            applicationEvents.fire(silkCarRuntime, dto, reasons);
         }
+        applicationEvents.fire(silkCarRuntime, dto, reasons);
         dto.setSilkCount(silkInfos.size());
         return dto;
     }
