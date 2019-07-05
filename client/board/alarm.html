@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>报警看板</title>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+<div id="app">
+  <div class="all-wrapper">
+    <main class="tab-bar" id="tabBar"></main>
+    <div class="action-bar">
+      <select id="workShop">
+        <option value="0">请选择车间</option>
+      </select>
+      <button id="search" onclick="search()">查询</button>
+      <button id="showBoard" onclick="fullScreen()">显示看板</button>
+    </div>
+    <div>
+      <div class="board-content" id="boardContent">
+        <div class="title-box">
+          <img class="logo" src="../img/logo.png" alt="">
+          <div class="title-name">
+            <span><label id="workLineName"></label>报警看板</span>
+          </div>
+          <div class="date-box">
+            <span id="currTime">2017-12-07</span>
+          </div>
+        </div>
+        <div class="content-box">
+          <table border="1" class="bottom-table main-table">
+            <tr>
+              <th style="width: 9rem">丝绽</th>
+              <th style="width: 3rem">线别</th>
+              <th style="width: 5rem">批号</th>
+              <th style="width: 7rem">规格</th>
+              <th style="width: 3rem">位号</th>
+              <th style="width: 3rem">落次</th>
+              <th style="width: 3rem">班次</th>
+              <th style="width: 9rem">原因</th>
+              <th style="width: 4rem">状态</th>
+              <th style="width: 4rem">操作者</th>
+              <th style="width: 4rem">处理人</th>
+              <th style="width: 11rem">备注</th>
+            </tr>
+            <tbody id="tbody">
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="./../js/window-global.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/common.js"></script>
+</body>
+<script>
+  // 搜索
+  var page = {current: 1, size: 15, total: 0}
+
+  function search () {
+    if ($('#workShop').val() === '0') {
+      return
+    }
+    $('#workLineName').html($('#workShop').find("option:selected").text())
+    var params = {
+      status: '1',
+      workshopId: $('#workShop').val(),
+      pageIndex: page.current,
+      pageCount: page.size
+    }
+    params = JSON.stringify(params)
+    $.ajax({
+      type: 'POST',
+      url: window.global.ajaxAutomatictBaseUrl + 'api/automaticintegration/board/getSilkAlarmList',
+      data: params,
+      contentType: 'application/json; charset=utf-8',
+      success: function (response) {
+        response = JSON.parse(response)
+        $('#currTime').text((new Date(response.data.systemDate).toISOString()).substr(0, 10))
+        var list = response.data.list
+        var tbodyHtml = ''
+        for (var i = 0; i < page.size; i++) {
+          tbodyHtml += '<tr>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].silkCode : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].lineName : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].batchNo : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].spec : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].item : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].fallNo : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].classesName : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].downGradeReasonName : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? (list[i].status === '1' ? '未处理' : '已处理') : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].employeeName : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].handleEmployeeName : '&nbsp;') + '</td>'
+          tbodyHtml += '<td>' + (i < list.length ? list[i].remark : '&nbsp;') + '</td>'
+          tbodyHtml += '</tr>'
+        }
+        $('#tbody').html(tbodyHtml)
+        page.current = ((page.current + 1) > Math.ceil(response.data.count / page.size)) ? 1 : page.current + 1
+      },
+      listor: function (a, b, c) {
+        console.log(a, b, c)
+      },
+      complete: function (xhr) {
+        xhr = null
+      }
+    })
+  }
+
+  var interval = null
+  $(function () {
+    addTabs()
+    getAllWorkshopOptions()
+    setCurrTab()
+    $('#currTime').text(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
+    interval = setInterval('search()', 30000)
+  })
+</script>
+<style>
+
+  .title-box .logo {
+    float: left;
+  }
+
+  .title-box .date-box {
+    float: right;
+    border: .06em solid #2c647c;
+    height: 2em;
+    line-height: 2em;
+    font-size: 1.6rem;
+    padding: 0 .5rem;
+  }
+
+  .title-box .date-box span {
+    font-size: 1.8rem;
+  }
+
+  .board-content .title-name {
+    display: inline-block;
+  }
+
+  .board-content .title-name span {
+    font-size: 2.7rem;
+  }
+
+  .content-box {
+    margin-top: 2rem;
+    border-top: .1em solid #2c647c;
+  }
+
+  .bottom-table {
+    width: 98% !important;
+  }
+
+  .board-content .main-table {
+    border-collapse: collapse;
+    border-color: #1d9a9a;
+    width: 31%;
+    margin: 1rem 1rem;
+  }
+
+  .board-content .main-table th {
+    background-color: rgba(6, 19, 31, 0.6);
+    font-weight: 100;
+    color: #51ffff;
+  }
+
+  .board-content .main-table tr {
+    font-size: 1.6rem;
+    font-weight: 100;
+    color: white;
+    text-align: center;
+  }
+
+  .board-content .main-table tr:nth-child(odd) {
+    background-color: rgba(6, 19, 31, 0.6);
+  }
+
+  .board-content .main-table th {
+    padding: .1rem 0;
+  }
+  .board-content .main-table td {
+    padding: .1rem 0;
+  }
+</style>
+</html>

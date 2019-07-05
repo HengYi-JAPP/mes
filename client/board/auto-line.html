@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+<div id="app">
+  <div class="all-wrapper">
+    <main class="tab-bar" id="tabBar"></main>
+    <div class="action-bar">
+      <select id="workShop">
+        <option value="0">请选择车间</option>
+      </select>
+      <select id="line">
+        <option value="0">请选择线别</option>
+      </select>
+      <input type="text" id="lineIDs" readonly="readonly">
+      <button id="search" onclick="search()">查询</button>
+      <button id="showBoard" onclick="fullScreen()">显示看板</button>
+    </div>
+    <div class="board-content" id="boardContent">
+      <div class="title-box">
+        <img class="logo" src="../img/logo.png" alt="">
+        <div class="title-name">
+          <span>自动包装线管理看板</span>
+        </div>
+        <div class="date-box">
+          <span id="currTime">2017-12-07</span>
+        </div>
+      </div>
+      <div class="content-box" id="tbody">
+        <ul>
+          <li>丝车数量：<span>0</span>辆</li>
+          <li>待包装量：<span>0</span>辆</li>
+        </ul>
+        <div class="flex-div">
+          <table border="1" class="main-table">
+            <thead>
+            <tr>
+              <th>批号</th>
+              <th>待包装量</th>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            </thead>
+          </table>
+          <table border="1" class="main-table">
+            <thead>
+            <tr>
+              <th>批号</th>
+              <th>待包装量</th>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            </thead>
+          </table>
+          <table border="1" class="main-table">
+            <thead>
+            <tr>
+              <th>批号</th>
+              <th>待包装量</th>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            </thead>
+          </table>
+        </div>
+
+        <table border="1" class="bottom-table main-table">
+          <tr>
+            <th>丝车号</th>
+            <th>批号</th>
+            <th>是否推入</th>
+            <th>管色</th>
+            <th>不能推入原因</th>
+            <th>当前丝锭数</th>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="./../js/window-global.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/common.js"></script>
+<!--<script src ="js/sockjs.min.js"> </script>-->
+</body>
+<script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="js/vertx-eventbus.js"></script>
+<script>
+    // var sock = new SockJS('http://127.0.0.1:8080/eventbus');
+    //
+    // sock.onopen = function() {
+    //     console.log('open');
+    // };
+    //
+    // sock.onmessage = function(e) {
+    //     console.log('message', e.data);
+    // };
+    //
+    // sock.onclose = function() {
+    //     console.log('close');
+    // };
+    //
+    // sock.send('test');
+    //
+    // sock.close();
+    // var eb = new EventBus('http://localhost:8080/eventbus/');
+    //
+    // eb.onopen = function() {
+    //
+    //     // set a handler to receive a message
+    //     eb.registerHandler('some-address', function(error, message) {
+    //         console.log('received a message: ' + JSON.stringify(message));
+    //     });
+    //
+    //     // send a message
+    //     eb.send('some-address', {name: 'tim', age: 587});
+    //
+    // }
+
+    // var ebTrail=new EventBus("http://127.0.0.1:8080/eventbus");
+    // ebTrail.onopen=function(){//监听数据
+    //     ebTrail.registerHandler("chat.to.client",function(err,msg){
+    //         console.log(msg.body);//在这里对接收的数据进行一些操作
+    //     });
+    //     ebTrail.publish("chat.to.server","RequestTrailData");//这行代码可以发送信息给服务端
+    // };
+    $(function () {
+        alert("进入方法");
+        var eventBus=new EventBus("http://127.0.0.1:8080/eventbus/");
+
+        eventBus.enableReconnect(true);
+        eventBus.onopen=function(){//监听数据
+            console.log(Date.now());
+            alert("连接成功")
+            eventBus.registerHandler("sockjs.global",function(err,msg){
+                console.log('sockjs.global:'+JSON.stringify(msg));//在这里对接收的数据进行一些操作
+
+            });
+            eb.send('sockjs.global', {name: 'tim', age: 587});
+            eventBus.publish("eventbus","RequestTrailData");//这行代码可以发送信息给服务端
+        }
+    })
+</script>
+<script>
+  function search () {
+    var lineIDs = $('#lineIDs').val().split(',')
+    if (lineIDs == '') {
+      return
+    }
+    var options = $('#line option')
+    var paramIds = []
+    for (var i = 0; i < options.length; i++) {
+      if (lineIDs.indexOf($(options[i]).text()) > -1) {
+        paramIds.push($(options[i]).val())
+      }
+    }
+    paramIds = paramIds.join(',')
+    var params = {lineIds: paramIds}
+    params = JSON.stringify(params)
+    $.ajax({
+      type: 'POST',
+      url: window.global.ajaxAutomatictBaseUrl + 'api/automaticintegration/board/getAutomaticPackeBoard',
+      data: params,
+      contentType: 'application/json; charset=utf-8',
+      success: function (response) {
+        var data = JSON.parse(response)
+        data = data.data
+        $('#currTime').text(data.systemDate)
+        var tbodyHtml = '<ul><li>丝车数量：<span>' + data.silkcarTotalNum + '</span>辆</li>' +
+          '<li>待包装量：<span>' + data.packingSilkcarNum + '</span>辆</li></ul>'
+        for (var i = 0; i < 9; i++) {
+          tbodyHtml += (i == 0) ? '<div class="flex-div">' : ''
+          tbodyHtml += (i % 3) == 0 ? '<table border="1" class="main-table"><tr><th>批号</th><th>待包装量</th></tr>' : ''
+          tbodyHtml += (i < data.automaticBoardBoList.length)
+            ? '<tr><td>' + data.automaticBoardBoList[i].batchNo + '</td>' +
+            '<td>' + data.automaticBoardBoList[i].packingSilkcarNum + '</td></tr>'
+            : '<tr><td>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;</td></tr>'
+          tbodyHtml += (i % 3) == 2 ? '</table>' : ''
+          tbodyHtml += (i == 8) ? '</div>' : ''
+        }
+        tbodyHtml += '<table border="1" class="main-table bottom-table">' +
+          '<tr><th>丝车号</th><th>批号</th><th>是否推入</th><th>管色</th><th>不能推入原因</th><th>当前丝锭数</th></tr>'
+        tbodyHtml += '<tr>'
+        tbodyHtml += (data.automaticPackeBoardVoList.length > 0)
+          ? '<td>' + data.automaticPackeBoardVoList[0].silkcarCode + '</td>' +
+          '<td>' + data.automaticPackeBoardVoList[0].batchNo + '</td>' +
+          '<td>' + data.automaticPackeBoardVoList[0].automaticPackeFlage + '</td>' +
+          '<td>' + data.automaticPackeBoardVoList[0].paperTube + '</td>' +
+          '<td>' + data.automaticPackeBoardVoList[0].reason + '</td>' +
+          '<td>' + data.automaticPackeBoardVoList[0].unPackeNum + '</td>'
+          : '<td>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;</td>' +
+          '<td>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;</td><td>&nbsp;&nbsp;</td>'
+        tbodyHtml += '</tr>'
+        tbodyHtml += '</table>'
+        $('#tbody').html(tbodyHtml)
+      },
+      error: function (a, b, c) {
+        console.log(a, b, c)
+      },
+      complete: function (xhr) {
+        xhr = null
+      }
+    })
+  }
+  var interval = null
+  $(function () {
+    addTabs()
+    getAllWorkshopOptions()
+    $('#workShop').on('change', function () {
+      getLineOptions($(this).val())
+    })
+    $('#line').on('change', function () {
+      var strLins = $('#lineIDs').val()
+      var valText = $(this).find('option:selected').text()
+      var val = $(this).val()
+      if (val !== '0' && strLins.split(',').indexOf(valText) == -1) {
+        strLins += (strLins == '' ? '' : ',') + valText
+      }
+      $('#lineIDs').val(strLins)
+    })
+    setCurrTab()
+    $('#currTime').text(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
+    interval = setInterval('search()', 50000000)
+  })
+</script>
+<style>
+  .board-content .main-table {
+    border-collapse: collapse;
+    border-color: #1d9a9a;
+    width: 31%;
+    margin: 1rem 1rem;
+  }
+
+  .board-content .main-table th {
+    background-color: rgba(6, 19, 31, 0.6);
+    font-size: 2rem;
+    font-weight: 100;
+    color: #51ffff;
+  }
+
+  .board-content .main-table tr {
+    font-size: 2.5rem;
+    font-weight: 100;
+    color: white;
+    text-align: center;
+  }
+
+  .board-content .main-table tr:nth-child(odd) {
+    background-color: rgba(6, 19, 31, 0.6);
+  }
+
+  .title-box .logo {
+    width: 13.5em;
+    float: left;
+  }
+
+  .title-box .date-box {
+    float: right;
+    margin-top: .1em;
+    border: .1em solid #2c647c;
+    height: 3em;
+    line-height: 3em;
+    padding: 0 .6em;
+    border-radius: .4em;
+  }
+
+  .title-box .date-box span {
+    font-size: 1.8em;
+  }
+
+  .board-content .title-name {
+    display: inline-block;
+  }
+
+  .board-content .title-name span {
+    font-size: 2.7em;
+  }
+
+  .content-box {
+    margin-top: 2rem;
+    border-top: .1em solid #2c647c;
+  }
+
+  .content-box ul {
+    list-style: none;
+    display: inline-block;
+    border: .1em solid #2c647c;
+    width: 97.5%;
+    padding: 0;
+    margin: 2rem .8rem 1.5rem .8rem;
+  }
+
+  .content-box ul li {
+    float: left;
+    width: 49%;
+    text-align: center;
+    font-size: 2rem;
+    height: 4rem;
+    line-height: 4rem;
+    margin: 1rem auto;
+  }
+
+  .content-box ul li:first-child {
+    border-right: 1px dashed #406161;
+  }
+
+  .flex-div {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .bottom-table {
+    width: 98% !important;
+  }
+</style>
+</html>

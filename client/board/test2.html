@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta http-equiv="Access-Control-Allow-Origin" content="*" />
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+aaaaaaaaaaaaa
+<div id='aa'></div>
+
+</body>
+<script src="./../js/window-global.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/common.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+<script src="js/vertx-eventbus.js"></script>
+<!--<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="js/sockjs.min.js"></script>
+<script src="js/vertx-eventbus.js"></script>-->
+
+
+
+
+</body>
+<script>
+
+    // var ebTrail = new EventBus( "http://192.168.128.234:8080/eventbus");
+    // ebTrail.enableReconnect(true);
+    // ebTrail.onopen = function () {//监听数据
+    //     ebTrail.registerHandler("mes-auto://websocket/boards/workshopExceptionReport/lines/"+lineId, function (err, msg) {
+    //         //$('#planDiv').empty();
+    //         //setTimeout(function(){renderPageData1( msg.body.items)},2000);
+    //         renderPageData1( msg.body.items);
+    //
+    //
+    //     });
+    // };
+    var ebTrail=new EventBus("http://127.0.0.1:8080/eventbus");
+    ebTrail.onopen=function(){//监听数据
+        ebTrail.registerHandler("sockjs.global",function(err,msg){
+            console.log(msg.body);//在这里对接收的数据进行一些操作
+        });
+
+    };
+
+
+</script>
+</html>

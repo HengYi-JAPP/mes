@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>车间异常看板</title>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+<div id="app">
+  <div class="all-wrapper">
+    <main class="tab-bar" id="tabBar"></main>
+    <div class="action-bar">
+      <select id="workShop">
+        <option value="0">请选择车间</option>
+      </select>
+      <select id="line">
+        <option value="0">请选择线别</option>
+      </select>
+      <input type="text" id="notice" placeholder="请填写通知" style="width: 18rem">
+      <button id="search" onclick="search()">查询</button>
+      <button id="showBoard" onclick="fullScreen()">显示看板</button>
+    </div>
+    <div class="board-content" id="boardContent">
+      <div class="title-box">
+        <img class="logo" src="../img/logo.png" alt="">
+        <div class="title-name">
+          <span>车间异常看板</span>
+        </div>
+        <div class="date-box">
+          <span class="currDate"></span>
+        </div>
+      </div>
+      <div class="tbody-div">
+        <div class="right-box" id="excepDiv">
+          <table border="1" class="main-table right-table">
+            <tr>
+              <th>纺位</th>
+              <th>落次</th>
+              <th>锭号</th>
+              <th>等级</th>
+              <th>异常</th>
+              <th>状态</th>
+              <th>处理人</th>
+              <th>时间</th>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+          </table>
+          <ul class="page-box">
+            <li>1</li>
+            <li>2</li>
+            <li class="current">3</li>
+            <li>4</li>
+            <li>5</li>
+          </ul>
+        </div>
+        <div class="left-box" id="planDiv">
+          <table border="1" class="main-table left-table">
+            <tr>
+              <th colspan="4">生产计划</th>
+            </tr>
+            <tr>
+              <th>纺位</th>
+              <th>批号</th>
+              <th>规格</th>
+              <th>管色</th>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+          </table>
+        </div>
+        <div class="left-box">
+          <table border="1" class="main-table left-table notice-table">
+            <tr>
+              <th>通知</th>
+            </tr>
+            <tr>
+              <td>
+                <span>各位同仁们：</span>
+                <p id="pNotice"></p>
+                <label id="pNoticeDate" class="currDate"></label>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+<style>
+  .gradeColorA {
+    color: #f7abab;
+  }
+
+  .gradeColorB {
+    color: #89c997;
+  }
+
+  .gradeColorC {
+    color: #ffe222;
+  }
+
+  .title-box .logo {
+    width: 13.5em;
+    float: left;
+  }
+
+  .title-box .title-name {
+    display: inline-block;
+  }
+
+  .board-content .tbody-div {
+    border-top: .1em solid #2c647c;
+    margin: 1rem;
+  }
+
+  .page-box {
+    text-align: center;
+    margin: .6em 0;
+    list-style: none;
+    padding: 0;
+  }
+
+  .page-box li {
+    display: inline-block;
+    width: 1.6em;
+    height: 1.6em;
+    line-height: 1.6em;
+    border-radius: 50%;
+    border: .1em solid #5ac2d8;
+    margin-right: .6em;
+  }
+
+  .page-box .current {
+    color: #000;
+    background-color: #5ac2d8;
+  }
+
+  .tbody-div .left-table {
+    width: 97%;
+  }
+
+  .title-name span {
+    font-size: 2.7em;
+  }
+
+  .title-box .date-box {
+    float: right;
+    margin-top: .5em;
+    border: .2em solid #2c647c;
+    height: 3em;
+    line-height: 3em;
+    padding: 0 .6em;
+    border-radius: .4em;
+  }
+
+  .date-box span {
+    font-size: 1.8em;
+  }
+
+  .right-box {
+    float: right;
+    margin-top: .8em;
+    width: 60%;
+  }
+
+  .board-content .main-table {
+    border-collapse: collapse;
+    border-color: #1d9a9a;
+    font-size: 1.5rem;
+    font-weight: 400;
+  }
+
+  .board-content .main-table th {
+    color: #51ffff;
+  }
+
+  .board-content .main-table th, td {
+    padding: 0.5rem;
+  }
+
+  .board-content .main-table tr {
+    color: white;
+    text-align: center;
+  }
+
+  .board-content .left-table tr:nth-child(even) {
+    background-color: rgba(6, 19, 31, 0.6);
+  }
+
+  .board-content .right-table {
+    width: 100%;
+  }
+
+  .board-content .right-table tr:nth-child(odd) {
+    background-color: rgba(6, 19, 31, 0.6);
+  }
+
+  .left-box {
+    width: 40%;
+    margin-top: .8em;
+  }
+
+  .left-title {
+    width: 97%;
+    text-align: center;
+    height: 4em;
+    line-height: 4em;
+  }
+
+  .left-title span {
+    font-size: 2.3em;
+  }
+
+  .notice-table tr {
+    text-align: left !important;
+    background: none !important;
+  }
+
+  .notice-table tr th:first-child {
+    text-align: center !important;
+  }
+
+  .notice-table tr p {
+    margin: .5rem 0;
+    text-indent: 2rem;
+  }
+
+  .notice-table label {
+    float: right;
+  }
+
+  .notice-table td:last-child {
+    padding: 1rem;
+  }
+
+</style>
+<script src="./../js/window-global.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/common.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+<script src="js/vertx-eventbus.js"></script>
+<script>
+	
+  var abnormalPage = {pageIndex: 1, pageCount: 10, workshopId: '', lineId: ''}
+  var planPage = {pageIndex: 1, pageCount: 3, workshopId: '', lineId: ''}
+  var showRowlength = 5
+  var lineMachinesnumlist= [];
+  var lineMachinesnum
+  var lineId;
+  function search () {
+      if ($('#workShop').val() == '0' || $('#line').val() == '0') {
+          return
+      }
+      lineId =  $('#line').val()
+
+      //不刷新页面更新URL
+      var currenturl=window.location.protocol+"//"+
+          window.location.host+
+          window.location.pathname
+      if(currenturl.indexOf("source")<=0){
+          history.pushState("", "Title", currenturl+"?lineId="+lineId);
+      }
+
+
+    $.ajax({
+      type: 'GET',
+      url: window.global.ajaxAutomatictBaseUrl + 'share/reports/workshopProductPlanReport?lineId='+lineId,
+      data: '',
+      contentType: 'application/json; charset=utf-8',
+      success: function (response) {
+          renderPageData1(response.items);
+		  var ebTrail = new EventBus( "http://192.168.128.234:8080/eventbus");
+          ebTrail.enableReconnect(true);
+          ebTrail.onopen = function () {//监听数据
+
+            ebTrail.registerHandler("mes-auto://websocket/boards/workshopExceptionReport/lines/"+lineId, function (err, msg) {
+			//$('#planDiv').empty();
+			//setTimeout(function(){renderPageData1( msg.body.items)},2000);
+			renderPageData1( msg.body.items);
+			
+			
+            });
+        };
+		    
+      },
+      error: function (xhr, status, error) {
+        xhr = null
+        console.log(error)
+      },
+      complete: function (xhr) {
+        xhr = null
+      }
+    })
+  }
+
+
+  function searchPlanBoard (value) {
+    planPage.lineId = $('#line').val()
+    planPage.workshopId = $('#workShop').val()
+    $.ajax({
+      type: 'POST',
+      url: window.global.ajaxAutomatictBaseUrl + '/api/automaticintegration/board/getProductPlanBoard',
+      data: JSON.stringify(planPage),
+      contentType: 'application/json; charset=utf-8',
+      success: function (response) {
+        response = JSON.parse(response)
+        renderPageData(value.data, response.data.pageVo)
+		
+		
+      },
+      error: function (xhr, status, error) {
+        console.log(error)
+      },
+      complete: function (xhr) {
+        xhr = null
+      }
+    })
+  }
+  function renderPageData1 (plan) {
+      console.log(plan)
+      console.log(plan[0].batch.batchNo)
+      console.log(plan[0].batch.spec)
+      console.log(plan[0].batch.tubeColor)
+      console.log(plan[0].lineMachines[0].item)
+      console.log(plan[0].lineMachines.length)
+      console.log(plan[0].lineMachines[plan[0].lineMachines.length-1].item)
+
+
+      var planHmtl = '<table border="1" class="main-table left-table">' +
+          '<tr><th colspan="4">生产计划</th></tr>' +
+          '<tr><th>纺位</th>' +
+          '<th>批号</th>' +
+          '<th>规格</th>' +
+          '<th>管色</th></tr>'
+      plan.forEach((item, i)=>{
+          BubbleSort(item.lineMachines)
+          console.log(item.lineMachines)
+          lineMachinesnum=item.lineMachines[0].item+'-'
+          for(var j=1;j<item.lineMachines.length;j++){
+
+              if(((item.lineMachines[j].item)-(item.lineMachines[j-1].item))>1){
+                  lineMachinesnum+=item.lineMachines[j-1].item+'<br>'+item.lineMachines[j].item+'-'
+              }
+          }
+          lineMachinesnum+=item.lineMachines[item.lineMachines.length-1].item;
+          console.log(lineMachinesnum);
+
+      planHmtl += i < plan.length
+          ? '<tr><td>' +lineMachinesnum+ '</td>' +
+          '<td>' + plan[i].batch.batchNo + '</td>' +
+          '<td>' + plan[i].batch.spec+ '</td>' +
+          '<td>' + plan[i].batch.tubeColor + '</td></tr>'
+          : '<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>'
+      planHmtl += '</table>'
+      $('#planDiv').html(planHmtl)
+
+      });
+
+
+  }
+  function BubbleSort(array) {
+      var length = array.length;
+      for (var i = length - 1; i > 0; i--) { //用于缩小范围
+          for (var j = 0; j < i; j++) { //在范围内进行冒泡，在此范围内最大的一个将冒到最后面
+              if (array[j].item > array[j+1].item) {
+                  var temp = array[j];
+                  array[j] = array[j+1];
+                  array[j+1] = temp;
+              }
+          }
+      }
+      return array;
+  }
+
+  function renderPageData (excep, plan) {
+    // 分页显示
+    abnormalPage.pageIndex = (abnormalPage.pageIndex + 1) > excep.pageSize ? 1 : (abnormalPage.pageIndex + 1)
+    planPage.pageIndex = (planPage.pageIndex + 1) > plan.pageSize ? 1 : (planPage.pageIndex + 1)
+    // 加载页面
+    var exceHtml = '<table border="1" class="main-table right-table">' +
+      '<tr><th>纺位</th>' +
+      '<th>落次</th>' +
+      '<th>锭号</th>' +
+      '<th>等级</th>' +
+      '<th>异常</th>' +
+      '<th>状态</th>' +
+      '<th>处理人</th>' +
+      '<th>时间</th></tr>'
+    for (var j = 0; j < abnormalPage.pageCount; j++) {
+      exceHtml += j < excep.list.length
+        ? '<tr><td>' + excep.list[j].item + '</td>' +
+        '<td>' + excep.list[j].fall + '</td>' +
+        '<td>' + getSpindle(excep.list[j].spindle) + '</td>' +
+        '<td>' + getColor(excep.list[j].grade) + '</td>' +
+        '<td>' + getAbnormal(excep.list[j]) + '</td>' +
+        '<td>' + excep.list[j].status + '次</td>' +
+        '<td>' + excep.list[j].handleEmployeeName + '</td>' +
+        '<td>' + excep.list[j].handleTime.substr(0, 10) + '</td>' +
+        '</tr>'
+        : '<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>' +
+        '<td>&nbsp;</td><td>&nbsp;</td></tr>'
+    }
+    exceHtml += '</table>'
+    exceHtml += '<ul class="page-box">'
+    var numberCount = 5
+    var min = Math.floor((excep.pageIndex - 1) / numberCount) * numberCount + 1
+    var max = excep.pageSize < (min + numberCount) ? excep.pageSize : (min + numberCount - 1)
+    for (var k = min; k <= max; k++) {
+      exceHtml += (k == excep.pageIndex) ? ('<li class="current">' + k + '</li>') : ('<li>' + k + '</li>')
+    }
+    exceHtml += '</ul>'
+    $('#excepDiv').html(exceHtml)
+
+
+  }
+
+  function getSpindle (spindle) {
+    var spinStr = ''
+    var arr = spindle.split(',')
+    spinStr += (arr.length > showRowlength)
+      ? '<span style="font-size: .1rem;">' + spindle + '</span>'
+      : spindle
+    return spinStr
+  }
+
+  function getColor (grade) {
+    var gradArr = grade.split(',')
+    var str = ''
+    for (var m = 0; m < gradArr.length; m++) {
+      str += '<span class="gradeColor' + gradArr[m] + '">' + gradArr[m] + '</span>'
+    }
+    return str
+  }
+
+  function getAbnormal (val) {
+    var exceptionInfo = val.exceptionInfo ? val.exceptionInfo : []
+    var exceptionLevel = val.exceptionLevel ? val.exceptionLevel : []
+    var textArray = exceptionInfo.concat(exceptionLevel)
+    return exceptionInfo.length > showRowlength
+      ? '<span style="font-size: .1rem;">' + textArray.join(';') + '</span>'
+      : textArray.join(';')
+  }
+  function GetQueryString(name){
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if(r!=null)return  unescape(r[2]); return null;
+}
+
+
+  // 获取通知
+//{lineId:lineId},
+
+  var interval = null
+  $(function () {
+    // var ebTrail=new EventBus("http://192.168.168.128:9998/eventbus/websocket/board/workshopExceptionReport");
+      lineId= GetQueryString("lineId");
+      if(lineId ){
+
+          $.ajax({
+              type: 'GET',
+              url: window.global.ajaxAutomatictBaseUrl + 'share/reports/workshopProductPlanReport?lineId='+lineId,
+              data: '',
+              contentType: 'application/json; charset=utf-8',
+              success: function (response) {
+
+                  renderPageData1(response.items);
+                  var ebTrail = new EventBus( "http://192.168.128.234:8080/eventbus");
+                  ebTrail.enableReconnect(true);
+                  ebTrail.onopen = function () {//监听数据
+                      ebTrail.registerHandler("mes-auto://websocket/boards/workshopExceptionReport/lines/"+lineId, function (err, msg) {
+                          //$('#planDiv').empty();
+                          //setTimeout(function(){renderPageData1( msg.body.items)},2000);
+                          renderPageData1( msg.body.items);
+
+
+                      });
+                  };
+
+              },
+              error: function (xhr, status, error) {
+                  xhr = null
+                  console.log(error)
+              },
+              complete: function (xhr) {
+                  xhr = null
+              }
+          })
+      }
+
+    addTabs()
+    getAllWorkshopOptions()
+    setCurrTab()
+    $('#workShop').on('change', function () {
+      getLineOptions($(this).val())
+    })
+    $('.currDate').text(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
+    interval = setInterval('search()', 30000000)
+  })
+</script>
+
+</html>

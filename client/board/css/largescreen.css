@@ -1,0 +1,499 @@
+table {
+  border-collapse: collapse;
+  width: 100%
+}
+
+table tr {
+  border-bottom: 1px dashed #1279bb;
+}
+
+table tr {
+  height: 2rem;
+  line-height: 2rem;
+  font-size: 1.2rem;
+}
+
+table tr th {
+  line-height: 3rem;
+  height: 3rem;
+  font-size: 1.5rem;
+  color: deepskyblue;
+  font-weight: 400;
+}
+
+table thead tr:first-child {
+  border-bottom: 1px solid #1279bb;
+}
+
+.hidden-ele {
+  display: none;
+}
+
+.margin-top-all{
+  margin-top: 1.5rem;
+}
+
+.common-border-top {
+  border-top: 1px dotted #1279bb;
+}
+
+.common-border-bottow {
+  border-bottom: 1px dotted #1279bb;
+}
+
+.common-border-left {
+  border-left: 1px dotted #1279bb;
+}
+
+.common-border-right {
+  border-right: 1px dotted #1279bb;
+}
+
+.screen-content {
+  padding: 0 1em;
+  color: #fff;
+  width: 100%;
+  height: 100%;
+  background: url(../img/background.jpg) center no-repeat;
+  background-size: cover;
+}
+
+.large-screen-content {
+  padding: 0 1em;
+  color: #fff;
+  width: 100%;
+  height: 100%;
+  background: url(../img/largebackground.jpg) center no-repeat;
+  background-size: cover;
+}
+
+.title-box {
+  display: flex;
+  justify-content: space-between;
+}
+
+.title-box .logo {
+  width: 13.5em;
+}
+
+.title-box .date-box {
+  margin-top: .1em;
+  border: .1em solid #1279bb;
+  height: 3em;
+  line-height: 3em;
+  padding: 0 .6em;
+  border-radius: .4em;
+}
+
+.title-box .date-box span {
+  font-size: 1.8em;
+}
+
+.title-name {
+  display: inline-block;
+  text-align: center;
+}
+
+.title-name span {
+  font-size: 2.7em;
+  text-align: center;
+}
+
+.content-box {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.content-box > div {
+  width: 33%;
+  padding: 0 1.1rem;
+}
+
+.content-box > div > ul > li {
+/*padding-top: 1rem;*/
+}
+
+ul {
+  list-style: none;
+}
+
+.leftring {
+  /*width: 16rem;*/
+  /*height: 16rem;*/
+  float: left;
+  width: 50%;
+}
+
+.leftring ul li {
+  float: left;
+  width: 50%;
+}
+
+.leftring li div {
+  width: 10rem;
+  height: 10rem;
+}
+
+.rightring {
+  float: right;
+  width: 50%;
+  height: 100%;
+}
+
+.defective-rate {
+  width: 20rem;
+  height: 20rem;
+}
+
+.single-defective-rate {
+  width: 29rem;
+  height: 24.5rem;
+}
+
+/* -------------------------第一行第三列------------------------ */
+.alarm-table {
+  margin: 0 auto;
+}
+
+.daily-production {
+  float: left;
+  width: 45%;
+
+}
+
+.daily-production > ul {
+  display: block;
+}
+
+.daily-production > ul > li {
+  float: left;
+  font-size: 3rem;
+  font-weight: 600;
+  height: 6rem;
+  line-height: 6rem;
+  vertical-align: middle;
+  width: 2.2rem;
+  text-align: center;
+  background-color: rgb(52, 83, 125);
+  margin: 0 0.2rem;
+}
+
+.receipt-issue {
+  float: left;
+  text-align: left;
+  width: 55%;
+}
+
+.receipt-issue > ul > li {
+  float: left;
+  height: 5rem;
+  line-height: 5rem;
+  width: 50%;
+}
+
+.receipt-issue > ul > li > label {
+  display: block;
+  height: 2rem;
+  line-height: 2rem;
+}
+
+.receipt-issue > ul > li > span {
+  display: block;
+  font-size: 2rem;
+  text-align: left;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  color: deepskyblue;
+}
+
+.receipt-issue > ul > li > div {
+  width: 95%;
+  height: 1.2rem;
+  filter: alpha(opacity=100 finishopacity=50 style=1 startx=0, starty=0, finishx=0, finishy=150) progid:DXImageTransform.Microsoft.gradient(startcolorstr=red, endcolorstr=blue, gradientType=0);
+  -ms-filter: alpha(opacity=100 finishopacity=50 style=1 startx=0, starty=0, finishx=0, finishy=150) progid:DXImageTransform.Microsoft.gradient(startcolorstr=red, endcolorstr=blue, gradientType=0);
+  background: -webkit-gradient(linear, 0 0, right bottom, from(#5bc0de), to(#91918a));
+}
+
+p.title {
+  color: deepskyblue;
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 1rem 0;
+}
+
+.auto-line {
+  margin-top: 2rem;
+}
+
+.auto-line ul li label, .auto-line ul li labelspan {
+  display: block;
+  text-align: center;
+}
+
+.auto-line ul li span {
+  display: block;
+  text-align: center;
+}
+
+label.sub-title {
+  font-size: larger;
+  color: #adc7e4;
+}
+
+label.sub-title ~ span {
+  display: block;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+label.sub-title{
+  margin-top: 0.6rem;
+}
+.auto-line ul li span {
+  margin-bottom: 1.2rem;
+}
+
+/*--------------------------------------第三行第二列开始--------------------------------------------*/
+#plan-production {
+  display: flex;
+  flex-direction: column;
+  /*margin-top: 3rem;*/
+}
+
+#plan-production .pp-title {
+  padding: 0.5em 0;
+  font-size: 2em;
+  text-align: center;
+  color: deepskyblue;
+  border-bottom: 1px dotted #1279bb;
+}
+
+#plan-production .pp-info {
+  display: flex;
+  flex-direction: column;
+  height: 10em;
+  /*todo*/
+}
+
+#plan-production .pp-info-line1 {
+  display: flex;
+  flex: 2;
+}
+
+#plan-production .pp-info-line2 {
+  display: flex;
+  flex: 1;
+}
+
+#plan-production .pp-info-line3 {
+  display: flex;
+  flex: 2;
+}
+
+#plan-production .pp-info-item {
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+}
+
+.pp-info-item .pp-item-header {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  color: #adc7e4;
+  font-size: 1.2rem;
+}
+
+.pp-info-item .pp-item-value {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: .1rem;
+}
+
+#plan-production .arrows {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: deepskyblue;
+  font-size: 1.5em;
+}
+
+#plan-production .border-wrapper {
+  flex: 5;
+  display: flex;
+  border: 1px dotted #1279bb;
+}
+
+#plan-production .pp-blank {
+  flex: 9;
+}
+
+#plan-production .pp-info-line2 .arrows {
+  flex: 2;
+}
+
+/*---------------------------------------------------第三行第二列结束-------------------------------------------*/
+
+.order-left {
+  width: 27%;
+  float: left;
+}
+
+.order-left > div {
+  background-color: rgb(14, 48, 95);
+  /*margin: 1rem 0;*/
+  padding: 1rem 0;
+}
+
+.order-left div label, .order-left div labelspan {
+  display: block;
+  text-align: center;
+}
+
+.order-left div.outter {
+  background-color: deepskyblue;
+  margin: 0 auto;
+  width: 2.2rem;
+  height: 12rem;
+  border-radius: .1rem;
+}
+
+.order-left span.inner {
+  background-color: #587591;
+  display: block;
+}
+
+.finish-span {
+  margin-bottom: 1rem;
+}
+
+.all-span {
+  margin-top: 1rem;
+}
+
+.order-right {
+  /*margin: 1rem auto;*/
+  width: 67%;
+  float: right;
+  margin-top: 1.5rem;
+}
+
+.order-right table {
+  padding: 2rem 0;
+}
+
+.order-right table tr{
+  height: 2.5rem;
+}
+
+.order-right table tr td:first-child {
+  color: yellow;
+  font-weight: 500;
+  width: 15%;
+}
+
+.order-right table tr td:nth-child(2) {
+  width: 50%;
+  text-align: left;
+  text-indent: 1rem;
+}
+
+.order-right table tr td:last-child {
+  color: #00a7d0;
+  width: 20%;
+  text-align: right;
+}
+
+.auto-line div ul li {
+  width: 40%;
+  float: left;
+  /*margin: 2rem 0;*/
+}
+
+.auto-line div ul li:first-child {
+  border-right: 1px dotted #1279bb;
+}
+
+.auto-line-right {
+  width: 20rem;
+  height: 12.36rem;
+  margin: 3.2rem 1rem;
+}
+
+#plan-production{
+  margin-top: 1.5rem;
+}
+/*-------------------------------------第三行第三列开始-------------------------------------*/
+.storage-location-top {
+  margin-top: 2.5rem;
+}
+
+.storage-location-top > ul > li {
+  float: left;
+}
+
+.storage-location-top > p {
+  float: left;
+}
+
+.storage-location-top > ul {
+  float: right;
+  margin: 1rem 0;
+}
+
+.storage-location-top > ul > li > div, .storage-location-top > ul > li > span {
+  display: inline-block;
+  height: 1.3rem;
+  line-height: 1.3rem;
+}
+
+.storage-location-top > ul > li > div {
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-left: 2rem;
+}
+
+.full {
+  background-color: red;
+}
+
+.overload {
+  background-color: red;
+}
+
+.notfull {
+  background-color: #2a3442;
+}
+
+.empty {
+  background-color: white;
+}
+
+.storage-location-bottom {
+  border: 1px dotted #1279bb;
+  display: inline-block;
+  width: 100%;
+}
+.storage-location-bottom > ul{
+}
+.storage-location-bottom > ul > li {
+  float: left;
+  width: 5%;
+  height: 2rem;
+  line-height: 2rem;
+  vertical-align: middle;
+  text-align: center;
+  margin: .2rem;
+}
+
+.storage-location-bottom > ul > li:nth-child(16n+1) {
+  margin-left: .75rem;
+}
