@@ -1,7 +1,9 @@
 package com.hengyi.japp.mes.auto.config;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.Util;
+import com.hengyi.japp.mes.auto.domain.data.CarpoolSilkCarModelOrderType;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -13,6 +15,7 @@ import lombok.Getter;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * @author jzb 2019-02-23
@@ -22,6 +25,8 @@ public class MesAutoConfig {
     @Getter
     private final Path rootPath;
     private final JsonObject rootConfig;
+    @Getter
+    private final CarpoolSilkCarModelOrderType carpoolSilkCarModelOrderType;
     @Getter
     private final JsonObject pdaConfig;
     @Getter
@@ -42,6 +47,10 @@ public class MesAutoConfig {
     public MesAutoConfig() {
         rootPath = Paths.get(System.getProperty("japp.mes.auto.path", "/home/mes/auto"));
         rootConfig = Util.readJsonObject(rootPath.resolve("config.yml"));
+        carpoolSilkCarModelOrderType = Optional.ofNullable(rootConfig.getString("carpoolSilkCarModelOrderType"))
+                .filter(J::nonBlank)
+                .map(CarpoolSilkCarModelOrderType::valueOf)
+                .orElse(CarpoolSilkCarModelOrderType.DEFAULT);
         pdaConfig = rootConfig.getJsonObject("pda");
         openConfig = rootConfig.getJsonObject("open");
         corsConfig = new CorsConfig(rootConfig.getJsonObject("cors"));
@@ -89,4 +98,5 @@ public class MesAutoConfig {
     public Path getDoffingSpecPath() {
         return rootPath.resolve("doffing_spec");
     }
+
 }

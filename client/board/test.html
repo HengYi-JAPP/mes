@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta http-equiv="Access-Control-Allow-Origin" content="*" />
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+aaaaaaaaaaaaa
+<div id='aa'></div>
+
+</body>
+<script src="./../js/window-global.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/common.js"></script>
+
+
+
+
+</body>
+<script>
+
+    var fso, ts, s ;
+    var ForReading = 1;
+    fso = new ActiveXObject("Scripting.FileSystemObject");
+    ts = fso.OpenTextFile("h:\\aaa.txt", ForReading);
+    s = ts.ReadLine(); document.getElementById("aa").innerHTML=s;
+
+</script>
+</html>

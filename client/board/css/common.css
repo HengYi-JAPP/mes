@@ -1,0 +1,841 @@
+/**, *:before, *:after {*/
+  /*margin: 0;*/
+  /*padding: 0;*/
+  /*box-sizing: border-box;*/
+/*}*/
+
+main {
+  padding: .4rem .2rem;
+}
+
+main input[type="radio"] {
+  display: none;
+}
+main input:checked + label {
+  color: #000000;
+  border-bottom: 2px solid #51ffff;
+}
+main label{
+  display: inline-block;
+  margin: 0 0 -1px;
+  padding: .1rem .3rem;
+  font-weight: 600;
+  text-align: center;
+  color: #313635;
+  border: 1px solid transparent;
+}
+
+.action-bar {
+  padding: .4rem .2rem;
+}
+.action-bar select {
+  width: 10rem;
+  margin-right: 1rem;
+}
+.action-bar select:first-child {
+  margin-left: 1rem;
+}
+
+.action-bar button {
+  /*width: 5rem;*/
+  margin-left: 1rem;
+}
+
+.board-content {
+  padding: 0 1em;
+  color: #fff;
+  width: 100%;
+  height: 100%;
+  background: url("./../img/background.jpg") center no-repeat;
+  background-size: cover;
+}
+
+.board-content .title-box {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.board-content table {
+  table-layout: fixed;
+}
+
+.board-content table td {
+  word-wrap:break-word;
+  word-break:break-all;
+}
+
+/*-----------------------------------报警看板----------------------------------*/
+.examine-index .title-box .logo {
+  float: left;
+}
+
+.examine-index.title-box .date-box {
+  float: right;
+  border: .06em solid #2c647c;
+  height: 2em;
+  line-height: 2em;
+  font-size: 1.6rem;
+  padding: 0 .5rem;
+}
+
+.examine-index .title-box .date-box span {
+  font-size: 1.8rem;
+}
+
+.examine-index .title-name {
+  display: inline-block;
+}
+
+.examine-index .title-name span {
+  font-size: 2.7rem;
+}
+
+.examine-index .content-box {
+  margin-top: 3.5rem;
+  border-top: .1em solid #2c647c;
+}
+
+.examine-index .main-table {
+  width: 100% !important;
+  border-collapse: collapse;
+  border-color: #1d9a9a;
+  margin: 1rem auto;
+}
+
+.examine-index .main-table th {
+  background-color: rgba(6, 19, 31, 0.6);
+  font-weight: 100;
+  color: #51ffff;
+}
+
+.examine-index .main-table thead tr, .examine-index .board-content .main-table tbody tr {
+  font-size: 2.6rem;
+  font-weight: 100;
+  color: white;
+  text-align: center;
+}
+
+.examine-index .main-table tr:nth-child(odd) {
+  background-color: rgba(6, 19, 31, 0.6);
+}
+
+.examine-index .main-table th {
+  text-align: center;
+  padding: .1rem 0;
+}
+
+.examine-index .main-table td {
+  text-align: center;
+  padding: .1rem 0;
+}
+/*-----------------------------------自动生产线看板-----------------------------------------------------*/
+.auto-line #margin table{
+  border-collapse: collapse;
+  border-color: #1d9a9a;
+  width: 31%;
+  margin: 1rem 1rem;
+}
+.auto-line .action-bar {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 3px;
+  background-color: #fff;
+}
+#margin tr{
+  font-size: 2.5rem;
+  font-weight: 100;
+  color: white;
+}
+.auto-line .flex-div{
+    display: flex;
+  }
+.auto-line .main-table th {
+  background-color: rgba(6, 19, 31, 0.6);
+  font-size: 3rem;
+  font-weight: 100;
+  color: #51ffff;
+  text-align: center;
+}
+.auto-line .title-name span {
+  font-size: 2.7em;
+}
+.auto-line .board-content .title-name {
+  display: inline-block;
+}
+.auto-line .title-box .logo {
+  width: 13.5em;
+  float: left;
+}
+.auto-line .title-box .date-box {
+  font-size: 2rem;
+  float: right;
+  margin-top: .1em;
+  border: .1em solid #2c647c;
+  height: 3em;
+  line-height: 3em;
+  padding: 0 .6em;
+  border-radius: .4em;
+}
+.auto-line .bottom-table{
+  width: 98%;
+  margin-bottom: 10px;
+}
+.auto-line .bottom-table tr {
+  font-size: 2.5rem;
+  font-weight: 100;
+  color: white;
+  text-align: center;
+}
+.auto-line .bottom-table tr th{
+    font-size: 2.6rem;
+    font-weight: 100;
+    color: #51ffff;
+    text-align: center;
+  }
+.auto-line .content-box ul {
+    list-style: none;
+    display: inline-block;
+    border: .1em solid #2c647c;
+    width: 97.5%;
+    padding: 0;
+    margin: 2rem .8rem 1.5rem .8rem;
+  }
+.auto-line .content-box ul li {
+    float: left;
+    width: 49%;
+    text-align: center;
+    font-size: 2rem;
+    height: 4rem;
+    line-height: 4rem;
+    margin: 1rem auto;
+  }
+
+.auto-line .content-box ul li:first-child {
+    border-right: 1px dashed #406161;
+  }
+.auto-line .bord-table thead tr{
+    background-color: #eef1f6;
+  }
+.auto-line .bord-table thead tr td{
+    font-size: 20px;
+  }
+.auto-line .bord-table td{
+    text-align: center;
+    color: #000;
+    border: 1px solid #bbb;
+    padding: 0 4px;
+    font-size: 40px;
+    font-weight: bold;
+  }
+/*--------------------------------------车间异常看板--------------------------------------------------------*/
+.all-wrapper1 {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 3px;
+  background-color: #fff;
+}
+.abnormmal .gradeColorA {
+  color: #f7abab;
+}
+
+.abnormmal .gradeColorB {
+  color: #89c997;
+}
+
+.abnormmal .gradeColorC {
+  color: #ffe222;
+}
+
+.abnormmal .title-box .logo {
+  width: 13.5em;
+  float: left;
+}
+
+.abnormmal .title-box .title-name {
+  display: inline-block;
+}
+
+.abnormmal .board-content .tbody-div {
+  border-top: .1em solid #2c647c;
+  margin: 1rem;
+  overflow: hidden;
+}
+
+.abnormmal .page-box {
+  text-align: center;
+  margin: .6em 0;
+  list-style: none;
+  padding: 0;
+}
+
+.abnormmal .page-box li {
+  display: inline-block;
+  width: 1.6em;
+  height: 1.6em;
+  line-height: 1.6em;
+  border-radius: 50%;
+  border: .1em solid #5ac2d8;
+  margin-right: .6em;
+}
+
+.abnormmal .page-box .current {
+  color: #000;
+  background-color: #5ac2d8;
+}
+
+.abnormmal .tbody-div .left-table {
+  width: 97%;
+}
+
+.abnormmal .title-name span {
+  font-size: 2.7em;
+}
+
+.abnormmal .title-box .date-box {
+  float: right;
+  margin-top: .5em;
+  border: .2em solid #2c647c;
+  height: 3em;
+  line-height: 3em;
+  padding: 0 .6em;
+  border-radius: .4em;
+}
+
+.abnormmal .date-box span {
+  font-size: 1.8em;
+}
+
+.abnormmal .right-box {
+  float: right;
+  margin-top: .8em;
+  width: 60%;
+}
+
+.abnormmal .board-content .main-table {
+  border-collapse: collapse;
+  border-color: #1d9a9a;
+  font-size: 2.5rem;
+  font-weight: 400;
+}
+
+.abnormmal .board-content .main-table th {
+  text-align: center;
+  color: #51ffff;
+}
+
+.abnormmal .board-content .main-table th, td {
+  padding: 0.5rem;
+}
+
+.abnormmal .board-content .main-table tr {
+  color: white;
+  text-align: center;
+}
+
+.abnormmal .board-content .left-table tr:nth-child(even) {
+  background-color: rgba(6, 19, 31, 0.6);
+}
+
+.abnormmal .board-content .right-table {
+  width: 100%;
+}
+
+.abnormmal .board-content .right-table tr:nth-child(odd) {
+  background-color: rgba(6, 19, 31, 0.6);
+}
+
+.abnormmal .left-box {
+  width: 40%;
+  margin-top: .8em;
+}
+
+.abnormmal .left-title {
+  width: 97%;
+  text-align: center;
+  height: 4em;
+  line-height: 4em;
+}
+
+.abnormmal .left-title span {
+  font-size: 2.3em;
+}
+
+.abnormmal .notice-table tr {
+  text-align: left !important;
+  background: none !important;
+}
+
+.abnormmal .notice-table tr th:first-child {
+  text-align: center !important;
+}
+
+.abnormmal .notice-table tr p {
+  margin: .5rem 0;
+  text-indent: 2rem;
+}
+
+.abnormmal .notice-table label {
+  float: right;
+}
+
+.abnormmal .notice-table td:last-child {
+  padding: 1rem;
+}
+
+/*--------------------------------------智能制造中心看板------------------------------------------------------*/
+.manufacturing-center {
+  color: #fff;
+  width: 100%;
+  height: 100%;
+  background: url(../../img/largebackground.jpg) center no-repeat;
+  background-size: cover;
+}
+.manufacturing-center .margin-left-1rem {
+  margin-left: 1rem;
+}
+.manufacturing-center .title-box {
+  display: flex;
+  position: absolute;
+  justify-content: space-between;
+  height: 8%;
+  width: 100%;
+}
+
+.manufacturing-center .title-box .logo {
+  height: 70%;
+}
+
+.manufacturing-center .title-box .date-box {
+  display: flex;
+  align-items: center;
+  padding: 0 .6em;
+  border-radius: .4em;
+}
+
+.manufacturing-center .title-box .date-box span {
+  font-size: 1.8em;
+  display: block;
+  border: 1px solid #1279bb;
+  padding: 5px;
+  border-radius: 2px;
+}
+
+.manufacturing-center .title-name {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.manufacturing-center .title-name span {
+  font-size: 2.7em;
+  text-align: center;
+}
+
+.manufacturing-center .content-box {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: scroll;
+}
+
+.manufacturing-center .content-box > div {
+  flex-grow: 1;
+}
+.manufacturing-center .content-box > div > ul {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.manufacturing-center .content-box > div > ul li {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+.manufacturing-center .content-box > div > ul li>div{}
+
+.manufacturing-center .li-margin-left {
+  margin-left: 1rem;
+}
+
+.manufacturing-center ul {
+  list-style: none;
+}
+
+.manufacturing-center .leftring {
+  margin-top: 10rem;
+  float: left;
+  width: 50%;
+}
+
+.manufacturing-center .leftring ul li {
+  float: left;
+  width: 50%;
+}
+
+.manufacturing-center .leftring li div {
+  width: 15rem;
+  height: 15rem;
+  margin: 1rem auto;
+}
+
+.manufacturing-center .rightring {
+  float: right;
+  width: 50%;
+  margin: 0rem auto;
+}
+
+.manufacturing-center .defective-rate {
+  width: 100%;
+}
+
+.manufacturing-center .single-defective-rate {
+  width: 29rem;
+  height: 24.5rem;
+}
+
+/* -------------------------第一行第三列------------------------ */
+.manufacturing-center .alarm-table {
+  margin: 0 auto;
+}
+
+.manufacturing-center .daily-production {
+  float: left;
+  width: 45%;
+
+}
+
+.manufacturing-center .daily-production > ul {
+  display: block;
+}
+
+.manufacturing-center .daily-production > ul > li {
+  float: left;
+  font-size: 3rem;
+  font-weight: 600;
+  height: 6rem;
+  line-height: 6rem;
+  vertical-align: middle;
+  width: 2.2rem;
+  text-align: center;
+  background-color: rgb(52, 83, 125);
+  margin: 0 0.2rem;
+}
+
+.manufacturing-center .receipt-issue {
+  float: left;
+  text-align: left;
+  width: 55%;
+}
+
+.manufacturing-center .receipt-issue > ul > li {
+  float: left;
+  height: 5rem;
+  line-height: 5rem;
+  width: 50%;
+}
+
+.manufacturing-center .receipt-issue > ul > li > label {
+  display: block;
+  height: 2rem;
+  line-height: 2rem;
+}
+
+.manufacturing-center .receipt-issue > ul > li > span {
+  display: block;
+  font-size: 2rem;
+  text-align: left;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  color: deepskyblue;
+}
+
+.manufacturing-center .receipt-issue > ul > li > div {
+  width: 95%;
+  height: 1.2rem;
+  filter: alpha(opacity=100 finishopacity=50 style=1 startx=0, starty=0, finishx=0, finishy=150) progid:DXImageTransform.Microsoft.gradient(startcolorstr=red, endcolorstr=blue, gradientType=0);
+  -ms-filter: alpha(opacity=100 finishopacity=50 style=1 startx=0, starty=0, finishx=0, finishy=150) progid:DXImageTransform.Microsoft.gradient(startcolorstr=red, endcolorstr=blue, gradientType=0);
+  background: -webkit-gradient(linear, 0 0, right bottom, from(#5bc0de), to(#91918a));
+}
+
+.manufacturing-center p.title {
+  color: deepskyblue;
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 1rem 0;
+}
+
+.manufacturing-center .auto-line {
+  /*margin-top: 2rem;*/
+}
+
+.manufacturing-center .auto-line ul li label, .auto-line ul li labelspan {
+  display: block;
+  text-align: center;
+}
+
+.manufacturing-center .auto-line ul li span {
+  display: block;
+  text-align: center;
+}
+
+.manufacturing-center label.sub-title {
+  font-size: larger;
+  color: #adc7e4;
+}
+
+.manufacturing-center label.sub-title ~ span {
+  display: block;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.manufacturing-center label.sub-title{
+  margin-top: 0.6rem;
+}
+.manufacturing-center .auto-line ul li span {
+  margin-bottom: 1.2rem;
+}
+
+/*--------------------------------------第三行第二列开始--------------------------------------------*/
+.manufacturing-center #plan-production {
+  display: flex;
+  flex-direction: column;
+  /*margin-top: 3rem;*/
+}
+
+.manufacturing-center #plan-production .pp-title {
+  padding: 0.5em 0;
+  font-size: 2em;
+  text-align: center;
+  color: deepskyblue;
+  border-bottom: 1px dotted #1279bb;
+}
+
+.manufacturing-center #plan-production .pp-info {
+  display: flex;
+  flex-direction: column;
+  height: 10em;
+  /*todo*/
+}
+
+.manufacturing-center #plan-production .pp-info-line1 {
+  display: flex;
+  flex: 2;
+}
+
+.manufacturing-center #plan-production .pp-info-line2 {
+  display: flex;
+  flex: 1;
+}
+
+.manufacturing-center #plan-production .pp-info-line3 {
+  display: flex;
+  flex: 2;
+}
+
+.manufacturing-center #plan-production .pp-info-item {
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+}
+
+.manufacturing-center .pp-info-item .pp-item-header {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  color: #adc7e4;
+  font-size: 1.2rem;
+}
+
+.manufacturing-center .pp-info-item .pp-item-value {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: .1rem;
+}
+
+.manufacturing-center #plan-production .arrows {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: deepskyblue;
+  font-size: 1.5em;
+}
+
+.manufacturing-center #plan-production .border-wrapper {
+  flex: 5;
+  display: flex;
+  border: 1px dotted #1279bb;
+}
+
+.manufacturing-center #plan-production .pp-blank {
+  flex: 9;
+}
+
+.manufacturing-center #plan-production .pp-info-line2 .arrows {
+  flex: 2;
+}
+
+/*---------------------------------------------------第三行第二列结束-------------------------------------------*/
+
+.manufacturing-center .order-left {
+  width: 27%;
+  float: left;
+}
+
+.manufacturing-center .order-left > div {
+  background-color: rgb(14, 48, 95);
+  /*margin: 1rem 0;*/
+  padding: 1rem 0;
+}
+
+.manufacturing-center .order-left div label, .order-left div labelspan {
+  display: block;
+  text-align: center;
+}
+
+.manufacturing-center .order-left div.outter {
+  background-color: deepskyblue;
+  margin: 0 auto;
+  width: 2.2rem;
+  height: 12rem;
+  border-radius: .1rem;
+}
+
+.manufacturing-center .order-left span.inner {
+  background-color: #587591;
+  display: block;
+}
+
+.manufacturing-center .finish-span {
+  margin-bottom: 1rem;
+}
+
+.manufacturing-center .all-span {
+  margin-top: 1rem;
+}
+
+.manufacturing-center .order-right {
+  /*margin: 1rem auto;*/
+  width: 67%;
+  float: right;
+  margin-top: 1.5rem;
+}
+
+.manufacturing-center .order-right table {
+  padding: 2rem 0;
+}
+
+.manufacturing-center .order-right table tr{
+  height: 2.5rem;
+}
+
+.manufacturing-center .order-right table tr td:first-child {
+  color: yellow;
+  font-weight: 500;
+  width: 15%;
+}
+
+.manufacturing-center .order-right table tr td:nth-child(2) {
+  width: 50%;
+  text-align: left;
+  text-indent: 1rem;
+}
+
+.manufacturing-center .order-right table tr td:last-child {
+  color: #00a7d0;
+  width: 20%;
+  text-align: right;
+}
+
+.manufacturing-center .auto-line div ul li {
+  width: 40%;
+  float: left;
+  /*margin: 2rem 0;*/
+}
+
+.manufacturing-center .auto-line div ul li:first-child {
+  border-right: 1px dotted #1279bb;
+}
+
+.manufacturing-center .auto-line-right {
+  width: 20rem;
+  height: 12.36rem;
+  margin: 3.2rem 1rem;
+}
+
+.manufacturing-center #plan-production{
+  margin-top: 1.5rem;
+}
+/*-------------------------------------第三行第三列开始-------------------------------------*/
+.manufacturing-center .storage-location-top {
+  margin-top: 2.5rem;
+}
+
+.manufacturing-center .storage-location-top > ul > li {
+  float: left;
+}
+
+.manufacturing-center .storage-location-top > p {
+  float: left;
+}
+
+.manufacturing-center .storage-location-top > ul {
+  float: right;
+  margin: 1rem 0;
+}
+
+.manufacturing-center .storage-location-top > ul > li > div, .storage-location-top > ul > li > span {
+  display: inline-block;
+  height: 1.3rem;
+  line-height: 1.3rem;
+}
+
+.manufacturing-center .storage-location-top > ul > li > div {
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-left: 2rem;
+}
+
+.manufacturing-center .full {
+  background-color: red;
+}
+
+.manufacturing-center .overload {
+  background-color: red;
+}
+
+.manufacturing-center .notfull {
+  background-color: #2a3442;
+}
+
+.manufacturing-center .empty {
+  background-color: white;
+}
+
+.manufacturing-center .storage-location-bottom {
+  border: 1px dotted #1279bb;
+  display: inline-block;
+  width: 100%;
+}
+.manufacturing-center .storage-location-bottom > ul{
+}
+.manufacturing-center .storage-location-bottom > ul > li {
+  float: left;
+  width: 5%;
+  height: 2rem;
+  line-height: 2rem;
+  vertical-align: middle;
+  text-align: center;
+  margin: .2rem;
+}
+
+.manufacturing-center .storage-location-bottom > ul > li:nth-child(16n+1) {
+  margin-left: .75rem;
+}

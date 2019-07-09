@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>杭州逸暻化纤智能制造指挥中心</title>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/largescreen.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+</head>
+<body>
+<div id="app">
+  <div class="all-wrapper">
+    <main class="tab-bar" id="tabBar"></main>
+    <div class="action-bar">
+      <select id="workShop">
+        <option value="0">C车间</option>
+        <option value="1">D车间</option>
+      </select>
+      <button id="search" onclick="search()">查询</button>
+      <button id="showBoard" onclick="fullScreen()">显示看板</button>
+    </div>
+    <div class="large-screen-content" id="boardContent">
+      <div class="title-box">
+        <img class="logo" src="./img/logo.png" alt="">
+        <div class="title-name">
+          <span>杭州逸暻化纤智能制造指挥中心</span>
+        </div>
+        <div class="date-box">
+          <span id="currTime">2017-12-07</span>
+        </div>
+      </div>
+      <div style="clear: both"></div>
+      <div class="content-box margin-top-all" id="tbody">
+        <!--第一列-->
+        <div class="common-border-right">
+          <ul>
+            <!--第一列第一行-->
+            <li style="margin-bottom: 0">
+              <div class="leftring">
+                <ul>
+                  <li>
+                    <div style="position:relative;margin-left:5%" id="doubleARate"></div>
+                  </li>
+                  <li>
+                    <div style="position:relative;margin-left:60%" id="aRate"></div>
+                  </li>
+                  <li>
+                    <div style="position:relative;margin-left:5%;margin-top: 45%" id="bRate"></div>
+                  </li>
+                  <li>
+                    <div style="position:relative;margin-left:60%;margin-top: 45%"" id="cRate"></div>
+                  </li>
+                </ul>
+              </div>
+              <div class="rightring">
+                <div id="defectiveRate" class="defective-rate"></div>
+              </div>
+              <div style="clear: both;"></div>
+            </li>
+            <!--第一列第二行-->
+            <!-- <li style="margin-bottom: 0">
+              <div class="single-defective-rate" id="singleDefectiveRate"></div>
+            </li> -->
+            <!--第一列第三行-->
+            <li>
+              <div class="alarm-table" style="text-align:center">
+                <table>
+                  <thead>
+                  <tr>
+                    <th>线别</th>
+                    <th>AA</th>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>C</th>
+                    <!-- <th>原因</th> -->
+                  </tr>
+                  </thead>
+                  <tbody id="sickAlarmTable">
+                  </tbody>
+                </table>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <!--第二列-->
+        <div>
+          <ul>
+            <!--第二列第一行-->
+            <li style="margin-bottom: 1.5rem">
+              <div class="daily-production">
+                <p class="title">当日产量(锭)</p>
+                <ul id="totalAmout">
+                  <li>&nbsp;</li>
+                  <li>&nbsp;</li>
+                  <!-- <li>&nbsp;</li>
+                  <li>&nbsp;</li>
+                  <li>&nbsp;</li>
+                  <li>&nbsp;</li> -->
+                </ul>
+              </div>
+              <div class="receipt-issue">
+                <p class="title">&nbsp;</p>
+                <ul>
+                  <li>
+                    <label class="sub-title">入库(锭)</label>
+                    <span style="font-size:1.4rem" class="sub-span" id="stockingNum">221569</span>
+                    <div>&nbsp;</div>
+                  </li>
+                  <li>
+                    <label class="sub-title">出库(锭)</label>
+                    <span style="font-size:1.4rem" id="retrievalNum">116562</span>
+                    <div>&nbsp;</div>
+                  </li>
+                </ul>
+              </div>
+              <div style="clear:both;"></div>
+            </li>
+            <!--第二列第二行-->
+            <li>
+              <div class="auto-line">
+                <p class="title">生产包装状况</p>
+                <div class="common-border-top common-border-bottow">
+                  <ul>
+                    <li>
+                      <label class="sub-title top-title">待包装锭数</label>
+                      <span id="waitPackNum">5000</span>
+                      <label class="sub-title top-title">打包锭数</label>
+                      <span id="packedNum">3500</span>
+                      <label class="sub-title top-title">打包包数</label>
+                      <span id="boxNum">40</span>
+                    </li>
+                    <li>
+                      <div id="autoline" class="auto-line-right"></div>
+                    </li>
+                  </ul>
+                  <div style="clear: both"></div>
+                </div>
+              </div>
+            </li>
+            <!--第二列第三行-->
+            <!-- <li>
+              <div class="order-left auto-line">
+                <div>
+                  <label class="sub-title">已完成订单(kg)</label>
+                  <span id="finishedCount" class="finish-span">1500</span>
+                  <div class="outter" id="outter"><span class="inner" id="inner"></span></div>
+                  <span id="allCount" class="all-span">2000</span>
+                  <label class="sub-title">订单总量(kg)</label>
+                </div>
+              </div>
+              <div class="order-right">
+                <table>
+                  <tbody id="maldistributionBoList">
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </li> -->
+          </ul>
+        </div>
+        <!--第三列-->
+        <div class="common-border-left">
+          <ul>
+            <!--第三列第一行-->
+            <li>
+              <div>
+                <table>
+                  <thead><tr><th>批号</th><th>降等率</th><th>降等数量</th></tr></thead>
+                  <tbody id="batchBoardBoList">
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                    <!-- <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr> -->
+                  </tbody>
+                </table>
+              </div>
+            </li>
+            <!--第三列第二行-->
+            <li>
+              <div id="plan-production">
+                <div class="pp-title">DTY计划生产数：<span id="planAmout">24948</span> 吨</div>
+                <!-- <div class="pp-info">
+                  <div class="line pp-info-line1">
+                    <div class="pp-info-item">
+                      <span class="pp-item-header">落筒</span>
+                      <span class="pp-item-value" id="fallNum">20200</span>
+                    </div>
+                    <div class="arrows"><i class="fa fa-arrow-right"></i></div>
+                    <div class="pp-info-item">
+                      <span class="pp-item-header">剥丝</span>
+                      <span class="pp-item-value" id="stripNum">20845</span>
+                    </div>
+                    <div class="arrows"><i class="fa fa-arrow-right"></i></div>
+                    <div class="pp-info-item">
+                      <span class="pp-item-header">测纤</span>
+                      <span class="pp-item-value" id="measureNum">424</span>
+                    </div>
+                    <div class="arrows"><i class="fa fa-arrow-right"></i></div>
+                    <div class="pp-info-item">
+                      <span class="pp-item-header">织袜</span>
+                      <span class="pp-item-value" id="hosieryNum">2888</span>
+                    </div>
+                  </div>
+                  <div class="line pp-info-line2">
+                    <div class="pp-blank"></div>
+                    <div class="arrows"><i class="fa fa-arrow-down"></i></div>
+                  </div>
+                  <div class="line pp-info-line3">
+                    <div class="border-wrapper">
+                      <div class="pp-info-item">
+                        <span class="pp-item-header">自动包装</span>
+                        <span class="pp-item-value" id="autoPackNum">18405</span>
+                      </div>
+                      <div class="pp-info-item">
+                        <span class="pp-item-header">人工包装</span>
+                        <span class="pp-item-value" id="handpackNum">623</span>
+                      </div>
+                    </div>
+                    <div class="arrows"><i class="fa fa-arrow-left"></i></div>
+                    <div class="pp-info-item">
+                      <span class="pp-item-header">外观检</span>
+                      <span class="pp-item-value" id="surfaceNum">21303</span>
+                    </div>
+                    <div class="arrows"><i class="fa fa-arrow-left"></i></div>
+                    <div class="pp-info-item">
+                      <span class="pp-item-header">染判</span>
+                      <span class="pp-item-value" id="sentenceNum">202</span>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+            </li>
+            <!--第三列第三行-->
+            <!-- <li>
+              <div class="storage-location-top">
+                <p class="title">库位实时情况(箱)</p>
+                <ul class="hidden-ele">
+                  <li>
+                    <div class="full">&nbsp;</div>
+                    <span>已满</span>
+                  </li>
+                  <li>
+                    <div class="notfull">&nbsp;</div>
+                    <span>未满</span>
+                  </li>
+                  <li>
+                    <div class="empty">&nbsp;</div>
+                    <span>空</span>
+                  </li>
+                </ul>
+                <div style="clear: both"></div>
+                <div class="storage-location-bottom">
+                  <ul id="storageViewStatus">
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                    <li class="overload">&nbsp;</li>
+                  </ul>
+                </div>
+              </div>
+            </li> -->
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="./../js/window-global.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/echarts.min.js"></script>
+<script src="js/common.js"></script>
+<script src="js/largescreen.js"></script>
+</body>
+<script>
+  var interval = null
+  var count = 0
+  $(function () {
+    addTabs()
+    // getAllWorkshopOptions()
+    setCurrTab()
+    $('#currTime').text(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
+    search()
+    interval = null
+    interval = setInterval('search()', 6000)
+  })
+
+  function search () {
+    // 定时循环每次到第2次重置
+    count++
+    if(count === 2){
+      count=0
+    }
+    var array = [
+      {
+        CommandCentreBoard: "{\"autoPackNum\":\"0\",\"autoPackNum1\":\"0\",\"autoPackNum2\":\"0\",\"autoPackNum3\":\"0\"," +
+            "\"batchBoardBoList\":[{\"amout\":\"0\",\"batchNo\":\"A92310\",\"list\":[\"1\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"A93014\",\"list\":[\"A9(1-48)\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"A92015\",\"list\":[\"A9(1-1)\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"GA093005\",\"list\":[\"A9(9-20)\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"GA092004\",\"list\":[\"A9(1-4)\"]}]," +
+            "\"boxNum\":\"0\",\"currentTime\":\"2019-04-27T09:18:21.553\",\"fallNum\":\"0\",\"handpackNum\":\"0\",\"hosieryNum\":\"0\"," +
+            "\"linelist\":[{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A1\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A2\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A2A\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A2B\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A3\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A4\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A5\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A6\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A7\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A8\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A9\"}]," +
+            "\"maldistributionBoList\":[],\"measureNum\":\"0\",\"packedNum\":\"0\",\"planAmout\":\"526.274\"," +
+            "\"rateA\":\"90\",\"rateAA\":\"99\",\"rateB\":\"98\",\"rateC\":\"93\"," +
+            "\"sentenceNum\":\"0\",\"stripNum\":\"0\",\"surfaceNum\":\"0\"," +
+            "\"totalAmout\":\"100\",\"waitPackNum\":\"3371\"}",
+        list: [
+          {lineName:'E1',AA:'1',A:'2',B:'3',C:'4'},
+          {lineName:'E1',AA:'1',A:'2',B:'3',C:'4'}
+        ],
+        dailyProductionByWorkShopId:{"productionNum":11,"retrievalNum":13856,"stockingNum":27328}
+      },
+      {
+        CommandCentreBoard: "{\"autoPackNum\":\"0\",\"autoPackNum1\":\"0\",\"autoPackNum2\":\"0\",\"autoPackNum3\":\"0\"," +
+            "\"batchBoardBoList\":[{\"amout\":\"0\",\"batchNo\":\"A92310\",\"list\":[\"80\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"A93014\",\"list\":[\"A9(1-48)\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"A92015\",\"list\":[\"A9(1-1)\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"GA093005\",\"list\":[\"A9(9-20)\"]}," +
+            "{\"amout\":\"0\",\"batchNo\":\"GA092004\",\"list\":[\"A9(1-4)\"]}]," +
+            "\"boxNum\":\"222\",\"currentTime\":\"2019-04-27T09:18:21.553\",\"fallNum\":\"0\",\"handpackNum\":\"0\",\"hosieryNum\":\"0\"," +
+            "\"linelist\":[{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A1\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A2\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A2A\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A2B\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A3\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A4\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A5\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A6\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A7\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A8\"}," +
+            "{\"amout\":\"0\",\"exceptionNum\":\"0\",\"line\":\"A9\"}]," +
+            "\"maldistributionBoList\":[],\"measureNum\":\"0\",\"packedNum\":\"111\",\"planAmout\":\"526.274\"," +
+            "\"rateA\":\"90\",\"rateAA\":\"99\",\"rateB\":\"98\",\"rateC\":\"93\"," +
+            "\"sentenceNum\":\"0\",\"stripNum\":\"0\",\"surfaceNum\":\"0\"," +
+            "\"totalAmout\":\"100\",\"waitPackNum\":\"3371\"}",
+        list: [
+          {lineName:'E1',AA:'1',A:'2',B:'3',C:'4'},
+          {lineName:'E1',AA:'1',A:'2',B:'3',C:'4'}
+        ],
+        dailyProductionByWorkShopId:{"productionNum":0,"retrievalNum":13856,"stockingNum":27328}
+      }
+    ]
+    var workShopID = $('#workShop').val()
+    // if (workShopID == 0) {
+    //   return
+    // }
+    var param = JSON.stringify({workshopId: workShopID})
+    getCommandCentreBoard(array[count].CommandCentreBoard)
+    // 第一列第三行报警
+    getSilkAlarmList(array[count].list)
+    getDailyProductionByWorkshopId(array[count].dailyProductionByWorkShopId)
+    // getOrderInfo(param)
+    // getStorageViewStatus(param)
+  }
+
+</script>
+</html>

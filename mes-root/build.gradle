@@ -1,17 +1,18 @@
 plugins {
     id 'io.spring.dependency-management' version '1.0.7.RELEASE'
-    id 'io.franzbecker.gradle-lombok' version '2.2'
-    id 'com.palantir.docker' version "0.22.0"
+    id 'io.franzbecker.gradle-lombok' version '3.0.0'
+    id 'com.palantir.docker' version '0.22.1'
     id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
 allprojects {
     group 'com.hengyi.japp.mes'
-    version '2.39'
+    version '1.17'
 
     apply plugin: 'idea'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
-    apply plugin: "io.spring.dependency-management"
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'io.franzbecker.gradle-lombok'
 
     repositories {
         mavenLocal()
@@ -33,11 +34,6 @@ subprojects {
     apply plugin: 'application'
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'com.palantir.docker'
-    apply plugin: 'io.franzbecker.gradle-lombok'
-    lombok {
-        version = "${lombokVersion}"
-        sha256 = ""
-    }
 
     dependencies {
         compileOnly "io.vertx:vertx-codegen"
@@ -53,15 +49,14 @@ subprojects {
      */
     shadowJar {
 //        dependsOn clean
-//        baseName "${project.name}-fat.jar"
         archiveName "${project.name}-fat.jar"
     }
     docker {
         dependsOn shadowJar
-        name "hengyi/${project.name}"
-        noCache true
-//        files "build/libs/${project.name}-fat.jar"
+        name "hengyi/${project.name}:${project.version}"
+        buildArgs([BUILD_VERSION: 'version'])
         files tasks.shadowJar.outputs
+        noCache true
     }
     jar.manifest {
         attributes(

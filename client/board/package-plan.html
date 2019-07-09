@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/common.css">
+</head>
+
+<body>
+  <div id="app">
+    <div class="all-wrapper">
+      <main class="tab-bar" id="tabBar"></main>
+      <div class="action-bar">
+        <select id="workShop">
+          <option value="0">请选择车间</option>
+        </select>
+        <button id="search" onclick="search()">查询</button>
+        <button id="showBoard" onclick="fullScreen()">显示看板</button>
+      </div>
+      <div class="board-content" id="boardContent">
+        <div class="title-box">
+          <img class="logo" src="img/logo.png" alt="">
+          <div class="title-name">
+            <span>包装计划排程</span>
+          </div>
+          <div class="date-box">
+            <!-- <span id="currTime">2017-12-07</span> -->
+          </div>
+        </div>
+        <div class="content-box" id="tbody">
+          <ul>
+            <li>待包装车数：<span>0</span>辆</li>
+            <li>已包装车数：<span>0</span>辆</li>
+          </ul>
+          <div class="flex-div">
+            <table border="1" class="main-table">
+              <thead>
+                <tr>
+                  <th>批号</th>
+                  <th>规格</th>
+                  <th>管色</th>
+                  <th>等级</th>
+                  <th>待包装丝车</th>
+                  <th>待包装丝锭</th>
+                  <th>已包装丝车</th>
+                  <th>已包装丝锭</th>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/board-global.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/common.js"></script>
+</body>
+<!-- <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script> -->
+<!-- <script src="js/vertx-eventbus.js"></script> -->
+<script>
+</script>
+<script>
+  function search() {
+    let params = {
+      workshopId: $('#workShop').val(),
+    }
+    params = JSON.stringify(params)
+    $.ajax({
+      processData: false,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUiLCJpYXQiOjE1NjE4NjA3MjcsImlzcyI6ImphcHAtbWVzLWF1dG8iLCJzdWIiOiI1YjM4NGIyY2Q4NzEyMDY0ZjEwMWUzMWUifQ.WwHOMRlL5bQQMG1fqQWSZj0Q6_ke3y6DmHXBP72y7FugdrMvg0_HY61eD9UD75sLzywuPwaRz1V7r33dAd8miOAHD2JiXY9oYhOAh1G3Bj2Xy9kac7_f2WuvoAmyEePXjjLkU3v1o5KRFR0lY3Chw5SEm98HA6bStF0PBujKblm2BeGR2HNatQ8jRtp_5LgjzZBRkyyBb8qTwqLLIAcDG-8QnQQmpf7GHD5XJH4he3cRW357EwzZmGMtUKJWyNiyUaNDRAPpCzYKNV3qwv2lNQPeevyxJXaEVPPRT5LXzo-v2-HTflGNCzrSUphPzmG-xY4hclX49FX156cFAkDbSA",
+      },
+      type: 'POST',
+      url: 'http://10.61.0.17:9997/packagePlanBoard',
+      data: params,
+      contentType: 'application/json; charset=utf-8',
+      success: function (response) {
+        let packagingSilkCarCount = 0
+        response.items.forEach(item => {
+          packagingSilkCarCount += item.packagingSilkCarCount
+        });
+        let packagedSilkCarCount = 0
+        response.items.forEach(item => {
+          packagedSilkCarCount += item.packagedSilkCarCount
+        });
+        response.items.sort((a,b)=>{
+          return b.packagingSilkCarCount-a.packagingSilkCarCount
+        })
+        // 列表显示数
+        let total = response.items.length < 9 ? response.items.length : 9
+        var tbodyHtml = '<ul><li>待包装车数：<span>' + packagingSilkCarCount + '</span>辆</li>' +
+          '<li>已包装车数：<span>' + packagedSilkCarCount + '</span>辆</li></ul>'
+        tbodyHtml += '<div class="flex-div">'
+        tbodyHtml += '<table border="1" class="main-table"><tr><th>批号</th><th>规格</th><th>管色</th><th>等级</th><th>待包装丝车</th><th>待包装丝锭</th><th>已包装丝车</th><th>已包装丝锭</th></tr>'
+        for (var i = 0; i < total; i++) {
+          tbodyHtml +=
+            '<tr><td>' + response.items[i].batchNo + '</td>' +
+            '<td>' + response.items[i].spec + '</td>' +
+            '<td>' + response.items[i].tubeColor + '</td>' +
+            '<td>' + response.items[i].gradeName + '</td>' +
+            '<td>' + response.items[i].packagingSilkCarCount + '</td>' +
+            '<td>' + response.items[i].packagingSilkCount + '</td>' +
+            '<td>' + response.items[i].packagedSilkCarCount + '</td>' +
+            '<td>' + response.items[i].packagedSilkCount + '</td></tr>'
+        }
+        tbodyHtml += '</table>'
+        tbodyHtml += '</div>'
+        $('#tbody').html(tbodyHtml)
+      },
+      error: function (a, b, c) {
+        console.log(a, b, c)
+      },
+      complete: function (xhr) {
+        xhr = null
+      }
+    })
+  }
+  var interval = null
+  $(function () {
+  //   addTabs()
+    getAllWorkshopOptions()
+  //   $('#workShop').on('change', function () {
+  //     getLineOptions($(this).val())
+  //   }
+  //   setCurrTab()
+  //   $('#currTime').text(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate())
+    interval = setInterval('search()', 30000)
+  })
+</script>
+<style>
+  .board-content .main-table {
+    border-collapse: collapse;
+    border-color: #1d9a9a;
+    width: 100%;
+    margin: 1rem 1rem;
+  }
+
+  .board-content .main-table th {
+    background-color: rgba(6, 19, 31, 0.6);
+    font-size: 2rem;
+    font-weight: 100;
+    color: #51ffff;
+  }
+
+  .board-content .main-table tr {
+    font-size: 1.5rem;
+    font-weight: 100;
+    color: white;
+    text-align: center;
+  }
+
+  .board-content .main-table tr:nth-child(odd) {
+    background-color: rgba(6, 19, 31, 0.6);
+  }
+
+  .title-box .logo {
+    width: 13.5em;
+    float: left;
+  }
+
+  .title-box .date-box {
+    float: right;
+    margin-top: .1em;
+    border: .1em solid #2c647c;
+    height: 3em;
+    line-height: 3em;
+    padding: 0 .6em;
+    border-radius: .4em;
+  }
+
+  .title-box .date-box span {
+    font-size: 1.8em;
+  }
+
+  .board-content .title-name {
+    display: inline-block;
+  }
+
+  .board-content .title-name span {
+    font-size: 2.7em;
+  }
+
+  .content-box {
+    margin-top: 2rem;
+    border-top: .1em solid #2c647c;
+  }
+
+  .content-box ul {
+    list-style: none;
+    display: inline-block;
+    border: .1em solid #2c647c;
+    width: 97.5%;
+    padding: 0;
+    margin: 0.5rem .4rem 1rem .4rem;
+  }
+
+  .content-box ul li {
+    float: left;
+    width: 49%;
+    text-align: center;
+    font-size: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    margin: 1rem auto;
+  }
+
+  .content-box ul li:first-child {
+    border-right: 1px dashed #406161;
+  }
+
+  .flex-div {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+</style>
+
+</html>
