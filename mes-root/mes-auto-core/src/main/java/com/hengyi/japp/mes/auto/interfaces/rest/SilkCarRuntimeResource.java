@@ -167,6 +167,12 @@ public class SilkCarRuntimeResource {
         ));
     }
 
+    @Path("SilkCarRuntimeWeightEvent")
+    @POST
+    public Completable handle(Principal principal, SilkCarRuntimeWeightEvent.Command command) {
+        return silkCarRuntimeService.handle(principal, command);
+    }
+
     @Path("SilkCarRuntimeGradeSubmitEvents")
     @POST
     public Completable handle(Principal principal, SilkCarRuntimeGradeSubmitEvent.Command command) {

@@ -28,6 +28,13 @@ public enum EventSourceType {
         }
     },
 
+    SilkCarRuntimeWeightEvent {
+        @Override
+        public Single<SilkCarRuntimeWeightEvent> from(JsonNode jsonNode) {
+            return com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeWeightEvent.DTO.from(jsonNode).toEvent();
+        }
+    },
+
     SilkRuntimeDetachEvent {
         @Override
         public Single<SilkRuntimeDetachEvent> from(JsonNode jsonNode) {

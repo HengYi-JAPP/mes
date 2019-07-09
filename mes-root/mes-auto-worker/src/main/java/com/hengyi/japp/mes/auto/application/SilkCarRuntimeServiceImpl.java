@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.application.SilkCarRuntimeService.checkAndGetBatch;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -168,7 +169,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             final List<EventSource> eventSourceList = J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
                     .filter(it -> !it.isDeleted())
                     .filter(it -> !it.getOperator().getId().equals(principal.getName()))
-                    .collect(Collectors.toList());
+                    .collect(toList());
             if (J.nonEmpty(eventSourceList)) {
                 throw new RuntimeException("已经有其他人对丝车操作，无法删除");
             }
@@ -187,7 +188,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
         return find(command.getSilkCarRecord()).flatMap(silkCarRuntime -> {
             final List<EventSource> eventSourceList = J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
                     .filter(it -> !it.isDeleted())
-                    .collect(Collectors.toList());
+                    .collect(toList());
             if (J.nonEmpty(eventSourceList)) {
                 throw new RuntimeException("已经有其他人对丝车操作，无法删除");
             }
@@ -207,6 +208,43 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 return silkCarRecordRepository.save(silkCarRecord);
             });
         }).ignoreElement();
+    }
+
+    @Override
+    public Completable handle(Principal principal, SilkCarRuntimeWeightEvent.Command command) {
+        final Single<SilkCarRuntimeWeightEvent> event$ = operatorRepository.find(principal).map(it -> {
+            final SilkCarRuntimeWeightEvent event = new SilkCarRuntimeWeightEvent();
+            event.setItems(command.getItems());
+            event.fire(it);
+            return event;
+        });
+        return event$.flatMapCompletable(event -> find(command.getSilkCarRecord()).flatMapCompletable(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            if (silkCarRecord.getGrade().getSortBy() >= 100) {
+                throw new RuntimeException("定重丝车无需称重！");
+            }
+            final Collection<SilkRuntime> silkRuntimes = silkCarRuntime.getSilkRuntimes();
+            final List<Completable> saveSilkCompletables = command.getItems().parallelStream().flatMap(item -> silkRuntimes.parallelStream().filter(silkRuntime -> {
+                final Silk silk = silkRuntime.getSilk();
+                return Objects.equals(silk.getLineMachine().getId(), item.getLineMachine().getId())
+                        && Objects.equals(silk.getDoffingNum(), item.getDoffingNum());
+            }).map(silkRuntime -> {
+                final Silk silk = silkRuntime.getSilk();
+                final Batch batch = silk.getBatch();
+                if (item.getWeight() > batch.getSilkWeight()) {
+                    throw new RuntimeException("丝锭重量[" + item.getWeight() + "]大于锭重[" + batch.getSilkWeight() + "]！");
+                }
+                silk.setWeight(item.getWeight());
+                return silkRepository.save(silk).ignoreElement();
+            })).collect(toList());
+            if (silkRuntimes.size() != saveSilkCompletables.size()) {
+                throw new RuntimeException("称重颗数有误！");
+            }
+            final Completable saveSilks$ = Completable.merge(saveSilkCompletables);
+            final Completable checkRole$ = authService.checkRole(event.getOperator(), RoleType.INSPECTION);
+            final Completable addEventSource$ = silkCarRuntimeRepository.addEventSource(silkCarRecord, event);
+            return checkRole$.andThen(saveSilks$).andThen(addEventSource$);
+        }));
     }
 
     @Override
@@ -502,7 +540,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                     silk.setGrade(silkRuntime.getGrade());
                     silk.setExceptions(silkRuntime.getExceptions());
                     return silk;
-                }).collect(Collectors.toList());
+                }).collect(toList());
         if (J.isEmpty(silks)) {
             return Completable.error(new SilkCarStatusException(silkCar));
         }
