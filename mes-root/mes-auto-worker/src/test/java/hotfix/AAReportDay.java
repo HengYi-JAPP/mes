@@ -1,7 +1,5 @@
 package hotfix;
 
-import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.Workshop;
 

@@ -68,7 +68,7 @@ public class RiambServiceImpl implements RiambService {
             return event;
         });
         return event$.flatMap(event -> silkCarRuntimeRepository.findByCode(code).flatMapSingle(silkCarRuntime -> {
-            final RiambFetchSilkCarRecordResultDTO dto = getResult(silkCarRuntime);
+            final RiambFetchSilkCarRecordResultDTO dto = getResult(principal, silkCarRuntime);
             event.setResult(MAPPER.writeValueAsString(dto));
             final Single<RiambFetchSilkCarRecordResultDTO> result$ = Single.fromCallable(() -> dto);
             if (packeFlage_NO.equals(dto.getPackeFlage())) {
@@ -79,7 +79,7 @@ public class RiambServiceImpl implements RiambService {
         }));
     }
 
-    private RiambFetchSilkCarRecordResultDTO getResult(SilkCarRuntime silkCarRuntime) {
+    private RiambFetchSilkCarRecordResultDTO getResult(Principal principal, SilkCarRuntime silkCarRuntime) {
         final RiambFetchSilkCarRecordResultDTO dto = new RiambFetchSilkCarRecordResultDTO();
         final var silkCarInfo = new RiambFetchSilkCarRecordResultDTO.SilkCarInfo();
         final List<RiambFetchSilkCarRecordResultDTO.SilkInfo> silkInfos = Lists.newArrayList();
@@ -177,7 +177,7 @@ public class RiambServiceImpl implements RiambService {
                 });
             }
         }
-        applicationEvents.fire(silkCarRuntime, dto, reasons);
+        applicationEvents.fire(principal, silkCarRuntime, dto, reasons);
         dto.setSilkCount(silkInfos.size());
         return dto;
     }

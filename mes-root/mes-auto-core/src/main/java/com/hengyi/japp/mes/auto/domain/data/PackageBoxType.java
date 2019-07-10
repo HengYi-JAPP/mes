@@ -27,5 +27,5 @@ public enum PackageBoxType {
 
     FOREIGN,
 
-    BIG,
+    BIG_SILK_CAR,
 }

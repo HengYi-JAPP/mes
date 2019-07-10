@@ -29,8 +29,8 @@ public class Worker {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
             return Completable.mergeArray(
-                    deployWorker(vertx).ignoreElement(),
-                    deployRuiguan(vertx).ignoreElement()
+//                    deployRuiguan(vertx).ignoreElement()
+                    deployWorker(vertx).ignoreElement()
             );
         }).subscribe();
     }

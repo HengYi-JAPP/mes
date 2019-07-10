@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.report.PoiUtil;
 import lombok.Cleanup;

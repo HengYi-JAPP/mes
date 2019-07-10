@@ -2,17 +2,20 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hengyi.japp.mes.auto.application.ReportService;
 import com.hengyi.japp.mes.auto.application.command.ReportCommand;
-import com.hengyi.japp.mes.auto.application.report.MeasurePackageBoxReport;
-import com.hengyi.japp.mes.auto.application.report.MeasureReport;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReport;
 import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
+import com.hengyi.japp.mes.auto.repository.LineMachineRepository;
+import com.hengyi.japp.mes.auto.repository.LineRepository;
+import com.hengyi.japp.mes.auto.repository.WorkshopRepository;
 import io.reactivex.Single;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.eventbus.Message;
 
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
-import java.time.LocalDate;
+import java.time.Duration;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -23,79 +26,52 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("api/reports")
 @Produces(APPLICATION_JSON)
 public class ReportResource {
-    private final ReportService reportService;
+    private final Vertx vertx;
+    private final WorkshopRepository workshopRepository;
+    private final LineRepository lineRepository;
+    private final LineMachineRepository lineMachineRepository;
 
     @Inject
-    private ReportResource(ReportService reportService) {
-        this.reportService = reportService;
+    private ReportResource(Vertx vertx, WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository) {
+        this.vertx = vertx;
+        this.workshopRepository = workshopRepository;
+        this.lineRepository = lineRepository;
+        this.lineMachineRepository = lineMachineRepository;
     }
 
     @Path("workshopProductPlanReport")
     @GET
-    public Single<WorkshopProductPlanReport> workshopProductPlanReport(@QueryParam("workshopId") String workshopId,
-                                                                       @QueryParam("lineId") String lineId) {
-        return reportService.workshopProductPlanReport(workshopId, lineId);
+    public Single<WorkshopProductPlanReport> workshopProductPlanReport(@QueryParam("workshopId") @NotBlank String workshopId) {
+        return workshopRepository.find(workshopId)
+                .flatMapPublisher(lineRepository::listBy)
+                .flatMap(lineMachineRepository::listBy).toList()
+                .map(WorkshopProductPlanReport::new);
     }
 
     @Path("measurePackageBoxReport")
     @POST
-    public Single<MeasurePackageBoxReport> measurePackageBoxReport(ReportCommand command) {
-
-        return reportService.measurePackageBoxReport(command);
+    public Single<String> measurePackageBoxReport(ReportCommand command) {
+        return vertx.eventBus().<String>rxSend("mes-auto:report:measurePackageBoxReport", command).map(Message::body);
     }
 
-    @Path("measureReport")
-    @POST
-    public Single<MeasureReport> measureReport(ReportCommand command) {
-        return reportService.measureReport(command);
-    }
-
-    @Path("statisticsReport")
+    @Path("doffingSilkCarRecordReport")
     @GET
-    public Single<StatisticsReport> statisticsReport(@QueryParam("workshopId") String workshopId,
-                                                     @QueryParam("startDate") @NotBlank String startLdString,
-                                                     @QueryParam("endDate") @NotBlank String endLdString) {
-        return reportService.statisticsReport(workshopId, LocalDate.parse(startLdString), LocalDate.parse(endLdString));
+    public Single<String> doffingSilkCarRecordReport(@QueryParam("workshopId") @NotBlank String workshopId,
+                                                     @QueryParam("startDate") @NotBlank String startDateString,
+                                                     @QueryParam("endDate") @NotBlank String endDateString) {
+        final JsonObject message = new JsonObject().put("workshopId", workshopId).put("startDate", startDateString).put("endDate", endDateString);
+        final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
+        return vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message, deliveryOptions).map(Message::body);
     }
 
-//    @Path("dailyDoffingReport")
-//    @GET
-//    public Single<DoffingReport> dailyDoffingReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                    @QueryParam("date") @NotBlank String dateString) {
-//        return reportService.doffingReport(workshopId, LocalDate.parse(dateString));
-//    }
-//
-//    @Path("dailyPackageBoxReport")
-//    @GET
-//    public Single<PackageBoxReport> dailyPackageBoxReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                          @QueryParam("date") @NotBlank String dateString) {
-//        return reportService.packageBoxReport(workshopId, LocalDate.parse(dateString));
-//    }
-//
-//    @Path("monthPackageBoxReport")
-//    @GET
-//    public Single<PackageBoxReport> monthPackageBoxReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                          @QueryParam("year") @Min(1) int year,
-//                                                          @QueryParam("month") @Min(1) @Max(12) int month) {
-//        final LocalDate ldStart = LocalDate.of(year, month, 1);
-//        final LocalDate ldEnd = ldStart.plusMonths(1);
-//        return reportService.packageBoxReport(workshopId, ldStart, ldEnd);
-//    }
-//
-//    @Path("dailySilkExceptionReport")
-//    @GET
-//    public Single<SilkExceptionReport> dailySilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                                @QueryParam("date") @NotBlank String dateString) {
-//        return reportService.silkExceptionReport(workshopId, LocalDate.parse(dateString));
-//    }
-//
-//    @Path("monthSilkExceptionReport")
-//    @GET
-//    public Single<SilkExceptionReport> monthSilkExceptionReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                                @QueryParam("year") @Min(1) int year,
-//                                                                @QueryParam("month") @Min(1) @Max(12) int month) {
-//        final LocalDate ldStart = LocalDate.of(year, month, 1);
-//        final LocalDate ldEnd = ldStart.plusMonths(1);
-//        return reportService.silkExceptionReport(workshopId, ldStart, ldEnd);
-//    }
+    @Path("toDtyReport")
+    @GET
+    public Single<String> toDtyReport(@QueryParam("workshopId") @NotBlank String workshopId,
+                                      @QueryParam("startDate") @NotBlank String startDateString,
+                                      @QueryParam("endDate") @NotBlank String endDateString) {
+        final JsonObject message = new JsonObject().put("workshopId", workshopId).put("startDate", startDateString).put("endDate", endDateString);
+        final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
+        return vertx.eventBus().<String>rxSend("mes-auto:report:toDtyReport", message, deliveryOptions).map(Message::body);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.domain.Line;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
@@ -13,6 +14,8 @@ public interface LineMachineRepository {
     Single<LineMachine> create();
 
     Single<LineMachine> find(String id);
+
+    Single<LineMachine> find(EntityDTO dto);
 
     Single<LineMachine> save(LineMachine lineMachine);
 

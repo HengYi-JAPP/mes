@@ -63,7 +63,7 @@ public class JikonAdapterImpl implements JikonAdapter {
     public Single<String> handle(Principal principal, JikonAdapterSilkCarInfoFetchEvent.Command command) {
         final String silkcarCode = command.getSilkcarCode();
         return command.toEvent(principal).flatMap(event -> silkCarRuntimeRepository.findByCode(silkcarCode).flatMapSingle(silkCarRuntime -> {
-            applicationEvents.fire(silkCarRuntime);
+//            applicationEvents.fire(silkCarRuntime, dto, reasons);
             final GetSilkSpindleInfoDTO dto = getResult(silkCarRuntime, command);
             event.setResult(JikonUtil.success(dto));
             final Single<String> result$ = Single.fromCallable(() -> event.getResult());

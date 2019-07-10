@@ -82,6 +82,8 @@ public class WorkerModule extends AbstractModule {
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
         bind(DoffingSpecService.class).to(DoffingSpecServiceCustom.class);
         bind(SilkBarcodeGenerateTemplateService.class).to(SilkBarcodeGenerateTemplateServiceImpl.class);
+        bind(ExceptionRecordService.class).to(ExceptionRecordServiceImpl.class);
+        bind(NotificationService.class).to(NotificationServiceImpl.class);
 
         bind(DictionaryService.class).to(DictionaryServiceImpl.class);
         bind(DictionaryRepository.class).to(DictionaryRepositoryMongo.class);
@@ -120,6 +122,8 @@ public class WorkerModule extends AbstractModule {
         bind(TemporaryBoxRecordRepository.class).to(TemporaryBoxRecordRepositoryMongo.class);
         bind(LoginRepository.class).to(LoginRepositoryMongo.class);
         bind(SilkBarcodeGenerateTemplateRepository.class).to(SilkBarcodeGenerateTemplateRepositoryMongo.class);
+        bind(ExceptionRecordRepository.class).to(ExceptionRecordRepositoryMongo.class);
+        bind(NotificationRepository.class).to(NotificationRepositoryMongo.class);
 
         bind(RuiguanService.class).to(RuiguanServiceImpl.class);
         bind(RiambService.class).to(RiambServiceImpl.class);

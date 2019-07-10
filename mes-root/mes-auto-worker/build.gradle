@@ -2,7 +2,6 @@ dependencies {
     compile "com.github.ixtf.japp:poi",
             project(':mes-auto-core'),
             project(':mes-auto-search'),
-            project(':mes-auto-report'),
             "cglib:cglib",
             // vertx 用了3.6
             'org.mongodb:mongo-java-driver:3.6.3',

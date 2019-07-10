@@ -95,6 +95,11 @@ public class MesAutoConfig {
         return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
     }
 
+    public Path reportPath(String type) {
+        final Path path = Paths.get("db", "report", type);
+        return rootPath.resolve(path);
+    }
+
     public Path getDoffingSpecPath() {
         return rootPath.resolve("doffing_spec");
     }

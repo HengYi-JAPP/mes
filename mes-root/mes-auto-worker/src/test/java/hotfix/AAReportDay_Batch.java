@@ -1,7 +1,6 @@
 package hotfix;
 
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.application.report.StatisticsReportDay_Batch;
 import com.hengyi.japp.mes.auto.domain.*;
 import hotfix.AAReport.AAReportSilkCarRecord;
 import lombok.Data;
