@@ -36,6 +36,7 @@ public class Batch extends LoggableMongoEntity implements Comparable<Batch> {
     @ToString.Include
     private String spec;
     private String tubeColor;
+    private double tubeWeight;
     private String note;
 
     @Override
