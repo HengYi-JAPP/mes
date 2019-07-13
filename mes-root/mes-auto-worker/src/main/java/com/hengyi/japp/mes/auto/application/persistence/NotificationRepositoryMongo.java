@@ -7,6 +7,7 @@ import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityReposit
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.domain.Notification;
 import com.hengyi.japp.mes.auto.repository.NotificationRepository;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +28,14 @@ public class NotificationRepositoryMongo extends MongoEntityRepository<Notificat
     @Override
     public Single<Notification> save(Notification notification) {
         return super.save(notification).doOnSuccess(applicationEvents::fire);
+    }
+
+    @Override
+    public Completable delete(String id) {
+        return find(id).flatMapCompletable(notification -> {
+            notification.setDeleted(true);
+            return notification._delete().doOnComplete(() -> applicationEvents.fire(notification));
+        });
     }
 
 }

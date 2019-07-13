@@ -2,11 +2,13 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.ApplicationEvents;
 import com.hengyi.japp.mes.auto.application.PackageBoxService;
 import com.hengyi.japp.mes.auto.application.query.ExceptionRecordQuery;
 import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.repository.*;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.reactivex.redis.RedisClient;
@@ -29,6 +31,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("share")
 @Produces(APPLICATION_JSON)
 public class ShareResource {
+    private final ApplicationEvents applicationEvents;
     private final RedisClient redisClient;
     private final ProductRepository productRepository;
     private final WorkshopRepository workshopRepository;
@@ -39,7 +42,8 @@ public class ShareResource {
     private final NotificationRepository notificationRepository;
 
     @Inject
-    private ShareResource(RedisClient redisClient, ProductRepository productRepository, WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, ExceptionRecordRepository exceptionRecordRepository, NotificationRepository notificationRepository) {
+    private ShareResource(ApplicationEvents applicationEvents, RedisClient redisClient, ProductRepository productRepository, WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, ExceptionRecordRepository exceptionRecordRepository, NotificationRepository notificationRepository) {
+        this.applicationEvents = applicationEvents;
         this.redisClient = redisClient;
         this.productRepository = productRepository;
         this.workshopRepository = workshopRepository;
@@ -68,13 +72,27 @@ public class ShareResource {
         return redisClient.rxIncr(incrKey);
     }
 
+    @Path("refreshAbnormal")
+    @GET
+    public Completable refreshAbnormal() {
+        return Completable.fromAction(applicationEvents::refreshAbnormal);
+    }
+
+    @Path("workshops/{id}/productPlans")
+    @GET
+    public Single<WorkshopProductPlanReport> productPlans(@PathParam("id") @NotBlank String workshopId) {
+        return workshopRepository.find(workshopId)
+                .flatMapPublisher(lineRepository::listBy)
+                .flatMap(lineMachineRepository::listBy).toList()
+                .map(WorkshopProductPlanReport::new);
+    }
+
     @Path("exceptionRecords")
     @GET
     public Single<Collection<ExceptionRecord>> exceptionRecords() {
         final ExceptionRecordQuery query = ExceptionRecordQuery.builder().build();
         return exceptionRecordRepository.query(query).map(ExceptionRecordQuery.Result::getResult);
     }
-
 
     @Path("notifications")
     @GET
@@ -98,14 +116,5 @@ public class ShareResource {
     @GET
     public Flowable<Product> query() {
         return productRepository.list();
-    }
-
-    @Path("workshops/{id}/productPlans")
-    @GET
-    public Single<WorkshopProductPlanReport> productPlans(@PathParam("id") @NotBlank String workshopId) {
-        return workshopRepository.find(workshopId)
-                .flatMapPublisher(lineRepository::listBy)
-                .flatMap(lineMachineRepository::listBy).toList()
-                .map(WorkshopProductPlanReport::new);
     }
 }

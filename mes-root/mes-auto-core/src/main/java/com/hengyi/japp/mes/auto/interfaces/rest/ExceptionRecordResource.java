@@ -46,7 +46,7 @@ public class ExceptionRecordResource {
 
     @Path("exceptionRecords/{id}/handle")
     @PUT
-    public Completable exceptionRecords(Principal principal, @PathParam("id") String id) {
+    public Completable handle(Principal principal, @PathParam("id") String id) {
         return exceptionRecordService.handle(principal, id);
     }
 

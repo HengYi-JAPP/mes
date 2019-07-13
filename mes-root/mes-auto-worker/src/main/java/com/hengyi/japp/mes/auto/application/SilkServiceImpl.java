@@ -40,6 +40,7 @@ public class SilkServiceImpl implements SilkService {
             silk.setGrade(grade);
             return silkRepository.save(silk);
         })).flatMap(silk -> exceptionRecordRepository.findBy(silk).switchIfEmpty(exceptionRecordRepository.create()).flatMap(exceptionRecord -> {
+            exceptionRecord.setId(silk.getId());
             exceptionRecord.setSilk(silk);
             exceptionRecord.setLineMachine(silk.getLineMachine());
             exceptionRecord.setSpindle(silk.getSpindle());

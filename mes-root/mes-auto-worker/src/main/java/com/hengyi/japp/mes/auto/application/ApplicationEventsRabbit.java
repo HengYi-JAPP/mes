@@ -43,6 +43,12 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
 
     @SneakyThrows
     @Override
+    public void refreshAbnormal() {
+        vertx.eventBus().publish("mes-auto://websocket/boards/abnormal/refresh", null);
+    }
+
+    @SneakyThrows
+    @Override
     public void fire(LineMachineProductPlan lineMachineProductPlan) {
         final String message = MAPPER.writeValueAsString(lineMachineProductPlan);
         vertx.eventBus().publish("mes-auto://websocket/boards/abnormal/productPlan", message);

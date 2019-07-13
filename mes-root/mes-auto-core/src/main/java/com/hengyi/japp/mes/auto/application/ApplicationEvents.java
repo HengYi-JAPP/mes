@@ -15,6 +15,8 @@ import java.util.List;
  */
 public interface ApplicationEvents {
 
+    void refreshAbnormal();
+
     void fire(LineMachineProductPlan lineMachineProductPlan);
 
     void fire(SilkCarRuntime silkCarRuntime, GetSilkSpindleInfoDTO dto, List<String> reasons);

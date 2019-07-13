@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.domain.Notification;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
@@ -17,4 +18,5 @@ public interface NotificationRepository {
 
     Flowable<Notification> list();
 
+    Completable delete(String id);
 }

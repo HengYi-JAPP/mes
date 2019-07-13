@@ -63,7 +63,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Completable delete(Principal principal, String id) {
-        return notificationRepository.find(id).flatMapCompletable(Notification::_delete);
+        return notificationRepository.delete(id);
     }
 
 }

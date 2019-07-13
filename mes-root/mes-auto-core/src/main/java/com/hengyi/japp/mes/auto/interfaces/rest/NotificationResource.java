@@ -45,13 +45,13 @@ public class NotificationResource {
 
     @Path("notifications/{id}")
     @DELETE
-    public Completable exceptionRecords(Principal principal, @PathParam("id") String id) {
+    public Completable delete(Principal principal, @PathParam("id") String id) {
         return notificationService.delete(principal, id);
     }
 
     @Path("notifications")
     @GET
-    public Flowable<Notification> exceptionRecords() {
+    public Flowable<Notification> notifications() {
         return notificationRepository.list();
     }
 
