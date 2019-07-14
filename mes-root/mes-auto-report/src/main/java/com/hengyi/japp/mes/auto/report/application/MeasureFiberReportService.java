@@ -106,7 +106,7 @@ public class MeasureFiberReportService {
                         Map<String, String> silkCarMap = RedisUtil.getRedis(document.getString("code"));
                         if (silkCarMap != null) {
                             flowable = Flowable.fromIterable(silkCarMap.keySet())
-                                    .filter(it -> it.startsWith(RedisUtil.EVENT_SOURCE_KEY_PREFIX))
+                                    .filter(it -> it.startsWith(RedisService.EVENT_SOURCE_KEY_PREFIX))
                                     .map(key -> silkCarMap.get(key))
                                     .map(MAPPER::readTree);
                         }

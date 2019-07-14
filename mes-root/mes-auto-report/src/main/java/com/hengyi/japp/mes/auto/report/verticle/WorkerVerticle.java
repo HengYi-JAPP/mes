@@ -1,8 +1,8 @@
-package com.hengyi.japp.mes.auto.report;
+package com.hengyi.japp.mes.auto.report.verticle;
 
+import com.hengyi.japp.mes.auto.report.PackagePlanService;
 import com.hengyi.japp.mes.auto.report.application.*;
-import com.hengyi.japp.mes.auto.report.application.dto.DoffingSilkCarRecordReport;
-import com.hengyi.japp.mes.auto.report.application.dto.ToDtyReport;
+import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportRange;
 import io.reactivex.Completable;
@@ -19,7 +19,7 @@ import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 /**
  * @author jzb 2019-05-20
  */
-public class ReportVerticle extends AbstractVerticle {
+public class WorkerVerticle extends AbstractVerticle {
     private DyeingReportService dyeingReportService = INJECTOR.getInstance(DyeingReportService.class);
     //    private StrippingReportService strippingReportService = INJECTOR.getInstance(StrippingReportService.class);
     private MeasureFiberReportService measureFiberReportService = INJECTOR.getInstance(MeasureFiberReportService.class);
@@ -41,17 +41,7 @@ public class ReportVerticle extends AbstractVerticle {
                             final LocalDate startLd = LocalDate.parse(jsonNode.get("startDate").asText(null));
                             final LocalDate endLd = LocalDate.parse(jsonNode.get("endDate").asText(null));
                             final DoffingSilkCarRecordReport report = doffingSilkCarRecordReportService.generate(workshopId, startLd, endLd).block();
-                            return MAPPER.writeValueAsString(report);
-                        }).subscribe(reply::reply, err -> reply.fail(400, err.getLocalizedMessage()))
-                ).rxCompletionHandler(),
-
-                vertx.eventBus().<String>consumer("mes-auto:report:toDtyReport", reply -> Single.just(reply.body()).map(MAPPER::readTree).map(jsonNode -> {
-                            final ToDtyReportService toDtyReportService = INJECTOR.getInstance(ToDtyReportService.class);
-                            final String workshopId = jsonNode.get("workshopId").asText(null);
-                            final LocalDate startLd = LocalDate.parse(jsonNode.get("startDate").asText(null));
-                            final LocalDate endLd = LocalDate.parse(jsonNode.get("endDate").asText(null));
-                            final ToDtyReport report = toDtyReportService.generate(workshopId, startLd, endLd).block();
-                            return MAPPER.writeValueAsString(report);
+                    return MAPPER.writeValueAsString(report.toJsonNode());
                         }).subscribe(reply::reply, err -> reply.fail(400, err.getLocalizedMessage()))
                 ).rxCompletionHandler(),
 

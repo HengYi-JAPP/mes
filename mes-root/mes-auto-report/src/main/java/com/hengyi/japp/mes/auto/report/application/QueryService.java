@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.ImplementedBy;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.report.Report;
 import com.hengyi.japp.mes.auto.report.application.internal.QueryServiceImpl;
 import com.mongodb.reactivestreams.client.MongoCollection;
@@ -40,9 +41,18 @@ public interface QueryService {
         return J.isBlank(id) ? Optional.empty() : CACHE.get(Pair.of(clazz, id));
     }
 
+    @SneakyThrows
+    static Optional<Document> findFromCache(Class<?> clazz, EntityDTO dto) {
+        return findFromCache(clazz, dto.getId());
+    }
+
     static Mono<Document> find(Class<?> clazz, String id) {
         final MongoCollection<Document> collection = Report.mongoCollection(clazz);
         return Mono.from(collection.find(eq(ID_COL, id)));
+    }
+
+    static Mono<Document> find(Class<?> clazz, EntityDTO dto) {
+        return find(clazz, dto.getId());
     }
 
     IndexReader indexReader(Class clazz);

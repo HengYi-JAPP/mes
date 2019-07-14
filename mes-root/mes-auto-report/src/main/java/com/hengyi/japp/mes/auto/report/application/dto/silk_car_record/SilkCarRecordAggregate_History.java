@@ -1,11 +1,17 @@
 package com.hengyi.japp.mes.auto.report.application.dto.silk_car_record;
 
-import com.hengyi.japp.mes.auto.domain.Batch;
-import com.hengyi.japp.mes.auto.domain.Grade;
-import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.ixtf.japp.core.J;
+import com.google.common.collect.ImmutableList;
+import com.hengyi.japp.mes.auto.application.event.EventSource;
+import lombok.SneakyThrows;
 import org.bson.Document;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+
+import static com.github.ixtf.japp.core.Constant.MAPPER;
 
 /**
  * @author jzb 2019-07-11
@@ -17,17 +23,22 @@ public class SilkCarRecordAggregate_History extends SilkCarRecordAggregate {
     }
 
     @Override
-    protected Grade fetchGrade() {
-        return null;
+    protected Collection<EventSource.DTO> fetchEventSources() {
+        return Optional.ofNullable(document.getString("eventsJsonString"))
+                .filter(J::nonBlank)
+                .map(this::toEventSources)
+                .orElse(Collections.emptyList());
     }
 
-    @Override
-    protected Collection<SilkRuntime> fetchInitSilkRuntimes() {
-        return null;
+    @SneakyThrows
+    private Collection<EventSource.DTO> toEventSources(String s) {
+        final ImmutableList.Builder<EventSource.DTO> builder = ImmutableList.builder();
+        final JsonNode jsonNode = MAPPER.readTree(s);
+        jsonNode.forEach(it -> {
+            final EventSource.DTO dto = toEventSource(it);
+            builder.add(dto);
+        });
+        return builder.build();
     }
 
-    @Override
-    protected Batch fetchBatch() {
-        return null;
-    }
 }

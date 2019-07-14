@@ -2,7 +2,7 @@ package com.hengyi.japp.mes.auto.agent.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
-import io.vertx.core.Future;
+import io.reactivex.Completable;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
@@ -18,10 +18,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  */
 @Slf4j
 public class PdaVerticle extends AbstractVerticle {
-    final MesAutoConfig config = INJECTOR.getInstance(MesAutoConfig.class);
 
     @Override
-    public void start(Future<Void> startFuture) {
+    public Completable rxStart() {
+        final MesAutoConfig config = INJECTOR.getInstance(MesAutoConfig.class);
+
         final Router router = Router.router(vertx);
         Jvertx.enableCommon(router);
         Jvertx.enableCors(router, config.getCorsConfig().getDomainPatterns());
@@ -37,13 +38,13 @@ public class PdaVerticle extends AbstractVerticle {
         final HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setDecompressionSupported(true)
                 .setCompressionSupported(true);
-        Jvertx.apiGateway().rxMount(router)
+        return Jvertx.apiGateway().rxMount(router)
                 .toSingleDefault(vertx.createHttpServer(httpServerOptions))
                 .flatMap(httpServer -> {
                     final int port = config.getPdaConfig().getInteger("port", 9998);
                     return httpServer.requestHandler(router).rxListen(port);
-                }).ignoreElement()
-                .subscribe(startFuture::complete, startFuture::fail);
+                })
+                .ignoreElement();
     }
 
 }

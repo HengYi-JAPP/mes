@@ -104,7 +104,7 @@ public abstract class EventSource implements Serializable, Comparable<EventSourc
     @Data
     @ToString(onlyExplicitlyIncluded = true)
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    public static abstract class DTO implements Serializable {
+    public static class DTO implements Serializable {
         @ToString.Include
         @EqualsAndHashCode.Include
         private String eventId;

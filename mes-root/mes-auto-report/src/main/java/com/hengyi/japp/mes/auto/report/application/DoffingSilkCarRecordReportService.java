@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.report.Jlucene;
-import com.hengyi.japp.mes.auto.report.application.dto.DoffingSilkCarRecordReport;
+import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

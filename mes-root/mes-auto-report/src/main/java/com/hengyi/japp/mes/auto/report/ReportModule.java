@@ -17,9 +17,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.mongodb.MongoCredential.createCredential;
+import static java.util.stream.Collectors.joining;
 
 /**
  * @author jzb 2019-05-20
@@ -71,7 +71,7 @@ public class ReportModule extends AbstractModule {
         final String collect = J.isEmpty(objects) ? ""
                 : "/?" + objects.parallelStream()
                 .map(it -> it.getLeft() + "=" + it.getRight())
-                .collect(Collectors.joining("&"));
+                .collect(joining("&"));
         return new ConnectionString("mongodb://" + host + ":" + port + collect);
     }
 

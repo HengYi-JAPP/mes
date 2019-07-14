@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
+import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.report.application.command.PackagePlanCommand;
 import com.hengyi.japp.mes.auto.report.application.dto.packagePlanReport;
 import com.mongodb.client.model.Filters;
@@ -110,7 +111,7 @@ public class PackagePlanService {
                     } else if (document.get("redisEvents") != null) {
                         Map<String, String> eventMap = (Map<String, String>) document.get("redisEvents");
                         boolean anyMatch = eventMap.keySet().stream()
-                                .filter(it -> it.startsWith(RedisUtil.EVENT_SOURCE_KEY_PREFIX))
+                                .filter(it -> it.startsWith(RedisService.EVENT_SOURCE_KEY_PREFIX))
                                 .map(key -> eventMap.get(key))
                                 .flatMap(content -> {
                                     try {

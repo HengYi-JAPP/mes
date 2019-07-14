@@ -93,7 +93,7 @@ public class SilkExceptionReportService {
                         String code = QueryService.find(SilkCar.class, document.getString("silkCar")).block().getString("code");
                         Map<String, String> silkCarMap = RedisUtil.getRedis(code);
                         return silkCarMap.keySet().stream()
-                                .filter(it -> it.startsWith(RedisUtil.EVENT_SOURCE_KEY_PREFIX))
+                                .filter(it -> it.startsWith(RedisService.EVENT_SOURCE_KEY_PREFIX))
                                 .map(key -> silkCarMap.get(key))
                                 .flatMap(content -> {
                                     try {
