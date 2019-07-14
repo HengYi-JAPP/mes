@@ -8,6 +8,7 @@ import org.bson.Document;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository.EVENT_SOURCE_KEY_PREFIX;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,6 +26,7 @@ public class SilkCarRecordAggregate_Runtime extends SilkCarRecordAggregate {
         final String redisKey = SilkCarRuntimeRepository.redisKey(code);
         final Map<String, String> redisMap = RedisService.call(jedis -> jedis.hgetAll(redisKey));
         return redisMap.keySet().parallelStream()
+                .filter(it -> it.startsWith(EVENT_SOURCE_KEY_PREFIX))
                 .map(redisMap::get)
                 .map(this::toEventSource)
                 .collect(toList());

@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.ImplementedBy;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.report.Report;
 import com.hengyi.japp.mes.auto.report.application.internal.QueryServiceImpl;
@@ -15,6 +16,7 @@ import org.apache.lucene.index.IndexReader;
 import org.bson.Document;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -56,4 +58,6 @@ public interface QueryService {
     }
 
     IndexReader indexReader(Class clazz);
+
+    Collection<String> query(SilkCarRecordQuery silkCarRecordQuery);
 }

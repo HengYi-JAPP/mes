@@ -24,7 +24,7 @@ public class SilkCarRecordAggregate_History extends SilkCarRecordAggregate {
 
     @Override
     protected Collection<EventSource.DTO> fetchEventSources() {
-        return Optional.ofNullable(document.getString("eventsJsonString"))
+        return Optional.ofNullable(document.getString("events"))
                 .filter(J::nonBlank)
                 .map(this::toEventSources)
                 .orElse(Collections.emptyList());
@@ -34,10 +34,7 @@ public class SilkCarRecordAggregate_History extends SilkCarRecordAggregate {
     private Collection<EventSource.DTO> toEventSources(String s) {
         final ImmutableList.Builder<EventSource.DTO> builder = ImmutableList.builder();
         final JsonNode jsonNode = MAPPER.readTree(s);
-        jsonNode.forEach(it -> {
-            final EventSource.DTO dto = toEventSource(it);
-            builder.add(dto);
-        });
+        jsonNode.forEach(it -> builder.add(toEventSource(it)));
         return builder.build();
     }
 

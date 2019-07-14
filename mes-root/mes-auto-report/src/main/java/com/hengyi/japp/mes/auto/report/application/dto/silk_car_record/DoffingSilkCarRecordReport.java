@@ -9,6 +9,7 @@ import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import reactor.core.publisher.Flux;
 
@@ -23,11 +24,12 @@ import static java.util.stream.Collectors.*;
 /**
  * @author jzb 2019-07-11
  */
+@Slf4j
 @Data
 public class DoffingSilkCarRecordReport implements Serializable {
     private final Collection<GroupBy_Batch_Grade> groupByBatchGrades;
 
-    public DoffingSilkCarRecordReport(List<String> silkCarRecordIds) {
+    public DoffingSilkCarRecordReport(Collection<String> silkCarRecordIds) {
         groupByBatchGrades = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds))
                 .flatMap(SilkCarRecordAggregate::from)
                 .filter(it -> Objects.nonNull(it.getDoffingDateTime())).toStream()
@@ -50,6 +52,7 @@ public class DoffingSilkCarRecordReport implements Serializable {
     public ArrayNode toJsonNode() {
         final ArrayNode arrayNode = MAPPER.createArrayNode();
         groupByBatchGrades.forEach(it -> arrayNode.add(it.toJsonNode()));
+        log.info("toJsonNode:" + arrayNode.toString());
         return arrayNode;
     }
 

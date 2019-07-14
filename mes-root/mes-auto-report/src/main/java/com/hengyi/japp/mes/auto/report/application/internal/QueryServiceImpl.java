@@ -1,15 +1,30 @@
 package com.hengyi.japp.mes.auto.report.application.internal;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
+import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
+import com.hengyi.japp.mes.auto.report.Jlucene;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
+import lombok.Cleanup;
 import lombok.SneakyThrows;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-05-20
@@ -28,5 +43,24 @@ public class QueryServiceImpl implements QueryService {
     public IndexReader indexReader(Class clazz) {
         final Path path = mesAutoConfig.luceneIndexPath(clazz);
         return DirectoryReader.open(FSDirectory.open(path));
+    }
+
+    @SneakyThrows
+    @Override
+    public Collection<String> query(SilkCarRecordQuery silkCarRecordQuery) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        Optional.ofNullable(silkCarRecordQuery.getWorkshopId()).filter(J::nonBlank)
+                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
+        final long startL = J.date(silkCarRecordQuery.getStartDate()).getTime();
+        final long endL = J.date(silkCarRecordQuery.getEndDate().plusDays(1)).getTime() - 1;
+        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
+
+        @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
+        final IndexSearcher searcher = new IndexSearcher(indexReader);
+        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
+        return Arrays.stream(topDocs.scoreDocs)
+                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
+                .map(it -> it.get("id"))
+                .collect(toList());
     }
 }

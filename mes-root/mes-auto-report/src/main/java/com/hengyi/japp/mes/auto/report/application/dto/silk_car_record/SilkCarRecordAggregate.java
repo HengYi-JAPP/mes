@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableList;
-import com.hengyi.japp.mes.auto.application.event.*;
+import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.application.event.EventSourceType;
+import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeAppendEvent;
+import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import lombok.Data;
@@ -43,9 +46,9 @@ public abstract class SilkCarRecordAggregate implements Serializable {
 
     protected SilkCarRecordAggregate(Document document) {
         this.document = document;
-        doffingOperatorId = document.getString("doffingOperatorId");
+        doffingOperatorId = document.getString("doffingOperator");
         doffingDateTime = document.getDate("doffingDateTime");
-        carpoolOperatorId = document.getString("carpoolOperatorId");
+        carpoolOperatorId = document.getString("carpoolOperator");
         carpoolDateTime = document.getDate("carpoolDateTime");
         creator = QueryService.findFromCache(Operator.class, Optional.ofNullable(doffingOperatorId).orElse(carpoolOperatorId)).get();
         startDateTime = Optional.ofNullable(doffingDateTime).orElse(carpoolDateTime);
@@ -67,7 +70,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
 
     private Collection<SilkRuntime.DTO> fetchInitSilkRuntimes() {
         final ImmutableList.Builder<SilkRuntime.DTO> builder = ImmutableList.builder();
-        final SilkCarRuntimeInitEvent.DTO initEventDto = SilkCarRuntimeInitEvent.DTO.from(document.getString("initEventJsonString"));
+        final SilkCarRuntimeInitEvent.DTO initEventDto = SilkCarRuntimeInitEvent.DTO.from(document.getString("initEvent"));
         builder.addAll(initEventDto.getSilkRuntimes());
         final Collection<SilkRuntime.DTO> appends = eventSourceDtos.parallelStream()
                 .filter(it -> EventSourceType.SilkCarRuntimeAppendEvent == it.getType())
@@ -89,22 +92,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
 
     protected EventSource.DTO toEventSource(JsonNode jsonNode) {
         final EventSourceType type = EventSourceType.valueOf(jsonNode.get("type").asText());
-        switch (type) {
-            case ToDtyEvent: {
-                return ToDtyEvent.DTO.from(jsonNode);
-            }
-            case ToDtyConfirmEvent: {
-                return ToDtyConfirmEvent.DTO.from(jsonNode);
-            }
-            case SilkCarRuntimeAppendEvent: {
-                return SilkCarRuntimeAppendEvent.DTO.from(jsonNode);
-            }
-            default: {
-                final EventSource.DTO dto = new EventSource.DTO();
-                dto.setType(type);
-                return dto;
-            }
-        }
+        return type.toDto(jsonNode);
     }
 
     public boolean hasEventSource(EventSourceType type) {
@@ -139,7 +127,10 @@ public abstract class SilkCarRecordAggregate implements Serializable {
                 .put("row", dto.getRow())
                 .put("col", dto.getCol());
         final Document silk = QueryService.find(Silk.class, dto.getSilk()).block();
-        objectNode.set("silk", MAPPER.readTree(silk.toJson()));
+        if (silk != null) {
+            // todo check
+            objectNode.set("silk", MAPPER.readTree(silk.toJson()));
+        }
         return objectNode;
     }
 
