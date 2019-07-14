@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class Worker {
     public static Injector INJECTOR;
 
+    @SneakyThrows
     public static void main(String[] args) {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());

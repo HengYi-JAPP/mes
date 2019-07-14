@@ -114,7 +114,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     }
 
     @SneakyThrows
-    public ObjectNode toResponse() {
+    public ObjectNode toJsonNode() {
         final ObjectNode objectNode = MAPPER.createObjectNode()
                 .put("id", document.getString(ID_COL))
                 .put("startDateTime", startDateTime.getTime())
@@ -125,15 +125,15 @@ public abstract class SilkCarRecordAggregate implements Serializable {
         objectNode.set("creator", MAPPER.readTree(creator.toJson()));
         final ArrayNode initSilkRuntimesArrayNode = MAPPER.createArrayNode();
         objectNode.set("initSilkRuntimes", initSilkRuntimesArrayNode);
-        initSilkRuntimeDtos.forEach(it -> initSilkRuntimesArrayNode.add(toResponse(it)));
+        initSilkRuntimeDtos.forEach(it -> initSilkRuntimesArrayNode.add(toJsonNode(it)));
         final ArrayNode eventSourcesArrayNode = MAPPER.createArrayNode();
         objectNode.set("eventSources", eventSourcesArrayNode);
-        eventSourceDtos.forEach(it -> eventSourcesArrayNode.add(toResponse(it)));
+        eventSourceDtos.forEach(it -> eventSourcesArrayNode.add(toJsonNode(it)));
         return objectNode;
     }
 
     @SneakyThrows
-    private ObjectNode toResponse(SilkRuntime.DTO dto) {
+    private ObjectNode toJsonNode(SilkRuntime.DTO dto) {
         final ObjectNode objectNode = MAPPER.createObjectNode()
                 .put("sideType", dto.getSideType().name())
                 .put("row", dto.getRow())
@@ -144,7 +144,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     }
 
     @SneakyThrows
-    private ObjectNode toResponse(EventSource.DTO dto) {
+    private ObjectNode toJsonNode(EventSource.DTO dto) {
         final ObjectNode objectNode = MAPPER.createObjectNode()
                 .put("eventId", dto.getEventId())
                 .put("type", dto.getType().name())

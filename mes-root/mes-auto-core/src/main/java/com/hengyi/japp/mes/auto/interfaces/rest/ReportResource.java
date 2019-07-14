@@ -61,7 +61,7 @@ public class ReportResource {
                                                      @QueryParam("endDate") @NotBlank String endDateString) {
         final JsonObject message = new JsonObject().put("workshopId", workshopId).put("startDate", startDateString).put("endDate", endDateString);
         final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
-        return vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message, deliveryOptions).map(Message::body);
+        return vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions).map(Message::body);
     }
 
 }

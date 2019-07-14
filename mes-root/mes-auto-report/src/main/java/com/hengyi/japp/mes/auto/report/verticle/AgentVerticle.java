@@ -36,7 +36,7 @@ public class AgentVerticle extends AbstractVerticle {
                     .put("startDate", rc.queryParams().get("startDate"))
                     .put("endDate", rc.queryParams().get("endDate"));
             final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
-            vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message, deliveryOptions)
+            vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions)
                     .map(Message::body)
                     .subscribe(rc.response()::end, rc::fail);
         });

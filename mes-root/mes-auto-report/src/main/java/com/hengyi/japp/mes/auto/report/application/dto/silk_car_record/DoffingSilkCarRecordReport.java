@@ -49,7 +49,7 @@ public class DoffingSilkCarRecordReport implements Serializable {
     @SneakyThrows
     public ArrayNode toJsonNode() {
         final ArrayNode arrayNode = MAPPER.createArrayNode();
-        groupByBatchGrades.forEach(it -> arrayNode.add(it.toResponse()));
+        groupByBatchGrades.forEach(it -> arrayNode.add(it.toJsonNode()));
         return arrayNode;
     }
 
@@ -70,7 +70,7 @@ public class DoffingSilkCarRecordReport implements Serializable {
         }
 
         @SneakyThrows
-        public ObjectNode toResponse() {
+        public ObjectNode toJsonNode() {
             final ObjectNode objectNode = MAPPER.createObjectNode()
                     .put("silkCount", silkCount)
                     .put("netWeight", netWeight);
@@ -82,7 +82,7 @@ public class DoffingSilkCarRecordReport implements Serializable {
             objectNode.set("noWeightItems", noWeightItemsArrayNode);
             items.forEach(item -> {
                 final SilkCarRecordAggregate silkCarRecordAggregate = item.getSilkCarRecordAggregate();
-                final ObjectNode silkCarRecordAggregateNode = silkCarRecordAggregate.toResponse();
+                final ObjectNode silkCarRecordAggregateNode = silkCarRecordAggregate.toJsonNode();
                 itemsArrayNode.add(silkCarRecordAggregateNode);
                 if (!item.hasNetWeight) {
                     noWeightItemsArrayNode.add(silkCarRecordAggregateNode);
