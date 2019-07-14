@@ -46,7 +46,7 @@ public class AgentVerticle extends AbstractVerticle {
                 .setCompressionSupported(true);
         return vertx.createHttpServer(httpServerOptions)
                 .requestHandler(router)
-                .rxListen(config.getPdaConfig().getInteger("port", 9998))
+                .rxListen(9997)
                 .ignoreElement();
     }
 
