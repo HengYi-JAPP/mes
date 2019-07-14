@@ -64,14 +64,4 @@ public class ReportResource {
         return vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message, deliveryOptions).map(Message::body);
     }
 
-    @Path("toDtyReport")
-    @GET
-    public Single<String> toDtyReport(@QueryParam("workshopId") @NotBlank String workshopId,
-                                      @QueryParam("startDate") @NotBlank String startDateString,
-                                      @QueryParam("endDate") @NotBlank String endDateString) {
-        final JsonObject message = new JsonObject().put("workshopId", workshopId).put("startDate", startDateString).put("endDate", endDateString);
-        final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
-        return vertx.eventBus().<String>rxSend("mes-auto:report:toDtyReport", message, deliveryOptions).map(Message::body);
-    }
-
 }
