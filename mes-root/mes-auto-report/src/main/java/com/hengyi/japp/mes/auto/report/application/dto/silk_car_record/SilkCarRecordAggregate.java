@@ -10,6 +10,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeAppendEvent;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -123,7 +124,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     @SneakyThrows
     private ObjectNode toJsonNode(SilkRuntime.DTO dto) {
         final ObjectNode objectNode = MAPPER.createObjectNode()
-                .put("sideType", dto.getSideType().name())
+                .put("sideType", Optional.ofNullable(dto.getSideType()).map(SilkCarSideType::name).orElse(null))
                 .put("row", dto.getRow())
                 .put("col", dto.getCol());
         final Document silk = QueryService.find(Silk.class, dto.getSilk()).block();
