@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.report.application.dto.silk_car_record;
 
 import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository;
 import org.bson.Document;
@@ -30,6 +31,11 @@ public class SilkCarRecordAggregate_Runtime extends SilkCarRecordAggregate {
                 .map(redisMap::get)
                 .map(this::toEventSource)
                 .collect(toList());
+    }
+
+    @Override
+    public SilkCarRecordAggregateType getType() {
+        return SilkCarRecordAggregateType.RUNTIME;
     }
 
 }

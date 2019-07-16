@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.report.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
+import com.hengyi.japp.mes.auto.report.application.QueryService;
 import io.reactivex.Completable;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerOptions;
@@ -30,6 +31,11 @@ public class AgentVerticle extends AbstractVerticle {
         Jvertx.enableCors(router, config.getCorsConfig().getDomainPatterns());
         router.route().failureHandler(Jvertx::failureHandler);
 
+        router.delete("/admin/cache").handler(rc -> {
+            QueryService.CACHE.cleanUp();
+            rc.response().end();
+        });
+
         router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON).handler(rc -> {
             final JsonObject message = new JsonObject()
                     .put("workshopId", rc.queryParams().get("workshopId"))
@@ -46,7 +52,11 @@ public class AgentVerticle extends AbstractVerticle {
                 .setCompressionSupported(true);
         return vertx.createHttpServer(httpServerOptions)
                 .requestHandler(router)
-                .rxListen(9997)
+                .rxListen(9090)
+                .doOnSuccess(it -> {
+                    final int actualPort = it.actualPort();
+                    System.out.println("actualPort=" + actualPort);
+                })
                 .ignoreElement();
     }
 

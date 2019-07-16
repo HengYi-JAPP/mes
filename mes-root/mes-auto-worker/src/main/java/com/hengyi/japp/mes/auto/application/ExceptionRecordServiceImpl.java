@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.ExceptionRecordUpdateCommand;
 import com.hengyi.japp.mes.auto.domain.ExceptionRecord;
+import com.hengyi.japp.mes.auto.domain.SilkException;
 import com.hengyi.japp.mes.auto.repository.ExceptionRecordRepository;
 import com.hengyi.japp.mes.auto.repository.LineMachineRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
@@ -40,13 +41,17 @@ public class ExceptionRecordServiceImpl implements ExceptionRecordService {
     }
 
     private Single<ExceptionRecord> save(Principal principal, ExceptionRecord exceptionRecord, ExceptionRecordUpdateCommand command) {
-        exceptionRecord.setSpindle(command.getSpindle());
-        exceptionRecord.setDoffingNum(command.getDoffingNum());
         exceptionRecord.setHandled(false);
-        return lineMachineRepository.find(command.getLineMachine()).flatMap(lineMachine -> {
-            exceptionRecord.setLineMachine(lineMachine);
-            return silkExceptionRepository.find(command.getException());
-        }).flatMap(silkException -> {
+        Single<SilkException> silkException$ = silkExceptionRepository.find(command.getException());
+        if (exceptionRecord.getSilk() == null) {
+            exceptionRecord.setSpindle(command.getSpindle());
+            exceptionRecord.setDoffingNum(command.getDoffingNum());
+            silkException$ = lineMachineRepository.find(command.getLineMachine()).flatMap(lineMachine -> {
+                exceptionRecord.setLineMachine(lineMachine);
+                return silkExceptionRepository.find(command.getException());
+            });
+        }
+        return silkException$.flatMap(silkException -> {
             exceptionRecord.setException(silkException);
             return operatorRepository.find(principal);
         }).flatMap(operator -> {

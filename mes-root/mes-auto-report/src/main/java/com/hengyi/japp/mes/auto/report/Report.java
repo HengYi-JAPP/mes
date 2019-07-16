@@ -33,11 +33,11 @@ public class Report {
     public static Injector INJECTOR;
     public static JedisPool JEDIS_POOL;
 
-    static {
-        // sshfs -o allow_other root@10.2.0.215:/data/mes/auto/db /data/mes-3000/auto/db
-        System.setProperty("japp.mes.auto.path", "/data/mes-3000/auto");
-//        INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
-    }
+    //    static {
+//        // sshfs -o allow_other root@10.2.0.215:/data/mes/auto/db /data/mes-3000/auto/db
+//        System.setProperty("japp.mes.auto.path", "/data/mes-3000/auto");
+////        INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
+//    }
     public static void main(String[] args) {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
@@ -67,7 +67,8 @@ public class Report {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()
                 .setWorker(true)
                 .setMaxWorkerExecuteTime(1)
-                .setMaxWorkerExecuteTimeUnit(TimeUnit.HOURS);
+                .setMaxWorkerExecuteTimeUnit(TimeUnit.HOURS)
+                .setInstances(1000);
         return vertx.rxDeployVerticle(WorkerVerticle.class.getName(), deploymentOptions);
     }
 

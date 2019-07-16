@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.ImmutableList;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import lombok.SneakyThrows;
 import org.bson.Document;
 
@@ -36,6 +37,11 @@ public class SilkCarRecordAggregate_History extends SilkCarRecordAggregate {
         final JsonNode jsonNode = MAPPER.readTree(s);
         jsonNode.forEach(it -> builder.add(toEventSource(it)));
         return builder.build();
+    }
+
+    @Override
+    public SilkCarRecordAggregateType getType() {
+        return SilkCarRecordAggregateType.HISTORY;
     }
 
 }

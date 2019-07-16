@@ -10,10 +10,12 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeAppendEvent;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import reactor.core.publisher.Mono;
 
@@ -29,9 +31,11 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author jzb 2019-07-11
  */
+@Slf4j
 @Data
 public abstract class SilkCarRecordAggregate implements Serializable {
     protected final Document document;
+    protected final String id;
     protected final String doffingOperatorId;
     protected final Date doffingDateTime;
     protected final String carpoolOperatorId;
@@ -47,6 +51,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
 
     protected SilkCarRecordAggregate(Document document) {
         this.document = document;
+        id = document.getString(ID_COL);
         doffingOperatorId = document.getString("doffingOperator");
         doffingDateTime = document.getDate("doffingDateTime");
         carpoolOperatorId = document.getString("carpoolOperator");
@@ -87,6 +92,21 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     protected abstract Collection<EventSource.DTO> fetchEventSources();
 
     @SneakyThrows
+    public static ObjectNode toJsonNode(SilkRuntime.DTO dto) {
+        final ObjectNode objectNode = MAPPER.createObjectNode()
+                .put("sideType", Optional.ofNullable(dto.getSideType()).map(SilkCarSideType::name).orElse(null))
+                .put("row", dto.getRow())
+                .put("col", dto.getCol());
+        final Document silk = QueryService.find(Silk.class, dto.getSilk()).block();
+        if (silk == null) {
+            log.error("");
+            return objectNode;
+        }
+        objectNode.set("silk", MAPPER.readTree(silk.toJson()));
+        return objectNode;
+    }
+
+    @SneakyThrows
     protected EventSource.DTO toEventSource(String s) {
         return toEventSource(MAPPER.readTree(s));
     }
@@ -103,40 +123,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     }
 
     @SneakyThrows
-    public ObjectNode toJsonNode() {
-        final ObjectNode objectNode = MAPPER.createObjectNode()
-                .put("id", document.getString(ID_COL))
-                .put("startDateTime", startDateTime.getTime())
-                .put("endDateTime", Optional.ofNullable(endDateTime).map(Date::getTime).orElse(null));
-        objectNode.set("silkCar", MAPPER.readTree(silkCar.toJson()));
-        objectNode.set("batch", MAPPER.readTree(batch.toJson()));
-        objectNode.set("grade", MAPPER.readTree(grade.toJson()));
-        objectNode.set("creator", MAPPER.readTree(creator.toJson()));
-        final ArrayNode initSilkRuntimesArrayNode = MAPPER.createArrayNode();
-        objectNode.set("initSilkRuntimes", initSilkRuntimesArrayNode);
-        initSilkRuntimeDtos.forEach(it -> initSilkRuntimesArrayNode.add(toJsonNode(it)));
-        final ArrayNode eventSourcesArrayNode = MAPPER.createArrayNode();
-        objectNode.set("eventSources", eventSourcesArrayNode);
-        eventSourceDtos.forEach(it -> eventSourcesArrayNode.add(toJsonNode(it)));
-        return objectNode;
-    }
-
-    @SneakyThrows
-    private ObjectNode toJsonNode(SilkRuntime.DTO dto) {
-        final ObjectNode objectNode = MAPPER.createObjectNode()
-                .put("sideType", Optional.ofNullable(dto.getSideType()).map(SilkCarSideType::name).orElse(null))
-                .put("row", dto.getRow())
-                .put("col", dto.getCol());
-        final Document silk = QueryService.find(Silk.class, dto.getSilk()).block();
-        if (silk != null) {
-            // todo check
-            objectNode.set("silk", MAPPER.readTree(silk.toJson()));
-        }
-        return objectNode;
-    }
-
-    @SneakyThrows
-    private ObjectNode toJsonNode(EventSource.DTO dto) {
+    public static ObjectNode toJsonNode(EventSource.DTO dto) {
         final ObjectNode objectNode = MAPPER.createObjectNode()
                 .put("eventId", dto.getEventId())
                 .put("type", dto.getType().name())
@@ -149,6 +136,32 @@ public abstract class SilkCarRecordAggregate implements Serializable {
             final Document deleteOperator = QueryService.findFromCache(Operator.class, dto.getDeleteOperator()).get();
             objectNode.set("deleteOperator", MAPPER.readTree(deleteOperator.toJson()));
         }
+        return objectNode;
+    }
+
+    public abstract SilkCarRecordAggregateType getType();
+
+    @SneakyThrows
+    public ObjectNode toJsonNode() {
+        final ObjectNode objectNode = MAPPER.createObjectNode()
+                .put("type", getType().name())
+                .put("id", document.getString(ID_COL))
+                .put("startDateTime", startDateTime.getTime())
+                .put("endDateTime", Optional.ofNullable(endDateTime).map(Date::getTime).orElse(null));
+        objectNode.set("silkCar", MAPPER.readTree(silkCar.toJson()));
+        objectNode.set("batch", MAPPER.readTree(batch.toJson()));
+        objectNode.set("grade", MAPPER.readTree(grade.toJson()));
+        objectNode.set("creator", MAPPER.readTree(creator.toJson()));
+        final ArrayNode initSilkRuntimesArrayNode = MAPPER.createArrayNode();
+        objectNode.set("initSilkRuntimes", initSilkRuntimesArrayNode);
+        J.emptyIfNull(initSilkRuntimeDtos).stream()
+                .map(SilkCarRecordAggregate::toJsonNode)
+                .forEach(initSilkRuntimesArrayNode::add);
+        final ArrayNode eventSourcesArrayNode = MAPPER.createArrayNode();
+        objectNode.set("eventSources", eventSourcesArrayNode);
+        J.emptyIfNull(eventSourceDtos).stream()
+                .map(SilkCarRecordAggregate::toJsonNode)
+                .forEach(eventSourcesArrayNode::add);
         return objectNode;
     }
 

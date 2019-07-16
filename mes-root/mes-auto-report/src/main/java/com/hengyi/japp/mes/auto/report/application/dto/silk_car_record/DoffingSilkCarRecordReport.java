@@ -15,7 +15,10 @@ import reactor.core.publisher.Flux;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
@@ -52,7 +55,6 @@ public class DoffingSilkCarRecordReport implements Serializable {
     public ArrayNode toJsonNode() {
         final ArrayNode arrayNode = MAPPER.createArrayNode();
         groupByBatchGrades.forEach(it -> arrayNode.add(it.toJsonNode()));
-        log.info("toJsonNode:" + arrayNode.toString());
         return arrayNode;
     }
 
@@ -61,36 +63,21 @@ public class DoffingSilkCarRecordReport implements Serializable {
         private final Document batch;
         private final Document grade;
         private final Collection<Item> items;
-        private final int silkCount;
-        private final BigDecimal netWeight;
 
         public GroupBy_Batch_Grade(Document batch, Document grade, Collection<SilkCarRecordAggregate> silkCarRecordAggregates) {
             this.batch = batch;
             this.grade = grade;
             items = silkCarRecordAggregates.parallelStream().map(it -> new Item(batch, grade, it)).collect(toList());
-            silkCount = items.parallelStream().collect(summingInt(Item::getSilkCount));
-            netWeight = items.parallelStream().map(Item::getNetWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
         }
 
         @SneakyThrows
         public ObjectNode toJsonNode() {
-            final ObjectNode objectNode = MAPPER.createObjectNode()
-                    .put("silkCount", silkCount)
-                    .put("netWeight", netWeight);
+            final ObjectNode objectNode = MAPPER.createObjectNode();
             objectNode.set("batch", MAPPER.readTree(batch.toJson()));
             objectNode.set("grade", MAPPER.readTree(grade.toJson()));
             final ArrayNode itemsArrayNode = MAPPER.createArrayNode();
             objectNode.set("items", itemsArrayNode);
-            final ArrayNode noWeightItemsArrayNode = MAPPER.createArrayNode();
-            objectNode.set("noWeightItems", noWeightItemsArrayNode);
-            items.forEach(item -> {
-                final SilkCarRecordAggregate silkCarRecordAggregate = item.getSilkCarRecordAggregate();
-                final ObjectNode silkCarRecordAggregateNode = silkCarRecordAggregate.toJsonNode();
-                itemsArrayNode.add(silkCarRecordAggregateNode);
-                if (!item.hasNetWeight) {
-                    noWeightItemsArrayNode.add(silkCarRecordAggregateNode);
-                }
-            });
+            items.forEach(item -> itemsArrayNode.add(item.toJsonNode()));
             return objectNode;
         }
     }
@@ -104,7 +91,6 @@ public class DoffingSilkCarRecordReport implements Serializable {
         private final BigDecimal netWeight;
         // 是否已经称重
         private final boolean hasNetWeight;
-        private final Collection<Document> noWeightSilks;
 
         public Item(Document batch, Document grade, SilkCarRecordAggregate silkCarRecordAggregate) {
             this.batch = batch;
@@ -114,7 +100,6 @@ public class DoffingSilkCarRecordReport implements Serializable {
             if (grade.getInteger("sortBy") >= 100) {
                 hasNetWeight = true;
                 netWeight = BigDecimal.valueOf(batch.getDouble("silkWeight")).multiply(BigDecimal.valueOf(silkCount));
-                noWeightSilks = Collections.EMPTY_LIST;
             } else {
                 final Map<Boolean, List<Document>> weightSilkMap = Flux.fromIterable(silkCarRecordAggregate.getInitSilkRuntimeDtos())
                         .flatMap(it -> QueryService.find(Silk.class, it.getSilk())).toStream()
@@ -122,17 +107,36 @@ public class DoffingSilkCarRecordReport implements Serializable {
                             final Double weight = it.getDouble("weight");
                             return weight != null && weight > 0;
                         }));
-                noWeightSilks = J.emptyIfNull(weightSilkMap.get(false));
-                hasNetWeight = J.isEmpty(noWeightSilks);
-                // 没称重的先按锭重计算
-                final BigDecimal notWeightSum = BigDecimal.valueOf(batch.getDouble("silkWeight")).multiply(BigDecimal.valueOf(noWeightSilks.size()));
-                final Collection<Document> weightSilks = J.emptyIfNull(weightSilkMap.get(true));
-                final BigDecimal weightSum = weightSilks.parallelStream().map(it -> {
-                    final Double weight = it.getDouble("weight");
-                    return BigDecimal.valueOf(weight);
-                }).reduce(BigDecimal.ZERO, BigDecimal::add);
-                netWeight = notWeightSum.add(weightSum);
+                hasNetWeight = J.isEmpty(weightSilkMap.get(false));
+                if (hasNetWeight) {
+                    final Collection<Document> weightSilks = J.emptyIfNull(weightSilkMap.get(true));
+                    netWeight = weightSilks.parallelStream().map(it -> {
+                        final Double weight = it.getDouble("weight");
+                        return BigDecimal.valueOf(weight);
+                    }).reduce(BigDecimal.ZERO, BigDecimal::add);
+                } else {
+                    // 没称重的先按锭重计算
+                    netWeight = BigDecimal.valueOf(batch.getDouble("silkWeight")).multiply(BigDecimal.valueOf(silkCount));
+                }
             }
+        }
+
+        @SneakyThrows
+        public ObjectNode toJsonNode() {
+            final ObjectNode objectNode = MAPPER.createObjectNode()
+                    .put("type", silkCarRecordAggregate.getType().name())
+                    .put("id", silkCarRecordAggregate.getId())
+                    .put("hasNetWeight", hasNetWeight)
+                    .put("silkCount", silkCount)
+                    .put("netWeight", netWeight);
+            objectNode.set("silkCar", MAPPER.readTree(silkCarRecordAggregate.getSilkCar().toJson()));
+            objectNode.set("creator", MAPPER.readTree(silkCarRecordAggregate.getCreator().toJson()));
+            final ArrayNode eventSourcesArrayNode = MAPPER.createArrayNode();
+            objectNode.set("eventSources", eventSourcesArrayNode);
+            J.emptyIfNull(silkCarRecordAggregate.getEventSourceDtos()).stream()
+                    .map(SilkCarRecordAggregate::toJsonNode)
+                    .forEach(eventSourcesArrayNode::add);
+            return objectNode;
         }
     }
 
