@@ -38,6 +38,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @Singleton
 public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
+    private final ApplicationEvents applicationEvents;
     private final AuthService authService;
     private final SilkCarRecordService silkCarRecordService;
     private final DyeingService dyeingService;
@@ -52,7 +53,8 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private SilkCarRuntimeServiceImpl(AuthService authService, SilkCarRecordService silkCarRecordService, DyeingService dyeingService, WorkshopRepository workshopRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkCarRecordRepository silkCarRecordRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, SilkRepository silkRepository, DyeingSampleRepository dyeingSampleRepository, TemporaryBoxRecordRepository temporaryBoxRecordRepository, OperatorRepository operatorRepository) {
+    private SilkCarRuntimeServiceImpl(ApplicationEvents applicationEvents, AuthService authService, SilkCarRecordService silkCarRecordService, DyeingService dyeingService, WorkshopRepository workshopRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkCarRecordRepository silkCarRecordRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, SilkRepository silkRepository, DyeingSampleRepository dyeingSampleRepository, TemporaryBoxRecordRepository temporaryBoxRecordRepository, OperatorRepository operatorRepository) {
+        this.applicationEvents = applicationEvents;
         this.authService = authService;
         this.silkCarRecordService = silkCarRecordService;
         this.dyeingService = dyeingService;
@@ -302,7 +304,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 checkSilkDuplicate(silkRuntimes),
                 handlePrevSilkCarData(silkCar)
         );
-        return checks$.andThen(result$);
+        return checks$.andThen(result$).doOnSuccess(it -> applicationEvents.fire(silkCar.getCode(), event));
     }
 
     @Override
@@ -436,7 +438,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 // todo 满车才能拼车
                 handlePrevSilkCarData(silkCar)
         );
-        return checks$.andThen(result$);
+        return checks$.andThen(result$).doOnSuccess(it -> applicationEvents.fire(silkCar.getCode(), event));
     }
 
     private Completable checkSilkDuplicate(Collection<SilkRuntime> silkRuntimes) {

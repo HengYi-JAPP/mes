@@ -41,8 +41,15 @@ public class AgentVerticle extends AbstractVerticle {
                     .put("workshopId", rc.queryParams().get("workshopId"))
                     .put("startDate", rc.queryParams().get("startDate"))
                     .put("endDate", rc.queryParams().get("endDate"));
-            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
+            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
             vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions)
+                    .map(Message::body)
+                    .subscribe(rc.response()::end, rc::fail);
+        });
+
+        router.get("/api/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON).handler(rc -> {
+            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
+            vertx.eventBus().<String>rxSend("mes-auto:report:silkCarRuntimeSilkCarCodes", null, deliveryOptions)
                     .map(Message::body)
                     .subscribe(rc.response()::end, rc::fail);
         });

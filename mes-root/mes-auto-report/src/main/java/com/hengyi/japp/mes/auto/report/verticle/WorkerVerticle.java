@@ -13,9 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
+import static java.util.stream.Collectors.toSet;
 
 //import com.hengyi.japp.mes.auto.report.application.StrippingReportService;
 
@@ -49,6 +51,15 @@ public class WorkerVerticle extends AbstractVerticle {
                             final Collection<String> silkCarRecordIds = queryService.query(silkCarRecordQuery);
                             final DoffingSilkCarRecordReport doffingSilkCarRecordReport = new DoffingSilkCarRecordReport(silkCarRecordIds);
                             return MAPPER.writeValueAsString(doffingSilkCarRecordReport.toJsonNode());
+                        }).subscribe(reply::reply, err -> {
+                            log.error("", err);
+                            reply.fail(400, err.getLocalizedMessage());
+                        })
+                ).rxCompletionHandler(),
+
+                vertx.eventBus().<String>consumer("mes-auto:report:silkCarRuntimeSilkCarCodes", reply -> Single.just(reply.body()).map(MAPPER::readTree).map(jsonNode -> {
+                            final Set<String> silkCarCodes = RedisService.listSilkCarRuntimeSilkCarCodes().collect(toSet());
+                            return MAPPER.writeValueAsString(silkCarCodes);
                         }).subscribe(reply::reply, err -> {
                             log.error("", err);
                             reply.fail(400, err.getLocalizedMessage());

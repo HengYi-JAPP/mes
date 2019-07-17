@@ -40,9 +40,10 @@ public class ShareResource {
     private final PackageBoxRepository packageBoxRepository;
     private final ExceptionRecordRepository exceptionRecordRepository;
     private final NotificationRepository notificationRepository;
+    private final SilkCarRuntimeRepository silkCarRuntimeRepository;
 
     @Inject
-    private ShareResource(ApplicationEvents applicationEvents, RedisClient redisClient, ProductRepository productRepository, WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, ExceptionRecordRepository exceptionRecordRepository, NotificationRepository notificationRepository) {
+    private ShareResource(ApplicationEvents applicationEvents, RedisClient redisClient, ProductRepository productRepository, WorkshopRepository workshopRepository, LineRepository lineRepository, LineMachineRepository lineMachineRepository, PackageBoxRepository packageBoxRepository, ExceptionRecordRepository exceptionRecordRepository, NotificationRepository notificationRepository, SilkCarRuntimeRepository silkCarRuntimeRepository) {
         this.applicationEvents = applicationEvents;
         this.redisClient = redisClient;
         this.productRepository = productRepository;
@@ -52,6 +53,7 @@ public class ShareResource {
         this.packageBoxRepository = packageBoxRepository;
         this.exceptionRecordRepository = exceptionRecordRepository;
         this.notificationRepository = notificationRepository;
+        this.silkCarRuntimeRepository = silkCarRuntimeRepository;
     }
 
     @Path("packageBoxes/codes/{code}")
@@ -72,10 +74,22 @@ public class ShareResource {
         return redisClient.rxIncr(incrKey);
     }
 
-    @Path("refreshAbnormal")
+    @Path("silkCarRuntimes/{code}")
+    @GET
+    public Single<SilkCarRuntime> get(@PathParam("code") @NotBlank String code) {
+        return silkCarRuntimeRepository.findByCode(code).toSingle(new SilkCarRuntime());
+    }
+
+    @Path("refreshAbnormalBoard")
     @GET
     public Completable refreshAbnormal() {
-        return Completable.fromAction(applicationEvents::refreshAbnormal);
+        return Completable.fromAction(applicationEvents::refreshAbnormalBoard);
+    }
+
+    @Path("refreshSilkCarRuntimeReportBoard")
+    @GET
+    public Completable refreshSilkCarRuntimeReport() {
+        return Completable.fromAction(applicationEvents::refreshSilkCarRuntimeReportBoard);
     }
 
     @Path("workshops/{id}/productPlans")

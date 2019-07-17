@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.application;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.domain.ExceptionRecord;
 import com.hengyi.japp.mes.auto.domain.LineMachineProductPlan;
 import com.hengyi.japp.mes.auto.domain.Notification;
@@ -43,7 +44,7 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
 
     @SneakyThrows
     @Override
-    public void refreshAbnormal() {
+    public void refreshAbnormalBoard() {
         vertx.eventBus().publish("mes-auto://websocket/boards/abnormal/refresh", null);
     }
 
@@ -66,6 +67,20 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
     public void fire(Notification notification) {
         final String message = MAPPER.writeValueAsString(notification);
         vertx.eventBus().publish("mes-auto://websocket/boards/abnormal/notification", message);
+    }
+
+    @SneakyThrows
+    @Override
+    public void refreshSilkCarRuntimeReportBoard() {
+        vertx.eventBus().publish("mes-auto://websocket/boards/silkCarRuntimeReport/refresh", null);
+    }
+
+    @SneakyThrows
+    @Override
+    public void fire(String silkCarCode, EventSource eventSource) {
+        final Map<String, Object> map = ImmutableMap.of("silkCarCode", silkCarCode, "eventSource", eventSource);
+        final String message = MAPPER.writeValueAsString(map);
+        vertx.eventBus().publish("mes-auto://websocket/boards/silkCarRuntimeReport/events", message);
     }
 
     @SneakyThrows

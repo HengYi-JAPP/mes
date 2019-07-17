@@ -6,7 +6,7 @@ plugins {
 }
 allprojects {
     group 'com.hengyi.japp.mes'
-    version '1.19'
+    version '1.20'
 //    version 'test'
 
     apply plugin: 'idea'

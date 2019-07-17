@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.domain.ExceptionRecord;
 import com.hengyi.japp.mes.auto.domain.LineMachineProductPlan;
 import com.hengyi.japp.mes.auto.domain.Notification;
@@ -15,9 +16,13 @@ import java.util.List;
  */
 public interface ApplicationEvents {
 
-    void refreshAbnormal();
+    void refreshAbnormalBoard();
 
     void fire(LineMachineProductPlan lineMachineProductPlan);
+
+    void refreshSilkCarRuntimeReportBoard();
+
+    void fire(String silkCarCode, EventSource eventSource);
 
     void fire(SilkCarRuntime silkCarRuntime, GetSilkSpindleInfoDTO dto, List<String> reasons);
 

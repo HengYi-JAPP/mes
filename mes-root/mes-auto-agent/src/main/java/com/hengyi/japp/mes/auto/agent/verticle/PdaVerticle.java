@@ -3,12 +3,17 @@ package com.hengyi.japp.mes.auto.agent.verticle;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import io.reactivex.Completable;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.core.eventbus.Message;
 import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.handler.JWTAuthHandler;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.Duration;
 
 import static com.hengyi.japp.mes.auto.agent.Agent.INJECTOR;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -34,6 +39,24 @@ public class PdaVerticle extends AbstractVerticle {
 
         final JWTAuth jwtAuth = JWTAuth.create(vertx, config.getJwtAuthOptions());
         router.route("/api/*").handler(JWTAuthHandler.create(jwtAuth));
+
+        router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON).handler(rc -> {
+            final JsonObject message = new JsonObject()
+                    .put("workshopId", rc.queryParams().get("workshopId"))
+                    .put("startDate", rc.queryParams().get("startDate"))
+                    .put("endDate", rc.queryParams().get("endDate"));
+            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
+            vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions)
+                    .map(Message::body)
+                    .subscribe(rc.response()::end, rc::fail);
+        });
+
+        router.get("/share/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON).handler(rc -> {
+            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
+            vertx.eventBus().<String>rxSend("mes-auto:report:silkCarRuntimeSilkCarCodes", null, deliveryOptions)
+                    .map(Message::body)
+                    .subscribe(rc.response()::end, rc::fail);
+        });
 
         final HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setDecompressionSupported(true)
