@@ -52,8 +52,9 @@ public class PdaVerticle extends AbstractVerticle {
         });
 
         router.get("/share/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON).handler(rc -> {
+            final JsonObject jsonObject = new JsonObject().put("workshopId", rc.queryParams().get("workshopId"));
             final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
-            vertx.eventBus().<String>rxSend("mes-auto:report:silkCarRuntimeSilkCarCodes", null, deliveryOptions)
+            vertx.eventBus().<String>rxSend("mes-auto:report:silkCarRuntimeSilkCarCodes", jsonObject.encode(), deliveryOptions)
                     .map(Message::body)
                     .subscribe(rc.response()::end, rc::fail);
         });
