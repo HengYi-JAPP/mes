@@ -16,8 +16,6 @@ import java.time.Duration;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-//import com.hengyi.japp.mes.auto.report.application.StrippingReportService;
-
 /**
  * @author jzb 2019-05-20
  */
@@ -47,7 +45,7 @@ public class AgentVerticle extends AbstractVerticle {
                     .subscribe(rc.response()::end, rc::fail);
         });
 
-        router.get("/api/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON).handler(rc -> {
+        router.get("/share/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON).handler(rc -> {
             final JsonObject jsonObject = new JsonObject().put("workshopId", rc.queryParams().get("workshopId"));
             final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
             vertx.eventBus().<String>rxSend("mes-auto:report:silkCarRuntimeSilkCarCodes", jsonObject.encode(), deliveryOptions)
@@ -61,10 +59,6 @@ public class AgentVerticle extends AbstractVerticle {
         return vertx.createHttpServer(httpServerOptions)
                 .requestHandler(router)
                 .rxListen(9090)
-                .doOnSuccess(it -> {
-                    final int actualPort = it.actualPort();
-                    System.out.println("actualPort=" + actualPort);
-                })
                 .ignoreElement();
     }
 
