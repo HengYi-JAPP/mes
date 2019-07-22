@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM mcr.microsoft.com/java/jre:11u3-zulu-alpine
 
 ENV TZ Asia/Shanghai
 ENV JAVA_OPTIONS ""
@@ -12,4 +12,4 @@ EXPOSE 9999
 
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]
-CMD ["exec java $JAVA_OPTIONS -jar $VERTICLE_FILE"]
+CMD ["exec java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED $JAVA_OPTIONS -jar $VERTICLE_FILE"]
