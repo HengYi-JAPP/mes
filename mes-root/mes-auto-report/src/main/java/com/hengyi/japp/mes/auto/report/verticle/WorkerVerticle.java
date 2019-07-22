@@ -3,24 +3,18 @@ package com.hengyi.japp.mes.auto.report.verticle;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
-import com.hengyi.japp.mes.auto.domain.Batch;
-import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.report.PackagePlanService;
 import com.hengyi.japp.mes.auto.report.application.*;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportRange;
-import com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.reactivex.core.AbstractVerticle;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -66,23 +60,24 @@ public class WorkerVerticle extends AbstractVerticle {
                 ).rxCompletionHandler(),
 
                 vertx.eventBus().<String>consumer("mes-auto:report:silkCarRuntimeSilkCarCodes", reply -> Single.fromCallable(() -> {
-                    final JsonNode jsonNode = MAPPER.readTree(reply.body());
-                    final String workshopId = jsonNode.get("workshopId").asText();
+                            final JsonNode jsonNode = MAPPER.readTree(reply.body());
+                            final String workshopId = jsonNode.get("workshopId").asText();
                             final Set<String> silkCarCodes = RedisService.listSilkCarRuntimeSilkCarCodes().collect(toSet());
-                    if (J.isBlank(workshopId)) {
-                        return MAPPER.writeValueAsString(silkCarCodes);
-                    }
+                            if (J.isBlank(workshopId)) {
+                                return MAPPER.writeValueAsString(silkCarCodes);
+                            }
 
-                    final Set<String> collect = Flux.fromIterable(silkCarCodes).filterWhen(silkCarCode -> {
-                        final String redisKey = SilkCarRuntimeRepository.redisKey(silkCarCode);
-                        final Map<String, String> redisMap = RedisService.call(jedis -> jedis.hgetAll(redisKey));
-                        final String silkCarRecordId = redisMap.get("silkCarRecord");
-                        return QueryService.find(SilkCarRecord.class, silkCarRecordId).flatMap(silkCarRecord -> {
-                            final String batchId = silkCarRecord.getString("batch");
-                            return QueryService.find(Batch.class, batchId).map(batch -> Objects.equals(workshopId, batch.getString("workshopId")));
-                        });
-                    }).toStream().collect(toSet());
-                    return MAPPER.writeValueAsString(collect);
+//                            final Set<String> collect = Flux.fromIterable(silkCarCodes).filterWhen(silkCarCode -> {
+//                                final String redisKey = SilkCarRuntimeRepository.redisKey(silkCarCode);
+//                                final Map<String, String> redisMap = RedisService.call(jedis -> jedis.hgetAll(redisKey));
+//                                final String silkCarRecordId = redisMap.get("silkCarRecord");
+//                                return QueryService.find(SilkCarRecord.class, silkCarRecordId).flatMap(silkCarRecord -> {
+//                                    final String batchId = silkCarRecord.getString("batch");
+//                                    return QueryService.find(Batch.class, batchId).map(batch -> Objects.equals(workshopId, batch.getString("workshopId")));
+//                                });
+//                            }).toStream().collect(toSet());
+//                            return MAPPER.writeValueAsString(collect);
+                            return MAPPER.writeValueAsString(silkCarCodes);
                         }).subscribe(reply::reply, err -> {
                             log.error("", err);
                             reply.fail(400, err.getLocalizedMessage());
