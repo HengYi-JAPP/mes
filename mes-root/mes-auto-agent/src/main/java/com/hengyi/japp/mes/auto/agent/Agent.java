@@ -29,11 +29,16 @@ public class Agent {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx));
 
-            final Completable pda$ = deployPda(vertx).ignoreElement();
-            final Completable open$ = deployOpen(vertx).ignoreElement();
-            final Completable mqtt$ = deployMqtt(vertx).ignoreElement();
-            return Completable.mergeArray(pda$, open$, mqtt$);
-        }).subscribe();
+            return Completable.mergeArray(
+                    deployMqtt(vertx).ignoreElement(),
+                    deployPda(vertx).ignoreElement(),
+                    deployOpen(vertx).ignoreElement()
+            );
+        }).subscribe(() -> {
+            log.info("mes-auto Agent 启动成功");
+        }, err -> {
+            log.info("mes-auto Agent 启动失败");
+        });
     }
 
     private static Single<String> deployMqtt(Vertx vertx) {

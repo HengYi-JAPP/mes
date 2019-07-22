@@ -61,21 +61,19 @@ services:
 #        source: /home/mes
 #        target: /home/mes
 #
-#  mes-auto-agent:
-#    image: hengyi/mes-auto-agent
-#    restart: always
-#    volumes:
-#      - type: bind
-#        source: /home/mes
-#        target: /home/mes
-#    expose:
-#      - "9999"
-#      - "9998"
-#      - "8080"
-#    ports:
-#      - "9999:9999"
-#      - "9998:9998"
-#      - "8080:8080"
+  mes-auto-agent:
+    image: hengyi/mes-auto-agent:1.21
+    restart: always
+    volumes:
+      - type: bind
+        source: /home/mes
+        target: /home/mes
+    expose:
+      - "9999"
+      - "9998"
+    ports:
+      - "9999:9999"
+      - "9998:9998"
 #    depends_on:
 #      - mes-auto-worker
 
