@@ -35,6 +35,7 @@ public class SilkRuntimeDetachEvent extends EventSource {
     @NotNull
     @Size(min = 1)
     private Collection<SilkRuntime> silkRuntimes;
+    private JsonNode command;
 
     @Override
     protected Collection<SilkRuntime> _calcSilkRuntimes(Collection<SilkRuntime> data) {
@@ -76,6 +77,7 @@ public class SilkRuntimeDetachEvent extends EventSource {
     @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
     public static class DTO extends EventSource.DTO {
         private Collection<SilkRuntime.DTO> silkRuntimes;
+        private JsonNode command;
 
         public static DTO from(JsonNode jsonNode) {
             return MAPPER.convertValue(jsonNode, DTO.class);

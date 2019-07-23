@@ -6,6 +6,4 @@ dependencies {
             "io.vertx:vertx-auth-jwt",
             "io.vertx:vertx-mongo-client",
             "io.vertx:vertx-redis-client"
-
-    testCompile "com.squareup.okhttp3:okhttp:3.11.0"
 }

@@ -4,7 +4,6 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
-import com.hengyi.japp.mes.auto.worker.verticle.RuiguanAutoDoffingVerticle;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -29,6 +28,22 @@ public class Worker {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());
 
+//            final SilkCarRuntimeRepository silkCarRuntimeRepository = Jvertx.getProxy(SilkCarRuntimeRepository.class);
+//            silkCarRuntimeRepository.findByCode("3000F48037").subscribe(silkCarRuntime -> {
+//                for (SilkRuntime silkRuntime : silkCarRuntime.getSilkRuntimes()) {
+//                    try {
+//                        final SilkRuntime.DyeingResultInfo firstDyeingResultInfo = silkRuntime.getFirstDyeingResultInfo();
+//                        final DyeingResult dyeingResult = firstDyeingResultInfo.getDyeingResult();
+//                        final Silk checkSilk = dyeingResult.getSilk();
+//                        if (checkSilk == null) {
+//                            System.out.println();
+//                        }
+//                    } catch (Exception e) {
+//                        System.out.println(silkCarRuntime);
+//                    }
+//                }
+//            });
+
             return Completable.mergeArray(
 //                    deployRuiguan(vertx).ignoreElement()
                     deployWorker(vertx).ignoreElement()
@@ -36,11 +51,11 @@ public class Worker {
         }).subscribe();
     }
 
-    private static Single<String> deployRuiguan(Vertx vertx) {
-        final DeploymentOptions deploymentOptions = new DeploymentOptions()
-                .setWorker(true);
-        return vertx.rxDeployVerticle(RuiguanAutoDoffingVerticle.class.getName(), deploymentOptions);
-    }
+//    private static Single<String> deployRuiguan(Vertx vertx) {
+//        final DeploymentOptions deploymentOptions = new DeploymentOptions()
+//                .setWorker(true);
+//        return vertx.rxDeployVerticle(RuiguanAutoDoffingVerticle.class.getName(), deploymentOptions);
+//    }
 
     private static Single<String> deployWorker(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()

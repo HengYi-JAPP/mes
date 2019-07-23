@@ -31,6 +31,8 @@ public class PackageBoxQueryForMeasure {
     @Getter
     private final String gradeId;
     @Getter
+    private final String automaticPackeLine;
+    @Getter
     private final LocalDateRange createDateTimeRange;
     @Getter
     private final PackageBoxType type;
