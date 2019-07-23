@@ -14,10 +14,7 @@ import io.reactivex.Single;
 import io.vertx.reactivex.redis.RedisClient;
 
 import javax.validation.constraints.NotBlank;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -130,5 +127,15 @@ public class ShareResource {
     @GET
     public Flowable<Product> query() {
         return productRepository.list();
+    }
+
+    @Path("reports/workshopProductPlanReport")
+    @GET
+    public Single<WorkshopProductPlanReport> workshopProductPlanReport(@QueryParam("lineId") String lineId,
+                                                                       @QueryParam("workshopId") String workshopId) {
+        return workshopRepository.find(workshopId)
+                .flatMapPublisher(lineRepository::listBy)
+                .flatMap(lineMachineRepository::listBy).toList()
+                .map(WorkshopProductPlanReport::new);
     }
 }
