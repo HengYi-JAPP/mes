@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.eventbus.Message;
 import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.RoutingContext;
 
 import java.time.Duration;
 
@@ -33,6 +34,22 @@ public class AgentVerticle extends AbstractVerticle {
             QueryService.CACHE.cleanUp();
             rc.response().end();
         });
+
+        router.post("/statisticReport/generate").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:statisticReport:generate", setMinutes(5)));
+        router.post("/statisticReport/fromDisk").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:statisticReport:fromDisk"));
+        router.post("/statisticReport/rangeDisk").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:statisticReport:rangeDisk"));
+
+        router.post("/dyeingReport").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:dyeingReport", setMinutes(5)));
+        router.post("/strippingReport").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:strippingReport", setMinutes(10)));
+        router.post("/measureFiberReport").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:measureFiberReport", setMinutes(5)));
+        router.post("/silkExceptionReport").produces(APPLICATION_JSON)
+                .handler(rc -> common(rc, "mes-auto:report:silkExceptionReport", setMinutes(3)));
 
         router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON).handler(rc -> {
             final JsonObject message = new JsonObject()
@@ -60,6 +77,22 @@ public class AgentVerticle extends AbstractVerticle {
                 .requestHandler(router)
                 .rxListen(9090)
                 .ignoreElement();
+    }
+
+    private DeliveryOptions setMinutes(long minutes) {
+        return new DeliveryOptions().setSendTimeout(Duration.ofMinutes(minutes).toMillis());
+    }
+
+    private void common(RoutingContext rc, String address) {
+        DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(1).toMillis());
+        common(rc, address, deliveryOptions);
+    }
+
+    private void common(RoutingContext rc, String address, DeliveryOptions deliveryOptions) {
+        vertx.eventBus().rxSend(address, rc.getBodyAsString(), deliveryOptions).subscribe(reply -> {
+            String ret = (String) reply.body();
+            rc.response().end(ret);
+        }, rc::fail);
     }
 
 }
