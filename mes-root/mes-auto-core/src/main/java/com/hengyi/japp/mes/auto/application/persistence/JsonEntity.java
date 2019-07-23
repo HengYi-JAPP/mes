@@ -1,6 +1,5 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.Data;
@@ -24,7 +23,6 @@ public abstract class JsonEntity implements Serializable {
     @NotBlank
     protected String id;
     @ToString.Include
-    @JsonIgnore
     protected boolean deleted;
 
     // todo 删除方法

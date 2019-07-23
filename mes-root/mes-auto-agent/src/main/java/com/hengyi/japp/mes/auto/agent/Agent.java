@@ -28,10 +28,15 @@ public class Agent {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx));
 
-            final Completable pda$ = deployPda(vertx).ignoreElement();
-            final Completable open$ = deployOpen(vertx).ignoreElement();
-            return Completable.mergeArray(pda$, open$);
-        }).subscribe();
+            return Completable.mergeArray(
+                    deployPda(vertx).ignoreElement(),
+                    deployOpen(vertx).ignoreElement()
+            );
+        }).subscribe(() -> {
+            log.info("mes-auto Agent 启动成功");
+        }, err -> {
+            log.info("mes-auto Agent 启动失败");
+        });
     }
 
     private static Single<String> deployPda(Vertx vertx) {
@@ -50,7 +55,7 @@ public class Agent {
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(10));
         Optional.ofNullable(System.getProperty("vertx.cluster.host"))
                 .filter(J::nonBlank)
-                .ifPresent(vertxOptions::setClusterHost);
+                .ifPresent(vertxOptions.getEventBusOptions()::setHost);
         return vertxOptions;
     }
 }

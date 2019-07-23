@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM mcr.microsoft.com/java/jre:11u3-zulu-alpine
 
 ENV TZ Asia/Shanghai
 ENV JAVA_OPTIONS ""
@@ -8,4 +8,12 @@ COPY $VERTICLE_FILE $VERTICLE_HOME/
 
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]
-CMD ["exec java $JAVA_OPTIONS -jar $VERTICLE_FILE"]
+CMD ["exec java --add-modules java.se \
+--add-exports java.base/jdk.internal.ref=ALL-UNNAMED \
+--add-opens java.base/java.lang=ALL-UNNAMED \
+--add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+--add-opens java.base/java.nio=ALL-UNNAMED \
+--add-opens java.base/sun.nio.ch=ALL-UNNAMED \
+--add-opens java.management/sun.management=ALL-UNNAMED \
+--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED \
+$JAVA_OPTIONS -jar $VERTICLE_FILE"]

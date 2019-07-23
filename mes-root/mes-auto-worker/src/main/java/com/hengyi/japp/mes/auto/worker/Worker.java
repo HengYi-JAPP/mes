@@ -5,6 +5,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
 import com.hengyi.japp.mes.auto.worker.verticle.WorkerVerticle;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
@@ -42,7 +43,10 @@ public class Worker {
 //                }
 //            });
 
-            return deployWorker(vertx).ignoreElement();
+            return Completable.mergeArray(
+//                    deployRuiguan(vertx).ignoreElement()
+                    deployWorker(vertx).ignoreElement()
+            );
         }).subscribe();
     }
 
@@ -57,11 +61,12 @@ public class Worker {
     private static VertxOptions vertxOptions() {
         final VertxOptions vertxOptions = new VertxOptions()
                 .setWorkerPoolSize(1000)
-                .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(1000000))
+                .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(1_000_000))
                 .setMaxWorkerExecuteTime(TimeUnit.MINUTES.toNanos(5));
         Optional.ofNullable(System.getProperty("vertx.cluster.host"))
                 .filter(J::nonBlank)
-                .ifPresent(vertxOptions::setClusterHost);
+                .ifPresent(vertxOptions.getEventBusOptions()::setHost);
         return vertxOptions;
     }
+
 }

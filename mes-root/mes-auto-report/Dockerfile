@@ -3,12 +3,8 @@ FROM mcr.microsoft.com/java/jre:11u3-zulu-alpine
 ENV TZ Asia/Shanghai
 ENV JAVA_OPTIONS ""
 ENV VERTICLE_HOME /usr/verticles
-ENV VERTICLE_FILE mes-auto-agent-fat.jar
+ENV VERTICLE_FILE mes-auto-report-fat.jar
 COPY $VERTICLE_FILE $VERTICLE_HOME/
-
-EXPOSE 8080
-EXPOSE 9998
-EXPOSE 9999
 
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]

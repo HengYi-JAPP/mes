@@ -1,11 +1,14 @@
 package com.hengyi.japp.mes.auto.application;
 
+import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.domain.ExceptionRecord;
 import com.hengyi.japp.mes.auto.domain.LineMachineProductPlan;
-import com.hengyi.japp.mes.auto.domain.Operator;
-import com.hengyi.japp.mes.auto.domain.Silk;
+import com.hengyi.japp.mes.auto.domain.Notification;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
 import com.hengyi.japp.mes.auto.interfaces.jikon.dto.GetSilkSpindleInfoDTO;
+import com.hengyi.japp.mes.auto.interfaces.riamb.dto.RiambFetchSilkCarRecordResultDTO;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -13,12 +16,20 @@ import java.util.List;
  */
 public interface ApplicationEvents {
 
+    void refreshAbnormalBoard();
+
     void fire(LineMachineProductPlan lineMachineProductPlan);
+
+    void refreshSilkCarRuntimeReportBoard();
+
+    void fire(String silkCarCode, EventSource eventSource);
 
     void fire(SilkCarRuntime silkCarRuntime, GetSilkSpindleInfoDTO dto, List<String> reasons);
 
-    void fire(Silk silk, Operator operator);
+    void fire(Principal principal, SilkCarRuntime silkCarRuntime, RiambFetchSilkCarRecordResultDTO dto, List<String> reasons);
 
-    void fire(SilkCarRuntime silkCarRuntime);
+    void fire(ExceptionRecord exceptionRecord);
+
+    void fire(Notification notification);
 
 }
