@@ -40,7 +40,7 @@ public class ApiGatewayAgent extends AbstractApiGateway implements ApiGateway {
 
     @Override
     public void submitApmSpan(ApmTraceSpan apmSpan) {
-        System.out.println(apmSpan);
+//        System.out.println(apmSpan);
     }
 
     @Override
