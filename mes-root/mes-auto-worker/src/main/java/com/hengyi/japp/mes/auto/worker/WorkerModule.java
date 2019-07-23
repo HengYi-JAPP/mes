@@ -19,7 +19,6 @@ import com.hengyi.japp.mes.auto.interfaces.riamb.RiambService;
 import com.hengyi.japp.mes.auto.interfaces.riamb.internal.RiambServiceImpl;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.internal.WarehouseServiceImpl;
-import com.hengyi.japp.mes.auto.report.api.ReportServiceImpl;
 import com.hengyi.japp.mes.auto.repository.*;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
@@ -77,8 +76,6 @@ public class WorkerModule extends AbstractModule {
         bind(TemporaryBoxService.class).to(TemporaryBoxServiceImpl.class);
         bind(PackageClassService.class).to(PackageClassServiceImpl.class);
         bind(PackageBoxService.class).to(PackageBoxServiceImpl.class);
-        bind(ReportService.class).to(ReportServiceImpl.class);
-        bind(DownloadService.class).to(DownloadServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
         bind(SilkBarcodeGenerateTemplateService.class).to(SilkBarcodeGenerateTemplateServiceImpl.class);
