@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
+import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
@@ -11,6 +12,7 @@ import com.hengyi.japp.mes.auto.repository.BatchRepository;
 import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -21,6 +23,9 @@ import org.bson.conversions.Bson;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.regex;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
@@ -50,7 +55,7 @@ public class BatchRepositoryMongo extends MongoEntityRepository<Batch> implement
                 .filter(StringUtils::isNotBlank)
                 .map(q -> {
                     final Pattern pattern = Pattern.compile(q, CASE_INSENSITIVE);
-                    return Filters.regex("batchNo", pattern);
+                    return regex("batchNo", pattern);
                 })
                 .orElse(null);
         final JsonObject query = MongoUtil.unDeletedQuery(workshopFilter, qFilter);
@@ -67,5 +72,28 @@ public class BatchRepositoryMongo extends MongoEntityRepository<Batch> implement
                 .ignoreElement();
 
         return Completable.mergeArray(query$, count$).toSingle(() -> builder.build());
+    }
+
+    @Override
+    public Maybe<Batch> findByBatchNo(String batchNo) {
+        final JsonObject query = MongoUtil.query(eq("batchNo", batchNo));
+        return mongoClient.rxFind(collectionName, query).flatMapMaybe(list -> {
+            if (J.isEmpty(list)) {
+                return Maybe.empty();
+            }
+            return rxCreateMongoEntiy(list.get(0)).toMaybe();
+        });
+    }
+
+    @Override
+    public Flowable<Batch> autoComplete(String q) {
+        if (StringUtils.isBlank(q)) {
+            return Flowable.empty();
+        }
+        final Pattern pattern = Pattern.compile(q, CASE_INSENSITIVE);
+        final Bson qFilter = regex("batchNo", pattern);
+        final JsonObject query = unDeletedQuery(qFilter);
+        final FindOptions findOptions = new FindOptions().setLimit(10);
+        return mongoClient.rxFindWithOptions(collectionName, query, findOptions).flatMapPublisher(Flowable::fromIterable).flatMapSingle(this::rxCreateMongoEntiy);
     }
 }

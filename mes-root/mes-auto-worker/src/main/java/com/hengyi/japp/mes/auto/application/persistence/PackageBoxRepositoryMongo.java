@@ -7,12 +7,12 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.PackageBoxService;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
+import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
 import com.hengyi.japp.mes.auto.search.lucene.PackageBoxLucene;
-import com.mongodb.client.model.Filters;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * @author jzb 2018-06-24
@@ -99,15 +100,15 @@ public class PackageBoxRepositoryMongo extends MongoEntityRepository<PackageBox>
 
     @Override
     public Single<PackageBox> findByCode(String code) {
-        final JsonObject query = unDeletedQuery(Filters.eq("code", code));
+        final JsonObject query = unDeletedQuery(eq("code", code));
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                 // fixme maybe single
                 .flatMapSingle(this::rxCreateMongoEntiy);
     }
 
     @Override
-    public Single<PackageBox> findByCodeOrCreate(String code) {
-        final JsonObject query = unDeletedQuery(Filters.eq("code", code));
+    public Single<PackageBox> findOrCreateByCode(String code) {
+        final JsonObject query = MongoUtil.query(eq("code", code));
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())
                 .switchIfEmpty(Single.just(new JsonObject()))
                 .flatMap(this::rxCreateMongoEntiy);

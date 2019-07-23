@@ -250,7 +250,7 @@ public class JikonAdapterImpl implements JikonAdapter {
         final Single<Map<String, PackageClass>> packageClassMap$ = packageClassRepository.list().toMap(PackageClass::getRiambCode);
         final Single<Map<String, Grade>> gradeMap$ = gradeRepository.list().toMap(Grade::getName);
         @NotBlank final String boxCode = command.getBoxCode();
-        return packageClassMap$.flatMap(packageClassMap -> gradeMap$.flatMap(gradeMap -> packageBoxRepository.findByCodeOrCreate(boxCode).flatMap(packageBox -> {
+        return packageClassMap$.flatMap(packageClassMap -> gradeMap$.flatMap(gradeMap -> packageBoxRepository.findOrCreateByCode(boxCode).flatMap(packageBox -> {
             packageBox.setType(PackageBoxType.AUTO);
             packageBox.command(MAPPER.convertValue(command, JsonNode.class));
             packageBox.setCode(boxCode);

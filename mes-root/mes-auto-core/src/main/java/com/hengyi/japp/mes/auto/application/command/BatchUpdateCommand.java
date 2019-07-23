@@ -31,6 +31,8 @@ public class BatchUpdateCommand implements Serializable {
     private String spec;
     @NotBlank
     private String tubeColor;
+    @Min(0)
+    private double tubeWeight;
     private String note;
 
 }

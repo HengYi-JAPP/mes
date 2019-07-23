@@ -95,7 +95,8 @@ public class SilkBarcodeResource {
                                                  @QueryParam("endDate") String endDate,
                                                  @QueryParam("lineId") String lineId,
                                                  @QueryParam("lineMachineId") String lineMachineId,
-                                                 @QueryParam("doffingNum") String doffingNum) {
+                                                 // todo 前端参数改变
+                                                 @QueryParam("doffingNum") String doffingNumQ) {
         final LocalDate startLd = Optional.ofNullable(startDate)
                 .map(LocalDate::parse)
                 .orElse(LocalDate.now());
@@ -107,7 +108,7 @@ public class SilkBarcodeResource {
                 .pageSize(pageSize)
                 .startLd(startLd)
                 .endLd(endLd)
-                .doffingNumQ(StringUtils.upperCase(doffingNum))
+                .doffingNumQ(StringUtils.upperCase(doffingNumQ))
                 .lineId(lineId)
                 .lineMachineId(lineMachineId)
                 .build();

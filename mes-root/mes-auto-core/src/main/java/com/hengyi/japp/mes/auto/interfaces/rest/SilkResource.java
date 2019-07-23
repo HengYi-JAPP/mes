@@ -2,6 +2,7 @@ package com.hengyi.japp.mes.auto.interfaces.rest;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.ApplicationEvents;
 import com.hengyi.japp.mes.auto.application.SilkService;
 import com.hengyi.japp.mes.auto.application.command.SilkInspectionExceptionUpdateCommand;
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
@@ -25,11 +26,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("api")
 @Produces(APPLICATION_JSON)
 public class SilkResource {
+    private final ApplicationEvents applicationEvents;
     private final SilkService silkService;
     private final SilkRepository silkRepository;
 
     @Inject
-    private SilkResource(SilkService silkService, SilkRepository silkRepository) {
+    private SilkResource(ApplicationEvents applicationEvents, SilkService silkService, SilkRepository silkRepository) {
+        this.applicationEvents = applicationEvents;
         this.silkService = silkService;
         this.silkRepository = silkRepository;
     }

@@ -4,6 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
+import com.hengyi.japp.mes.auto.agent.verticle.MqttVerticle;
 import com.hengyi.japp.mes.auto.agent.verticle.OpenVerticle;
 import com.hengyi.japp.mes.auto.agent.verticle.PdaVerticle;
 import io.reactivex.Completable;
@@ -29,6 +30,7 @@ public class Agent {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx));
 
             return Completable.mergeArray(
+                    deployMqtt(vertx).ignoreElement(),
                     deployPda(vertx).ignoreElement(),
                     deployOpen(vertx).ignoreElement()
             );
@@ -37,6 +39,11 @@ public class Agent {
         }, err -> {
             log.info("mes-auto Agent 启动失败");
         });
+    }
+
+    private static Single<String> deployMqtt(Vertx vertx) {
+        final DeploymentOptions deploymentOptions = new DeploymentOptions();
+        return vertx.rxDeployVerticle(MqttVerticle.class.getName(), deploymentOptions);
     }
 
     private static Single<String> deployPda(Vertx vertx) {

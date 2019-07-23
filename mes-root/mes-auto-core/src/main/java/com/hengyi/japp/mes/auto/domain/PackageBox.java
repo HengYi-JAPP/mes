@@ -70,6 +70,7 @@ public class PackageBox extends LoggableMongoEntity {
     @JsonIgnore
     @JsonEntityProperty("command")
     private String commandJsonString;
+    private String riambJobId;
 
     /**
      * 唛头上的打印日期
