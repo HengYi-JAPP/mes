@@ -2,7 +2,6 @@ package com.hengyi.japp.mes.auto.application;
 
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
-import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import java.security.Principal;
@@ -14,5 +13,5 @@ public interface AdminService {
 
     Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminManualDoffingCommand command);
 
-    Completable deleteSilkCarRecord(Principal principal, String id);
+    Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AdminAutoDoffingAdaptCommand command);
 }

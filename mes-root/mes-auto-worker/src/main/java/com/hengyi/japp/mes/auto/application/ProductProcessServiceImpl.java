@@ -49,6 +49,7 @@ public class ProductProcessServiceImpl implements ProductProcessService {
         productProcess.setSortBy(command.getSortBy());
         productProcess.setRelateRoles(command.getRelateRoles());
         productProcess.setMustProcess(command.isMustProcess());
+        productProcess.setAtMostOnce(command.isAtMostOnce());
 
         return Flowable.fromIterable(CollectionUtils.emptyIfNull(command.getNotes()))
                 .map(EntityDTO::getId)

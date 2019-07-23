@@ -30,4 +30,6 @@ public class Operator extends MongoEntity {
     private Collection<RoleType> roles;
     @JsonIgnore
     private Collection<Permission> permissions;
+    @JsonIgnore
+    private String password;
 }
