@@ -44,6 +44,7 @@ import static java.util.stream.Collectors.*;
 @Slf4j
 @Singleton
 public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
+    private final ApplicationEvents applicationEvents;
     private final AuthService authService;
     private final SilkCarRecordService silkCarRecordService;
     private final DyeingService dyeingService;
@@ -58,7 +59,8 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private SilkCarRuntimeServiceImpl(AuthService authService, SilkCarRecordService silkCarRecordService, DyeingService dyeingService, WorkshopRepository workshopRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkCarRecordRepository silkCarRecordRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, SilkRepository silkRepository, DyeingSampleRepository dyeingSampleRepository, TemporaryBoxRecordRepository temporaryBoxRecordRepository, OperatorRepository operatorRepository) {
+    private SilkCarRuntimeServiceImpl(ApplicationEvents applicationEvents, AuthService authService, SilkCarRecordService silkCarRecordService, DyeingService dyeingService, WorkshopRepository workshopRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkCarRecordRepository silkCarRecordRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, SilkRepository silkRepository, DyeingSampleRepository dyeingSampleRepository, TemporaryBoxRecordRepository temporaryBoxRecordRepository, OperatorRepository operatorRepository) {
+        this.applicationEvents = applicationEvents;
         this.authService = authService;
         this.silkCarRecordService = silkCarRecordService;
         this.dyeingService = dyeingService;
@@ -349,6 +351,43 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
     }
 
     @Override
+    public Completable handle(Principal principal, SilkCarRuntimeWeightEvent.Command command) {
+        final Single<SilkCarRuntimeWeightEvent> event$ = operatorRepository.find(principal).map(it -> {
+            final SilkCarRuntimeWeightEvent event = new SilkCarRuntimeWeightEvent();
+            event.setItems(command.getItems());
+            event.fire(it);
+            return event;
+        });
+        return event$.flatMapCompletable(event -> find(command.getSilkCarRecord()).flatMapCompletable(silkCarRuntime -> {
+            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+            if (silkCarRecord.getGrade().getSortBy() >= 100) {
+                throw new RuntimeException("定重丝车无需称重！");
+            }
+            final Collection<SilkRuntime> silkRuntimes = silkCarRuntime.getSilkRuntimes();
+            final List<Completable> saveSilkCompletables = command.getItems().parallelStream().flatMap(item -> silkRuntimes.parallelStream().filter(silkRuntime -> {
+                final Silk silk = silkRuntime.getSilk();
+                return Objects.equals(silk.getLineMachine().getId(), item.getLineMachine().getId())
+                        && Objects.equals(silk.getDoffingNum(), item.getDoffingNum());
+            }).map(silkRuntime -> {
+                final Silk silk = silkRuntime.getSilk();
+                final Batch batch = silk.getBatch();
+                if (item.getWeight() > batch.getSilkWeight()) {
+                    throw new RuntimeException("丝锭重量[" + item.getWeight() + "]大于锭重[" + batch.getSilkWeight() + "]！");
+                }
+                silk.setWeight(item.getWeight());
+                return silkRepository.save(silk).ignoreElement();
+            })).collect(toList());
+            if (silkRuntimes.size() != saveSilkCompletables.size()) {
+                throw new RuntimeException("称重颗数有误！");
+            }
+            final Completable saveSilks$ = Completable.merge(saveSilkCompletables);
+            final Completable checkRole$ = authService.checkRole(event.getOperator(), RoleType.INSPECTION);
+            final Completable addEventSource$ = silkCarRuntimeRepository.addEventSource(silkCarRecord, event);
+            return checkRole$.andThen(saveSilks$).andThen(addEventSource$);
+        }));
+    }
+
+    @Override
     public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommand command) {
         final Single<SilkCar> silkCar$ = silkCarRepository.findByCode(command.getSilkCar().getCode());
         final Single<Workshop> workshop$ = workshopRepository.find(command.getWorkshop().getId());
@@ -403,7 +442,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 checkSilkDuplicate(silkRuntimes),
                 handlePrevSilkCarData(silkCar)
         );
-        return checks$.andThen(result$);
+        return checks$.andThen(result$).doOnSuccess(it -> applicationEvents.fire(silkCar.getCode(), event));
     }
 
     @Override
@@ -537,7 +576,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
                 // todo 满车才能拼车
                 handlePrevSilkCarData(silkCar)
         );
-        return checks$.andThen(result$);
+        return checks$.andThen(result$).doOnSuccess(it -> applicationEvents.fire(silkCar.getCode(), event));
     }
 
     private Completable checkSilkDuplicate(Collection<SilkRuntime> silkRuntimes) {

@@ -125,4 +125,6 @@ public interface SilkCarRuntimeService {
     Completable delete(Principal principal, SilkCarRuntimeDeleteCommand command);
 
     Completable flip(Principal principal, SilkCarRuntimeFlipCommand command);
+
+    Completable handle(Principal principal, SilkCarRuntimeWeightEvent.Command command);
 }

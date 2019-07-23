@@ -4,13 +4,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
+import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
 import com.hengyi.japp.mes.auto.repository.DyeingPrepareRepository;
 import com.hengyi.japp.mes.auto.search.lucene.DyeingPrepareLucene;
+import com.mongodb.client.model.Filters;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.search.Sort;
@@ -34,6 +37,14 @@ public class DyeingPrepareRepositoryMongo extends MongoEntityRepository<DyeingPr
     @Override
     public Single<DyeingPrepare> save(DyeingPrepare dyeingPrepare) {
         return super.save(dyeingPrepare).doOnSuccess(dyeingPrepareLucene::index);
+    }
+
+    @Override
+    public Flowable<DyeingPrepare> qeryBySilkCarRecordId(String id) {
+        final JsonObject query = MongoUtil.unDeletedQuery(Filters.eq("silkCarRecord", id));
+        return mongoClient.rxFind(collectionName, query)
+                .flatMapPublisher(Flowable::fromIterable)
+                .flatMapSingle(this::rxCreateMongoEntiy);
     }
 
     @Override

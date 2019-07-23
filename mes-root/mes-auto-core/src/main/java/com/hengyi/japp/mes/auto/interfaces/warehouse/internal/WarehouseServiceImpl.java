@@ -121,7 +121,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         return Flowable.fromIterable(command.getItems()).flatMapSingle(item -> silkCarRuntimeService.find(item.getSilkCarRecord()).map(silkCarRuntime -> {
             final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
             final SilkCar silkCar = silkCarRecord.getSilkCar();
-            final Set<String> silkIds = item.getSilks().stream().map(EntityDTO::getId).collect(Collectors.toSet());
+            final Set<String> silkIds = item.getSilks().stream().map(EntityDTO::getId).collect(toSet());
             final List<SilkRuntime> silkRuntimes = silkCarRuntime.getSilkRuntimes().stream()
                     .filter(it -> silkIds.contains(it.getSilk().getId()))
                     .collect(Collectors.toList());
