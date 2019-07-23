@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.OperatorService;
 import com.hengyi.japp.mes.auto.application.command.OperatorCreateCommand;
 import com.hengyi.japp.mes.auto.application.command.OperatorPermissionUpdateCommand;
+import com.hengyi.japp.mes.auto.application.command.OperatorUpdateCommand;
 import com.hengyi.japp.mes.auto.application.command.PasswordChangeCommand;
 import com.hengyi.japp.mes.auto.application.query.OperatorQuery;
 import com.hengyi.japp.mes.auto.domain.Operator;
@@ -54,6 +55,12 @@ public class OperatorResource {
     @PUT
     public Single<Operator> update(Principal principal, @PathParam("id") @NotBlank String id, OperatorPermissionUpdateCommand command) {
         return operatorService.update(principal, id, command);
+    }
+
+    @Path("operators/{id}/info")
+    @PUT
+    public Single<Operator> updateInfo(Principal principal, @PathParam("id") @NotBlank String id, OperatorUpdateCommand command) {
+        return operatorService.updateInfo(principal, id, command);
     }
 
     @Path("operators/{id}/password")

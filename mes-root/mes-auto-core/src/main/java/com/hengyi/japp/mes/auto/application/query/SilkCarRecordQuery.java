@@ -26,7 +26,7 @@ public class SilkCarRecordQuery {
     @Getter
     private final String silkCarCode;//丝车编码
     @Getter
-    private final String workShopId;
+    private final String workshopId;
 
     @Builder
     public static class Result {

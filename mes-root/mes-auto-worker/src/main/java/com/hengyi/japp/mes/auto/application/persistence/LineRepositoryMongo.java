@@ -6,7 +6,6 @@ import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityReposit
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.query.LineQuery;
 import com.hengyi.japp.mes.auto.domain.Line;
-import com.hengyi.japp.mes.auto.domain.Workshop;
 import com.hengyi.japp.mes.auto.repository.LineRepository;
 import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
@@ -22,6 +21,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
@@ -34,6 +34,13 @@ public class LineRepositoryMongo extends MongoEntityRepository<Line> implements 
     @Inject
     private LineRepositoryMongo(MongoEntiyManager mongoEntiyManager) {
         super(mongoEntiyManager);
+    }
+
+    @Override
+    public Single<Line> findByName(String lineName) {
+        final JsonObject query = unDeletedQuery(eq("name", lineName));
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .flatMapSingle(this::rxCreateMongoEntiy);
     }
 
     @Override
@@ -60,7 +67,7 @@ public class LineRepositoryMongo extends MongoEntityRepository<Line> implements 
 
         final Bson workshopFilter = Optional.ofNullable(lineQuery.getWorkshopId())
                 .filter(StringUtils::isNotBlank)
-                .map(workshopId -> Filters.eq("workshop", workshopId))
+                .map(workshopId -> eq("workshop", workshopId))
                 .orElse(null);
         final Bson qFilter = Optional.ofNullable(lineQuery.getQ())
                 .filter(StringUtils::isNotBlank)
@@ -87,15 +94,10 @@ public class LineRepositoryMongo extends MongoEntityRepository<Line> implements 
 
     @Override
     public Flowable<Line> listByWorkshopId(String id) {
-        final JsonObject query = unDeletedQuery(Filters.eq("workshop", id));
+        final JsonObject query = unDeletedQuery(eq("workshop", id));
         return mongoClient.rxFind(collectionName, query)
                 .flatMapPublisher(Flowable::fromIterable)
                 .flatMapSingle(this::rxCreateMongoEntiy);
-    }
-
-    @Override
-    public Flowable<Line> listBy(Workshop workshop) {
-        return listByWorkshopId(workshop.getId());
     }
 
 }

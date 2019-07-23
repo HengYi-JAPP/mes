@@ -1,9 +1,6 @@
 package com.hengyi.japp.mes.auto.application;
 
-import com.hengyi.japp.mes.auto.application.command.OperatorCreateCommand;
-import com.hengyi.japp.mes.auto.application.command.OperatorImportCommand;
-import com.hengyi.japp.mes.auto.application.command.OperatorPermissionUpdateCommand;
-import com.hengyi.japp.mes.auto.application.command.PasswordChangeCommand;
+import com.hengyi.japp.mes.auto.application.command.*;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -22,4 +19,6 @@ public interface OperatorService {
     Single<Operator> update(Principal principal, String id, OperatorPermissionUpdateCommand command);
 
     Completable password(String id, PasswordChangeCommand command);
+
+    Single<Operator> updateInfo(Principal principal, String id, OperatorUpdateCommand command);
 }

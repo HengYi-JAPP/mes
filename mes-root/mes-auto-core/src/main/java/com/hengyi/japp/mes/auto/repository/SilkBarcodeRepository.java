@@ -9,6 +9,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 
+import java.security.Principal;
 import java.time.LocalDate;
 
 /**
@@ -46,4 +47,6 @@ public interface SilkBarcodeRepository {
     void index(SilkBarcode silkBarcode);
 
     Completable delete(String id);
+
+    Single<SilkBarcode> findByAuto(Principal principal, LineMachine lineMachine, Batch batch, long timestamp);
 }

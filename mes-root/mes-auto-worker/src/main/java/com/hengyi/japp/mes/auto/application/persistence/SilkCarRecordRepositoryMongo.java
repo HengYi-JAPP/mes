@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
-import com.hengyi.japp.mes.auto.application.query.SilkCarRecordByWorkshopQuery;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
@@ -14,7 +13,9 @@ import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkCarRecordLucene;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonObject;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -52,16 +53,6 @@ public class SilkCarRecordRepositoryMongo extends MongoEntityRepository<SilkCarR
                 .map(silkBarcodes -> builder.silkCarRecords(silkBarcodes).build());
     }
 
-    @Override
-    public Flowable<String> listByWorkshop(SilkCarRecordByWorkshopQuery silkCarRecordByWorkshopQuery) {
-        return Single.just(silkCarRecordByWorkshopQuery)
-                .map(lucene::buildRecordByWorkshop)
-                .map(it -> lucene.baseQuery(it))
-                .flatMapPublisher(Flowable::fromIterable)
-                .flatMapSingle(this::find)
-                .map(silkCarRecord -> silkCarRecord.getId());
-    }
-
     @SneakyThrows
     @Override
     public void index(SilkCarRecord silkCarRecord) {
@@ -80,6 +71,19 @@ public class SilkCarRecordRepositoryMongo extends MongoEntityRepository<SilkCarR
                 .map(SilkRuntime::getSilk)
                 .flatMapCompletable(silkRepository::delete);
         return Completable.mergeArray(delSilkCarRecord$, delSilks$);
+    }
+
+    @Override
+    public Maybe<SilkCarRecord> findByAutoId(String id) {
+        final JsonObject query = new JsonObject().put("_id", id);
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .toSingle(new JsonObject())
+                .flatMapMaybe(it -> {
+                    if (it.isEmpty()) {
+                        return Maybe.empty();
+                    }
+                    return rxCreateMongoEntiy(it).toMaybe();
+                });
     }
 
 }

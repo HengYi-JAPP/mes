@@ -22,8 +22,6 @@ public interface SilkRepository {
 
     Single<SilkQuery.Result> query(SilkQuery silkQuery);
 
-    Single<SilkQuery.Result> queryReport(SilkQuery silkQuery);
-
     Flowable<Silk> list();
 
     void index(Silk silk);
@@ -31,4 +29,6 @@ public interface SilkRepository {
     Completable delete(Silk silk);
 
     Silk find_(String id);
+
+    Single<Silk> findByCodeOrCreate(String code);
 }

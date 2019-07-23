@@ -13,6 +13,4 @@ public class PrinterConfig {
     private String id;
     @NotBlank
     private String name;
-//    @NotBlank
-//    private String localname;
 }

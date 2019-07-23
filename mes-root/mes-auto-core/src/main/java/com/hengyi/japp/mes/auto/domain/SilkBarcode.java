@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
  * 落次编码，数值类型全部36进制
  * 生成规则：
  * 4位日期        数值类型： 初始2018-11-11，相差天数，36进制
- * 5位落次        数值类型： 落次流水号，按天自增，16进制
+ * 5位落次        数值类型： 落次流水号，按天自增，36进制
  * <p>
  * 丝锭条码
  * 2位锭号        数值类型，10进制
@@ -61,6 +61,10 @@ public class SilkBarcode extends LoggableMongoEntity {
      */
     @ToString.Include
     private String doffingNum;
+    /**
+     * 自动落筒时间戳
+     */
+    private long autoDoffingTimestamp;
     private Batch batch;
     /**
      * 是否使用，在 check 贴标 的时候更新

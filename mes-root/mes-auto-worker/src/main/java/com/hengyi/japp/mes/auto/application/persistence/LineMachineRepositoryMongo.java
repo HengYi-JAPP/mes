@@ -34,11 +34,6 @@ public class LineMachineRepositoryMongo extends MongoEntityRepository<LineMachin
     }
 
     @Override
-    public Flowable<LineMachine> listBy(Line line) {
-        return listByLineId(line.getId());
-    }
-
-    @Override
     public Single<LineMachine> findBy(Line line, int item) {
         final JsonObject query = MongoUtil.unDeletedQuery(eq("line", line.getId()), eq("item", item));
         return mongoClient.rxFindOne(collectionName, query, new JsonObject())

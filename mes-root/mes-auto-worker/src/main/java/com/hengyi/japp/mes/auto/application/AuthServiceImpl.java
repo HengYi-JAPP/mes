@@ -57,7 +57,6 @@ public class AuthServiceImpl implements AuthService {
                     .setSubject(operator.getId())
                     .setAlgorithm(JWT_ALGORITHM)
                     .setIssuer("japp-mes-auto");
-//                    .setExpiresInMinutes((int) TimeUnit.HOURS.toMinutes(12));
             final JsonObject claims = new JsonObject().put("uid", operator.getId());
             return jwtAuth.generateToken(claims, options);
         }).toSingle();

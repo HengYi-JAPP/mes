@@ -10,13 +10,13 @@ import io.reactivex.Single;
  */
 public interface WorkshopRepository {
 
+    Single<Workshop> find(String id);
+
     Single<Workshop> find(EntityDTO workshop);
 
     Single<Workshop> create();
 
     Single<Workshop> save(Workshop workshop);
-
-    Single<Workshop> find(String id);
 
     Flowable<Workshop> list();
 }

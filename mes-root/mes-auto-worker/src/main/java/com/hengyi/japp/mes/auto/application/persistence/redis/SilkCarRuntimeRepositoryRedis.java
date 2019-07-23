@@ -5,6 +5,7 @@ import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.ApplicationEvents;
 import com.hengyi.japp.mes.auto.application.DyeingService;
 import com.hengyi.japp.mes.auto.application.event.DyeingPrepareEvent;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
@@ -31,12 +32,14 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Slf4j
 @Singleton
 public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
+    private final ApplicationEvents applicationEvents;
     private final RedisClient redisClient;
     private final SilkCarRecordRepository silkCarRecordRepository;
     private final SilkRepository silkRepository;
 
     @Inject
-    private SilkCarRuntimeRepositoryRedis(RedisClient redisClient, SilkCarRecordRepository silkCarRecordRepository, SilkRepository silkRepository) {
+    private SilkCarRuntimeRepositoryRedis(ApplicationEvents applicationEvents, RedisClient redisClient, SilkCarRecordRepository silkCarRecordRepository, SilkRepository silkRepository) {
+        this.applicationEvents = applicationEvents;
         this.redisClient = redisClient;
         this.silkCarRecordRepository = silkCarRecordRepository;
         this.silkRepository = silkRepository;
@@ -192,7 +195,7 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
         }).flatMapCompletable(it -> {
             final String redisKey = SilkCarRuntimeRepository.redisKey(code);
             return redisClient.rxHmset(redisKey, it).ignoreElement();
-        });
+        }).doOnComplete(() -> applicationEvents.fire(code, eventSource));
     }
 
     @Override

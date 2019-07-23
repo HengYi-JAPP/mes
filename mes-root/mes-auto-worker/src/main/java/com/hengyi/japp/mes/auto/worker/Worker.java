@@ -50,6 +50,12 @@ public class Worker {
         }).subscribe();
     }
 
+//    private static Single<String> deployRuiguan(Vertx vertx) {
+//        final DeploymentOptions deploymentOptions = new DeploymentOptions()
+//                .setWorker(true);
+//        return vertx.rxDeployVerticle(RuiguanAutoDoffingVerticle.class.getName(), deploymentOptions);
+//    }
+
     private static Single<String> deployWorker(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()
                 .setInstances(1000)

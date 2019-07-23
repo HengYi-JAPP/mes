@@ -10,7 +10,6 @@ import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.exception.JJsonEntityNotExsitException;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkLucene;
-import com.mongodb.client.model.Filters;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
@@ -21,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
+import static com.mongodb.client.model.Filters.eq;
 
 /**
  * @author jzb 2018-06-24
@@ -43,13 +43,21 @@ public class SilkRepositoryMongo extends MongoEntityRepository<Silk> implements 
 
     @Override
     public Maybe<Silk> findByCode(String code) {
-        final JsonObject query = unDeletedQuery(Filters.eq("code", code));
+        final JsonObject query = unDeletedQuery(eq("code", code));
         return mongoClient.rxFind(collectionName, query).flatMapMaybe(list -> {
             if (J.isEmpty(list)) {
                 return Maybe.empty();
             }
             return rxCreateMongoEntiy(list.get(0)).toMaybe();
         });
+    }
+
+    @Override
+    public Single<Silk> findByCodeOrCreate(String code) {
+        final JsonObject query = unDeletedQuery(eq("code", code));
+        return mongoClient.rxFindOne(collectionName, query, new JsonObject())
+                .switchIfEmpty(Single.just(new JsonObject()))
+                .flatMap(this::rxCreateMongoEntiy);
     }
 
     @Override
@@ -60,31 +68,6 @@ public class SilkRepositoryMongo extends MongoEntityRepository<Silk> implements 
 
         return Single.just(silkQuery)
                 .map(silkLucene::build)
-                .map(it -> silkLucene.baseQuery(it, first, pageSize))
-                .doOnSuccess(it -> builder.count(it.getKey()))
-                .map(Pair::getValue)
-                .flatMapPublisher(Flowable::fromIterable)
-                .flatMapSingle(this::find)
-                .onErrorReturn(ex -> {
-                    if (ex instanceof JJsonEntityNotExsitException) {
-                        final JJsonEntityNotExsitException entityNotExsitException = (JJsonEntityNotExsitException) ex;
-                        silkLucene.delete(entityNotExsitException.getId());
-                        return new Silk();
-                    }
-                    throw new RuntimeException(ex);
-                })
-                .toList()
-                .map(silks -> builder.silks(silks).build());
-    }
-
-    @Override
-    public Single<SilkQuery.Result> queryReport(SilkQuery silkQuery) {
-        final int first = silkQuery.getFirst();
-        final int pageSize = silkQuery.getPageSize();
-        final SilkQuery.Result.ResultBuilder builder = SilkQuery.Result.builder().first(first).pageSize(pageSize);
-
-        return Single.just(silkQuery)
-                .map(silkLucene::buildReport)
                 .map(it -> silkLucene.baseQuery(it, first, pageSize))
                 .doOnSuccess(it -> builder.count(it.getKey()))
                 .map(Pair::getValue)

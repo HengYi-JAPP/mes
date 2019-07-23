@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
@@ -108,6 +109,44 @@ public class SilkCarRuntimeInitEvent extends EventSource {
         @NotNull
         @Size(min = 1)
         private List<EntityByCodeDTO> checkSilks;
+    }
+
+    @Data
+    public static class RuiguanAutoDoffingCommand implements Serializable {
+        private String id;
+        private String line;
+        private String principalName;
+        private Date createDateTime;
+        private SilkCarInfo silkCarInfo;
+        private Collection<SilkInfo> silkInfos;
+
+        /**
+         * @author jzb 2019-03-09
+         */
+        @Data
+        public static class SilkCarInfo implements Serializable {
+            private String code;
+            private int row;
+            private int col;
+            private String batchNo;
+            private String batchSpec;
+            private String grade;
+        }
+
+        /**
+         * @author jzb 2019-03-09
+         */ // { "line":"C5", "lineMachine":47, "spindle":1, "timestamp":1552038447 }
+        @Data
+        public static class SilkInfo implements Serializable {
+            private SilkCarSideType sideType;
+            private int row;
+            private int col;
+            private String line;
+            private int lineMachine;
+            private int spindle;
+            private long timestamp;
+            private Date doffingDateTime;
+        }
     }
 
     @Data

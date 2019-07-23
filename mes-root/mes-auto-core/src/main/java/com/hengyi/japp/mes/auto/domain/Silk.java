@@ -58,5 +58,7 @@ public class Silk extends MongoEntity {
     @JsonIgnore
     private PackageBox packageBox;
     private Date packageDateTime;
+    // 外观称重
+    private double weight;
 
 }

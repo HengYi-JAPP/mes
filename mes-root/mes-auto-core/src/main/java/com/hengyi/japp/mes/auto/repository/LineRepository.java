@@ -26,7 +26,11 @@ public interface LineRepository {
 
     Flowable<Line> listByWorkshopId(String id);
 
-    Flowable<Line> listBy(Workshop workshop);
+    default Flowable<Line> listBy(Workshop workshop) {
+        return listByWorkshopId(workshop.getId());
+    }
 
     Flowable<Line> list();
+
+    Single<Line> findByName(String lineName);
 }

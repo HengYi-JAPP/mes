@@ -4,10 +4,7 @@ import com.github.ixtf.japp.codec.Jcodec;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hengyi.japp.mes.auto.application.command.OperatorCreateCommand;
-import com.hengyi.japp.mes.auto.application.command.OperatorImportCommand;
-import com.hengyi.japp.mes.auto.application.command.OperatorPermissionUpdateCommand;
-import com.hengyi.japp.mes.auto.application.command.PasswordChangeCommand;
+import com.hengyi.japp.mes.auto.application.command.*;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.OperatorGroup;
 import com.hengyi.japp.mes.auto.domain.Permission;
@@ -120,6 +117,16 @@ public class OperatorServiceImpl implements OperatorService {
             }
             throw new RuntimeException();
         }).ignoreElement();
+    }
+
+    @Override
+    public Single<Operator> updateInfo(Principal principal, String id, OperatorUpdateCommand command) {
+        return operatorRepository.find(id).flatMap(operator -> {
+            operator.setName(command.getName());
+            operator.setHrId(command.getHrId());
+            operator.setOaId(command.getOaId());
+            return operatorRepository.save(operator);
+        });
     }
 
 }

@@ -4,17 +4,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
-import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
-import com.hengyi.japp.mes.auto.application.query.DyeingPrepareReportQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
 import com.hengyi.japp.mes.auto.repository.DyeingPrepareRepository;
 import com.hengyi.japp.mes.auto.search.lucene.DyeingPrepareLucene;
-import com.mongodb.client.model.Filters;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.lucene.search.Sort;
@@ -38,14 +34,6 @@ public class DyeingPrepareRepositoryMongo extends MongoEntityRepository<DyeingPr
     @Override
     public Single<DyeingPrepare> save(DyeingPrepare dyeingPrepare) {
         return super.save(dyeingPrepare).doOnSuccess(dyeingPrepareLucene::index);
-    }
-
-    @Override
-    public Flowable<DyeingPrepare> qeryBySilkCarRecordId(String id) {
-        final JsonObject query = MongoUtil.unDeletedQuery(Filters.eq("silkCarRecord", id));
-        return mongoClient.rxFind(collectionName, query)
-                .flatMapPublisher(Flowable::fromIterable)
-                .flatMapSingle(this::rxCreateMongoEntiy);
     }
 
     @Override
@@ -73,23 +61,6 @@ public class DyeingPrepareRepositoryMongo extends MongoEntityRepository<DyeingPr
         final Sort sort = new Sort(new SortedNumericSortField("createDateTime", SortField.Type.LONG, true));
 
         return Single.just(dyeingPrepareResultQuery)
-                .map(dyeingPrepareLucene::build)
-                .map(it -> dyeingPrepareLucene.baseQuery(it, first, pageSize, sort))
-                .doOnSuccess(it -> builder.count(it.getKey()))
-                .map(Pair::getValue)
-                .flatMapPublisher(Flowable::fromIterable)
-                .flatMapSingle(this::find).toList()
-                .map(dyeingPrepares -> builder.dyeingPrepares(dyeingPrepares).build());
-    }
-
-    @Override
-    public Single<DyeingPrepareReportQuery.Result> query(DyeingPrepareReportQuery dyeingPrepareReportQuery) {
-        final int first = dyeingPrepareReportQuery.getFirst();
-        final int pageSize = dyeingPrepareReportQuery.getPageSize();
-        final DyeingPrepareReportQuery.Result.ResultBuilder builder = DyeingPrepareReportQuery.Result.builder().first(first).pageSize(pageSize);
-        final Sort sort = new Sort(new SortedNumericSortField("createDateTime", SortField.Type.LONG, true));
-
-        return Single.just(dyeingPrepareReportQuery)
                 .map(dyeingPrepareLucene::build)
                 .map(it -> dyeingPrepareLucene.baseQuery(it, first, pageSize, sort))
                 .doOnSuccess(it -> builder.count(it.getKey()))

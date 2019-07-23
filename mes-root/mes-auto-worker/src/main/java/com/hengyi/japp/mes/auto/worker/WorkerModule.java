@@ -78,9 +78,13 @@ public class WorkerModule extends AbstractModule {
         bind(PackageBoxService.class).to(PackageBoxServiceImpl.class);
         bind(SapService.class).to(SapServiceImpl.class);
         bind(SapT001lService.class).to(SapT001lServiceImpl.class);
+        bind(DoffingSpecService.class).to(DoffingSpecServiceCustom.class);
         bind(SilkBarcodeGenerateTemplateService.class).to(SilkBarcodeGenerateTemplateServiceImpl.class);
         bind(ExceptionRecordService.class).to(ExceptionRecordServiceImpl.class);
         bind(NotificationService.class).to(NotificationServiceImpl.class);
+
+//        bind(DictionaryService.class).to(DictionaryServiceImpl.class);
+//        bind(DictionaryRepository.class).to(DictionaryRepositoryMongo.class);
 
         bind(OperatorRepository.class).to(OperatorRepositoryMongo.class);
         bind(OperatorGroupRepository.class).to(OperatorGroupRepositoryMongo.class);
