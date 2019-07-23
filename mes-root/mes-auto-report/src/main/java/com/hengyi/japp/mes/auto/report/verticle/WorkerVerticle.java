@@ -3,7 +3,6 @@ package com.hengyi.japp.mes.auto.report.verticle;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
-import com.hengyi.japp.mes.auto.report.PackagePlanService;
 import com.hengyi.japp.mes.auto.report.application.*;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
@@ -33,7 +32,6 @@ public class WorkerVerticle extends AbstractVerticle {
     //    private StrippingReportService strippingReportService = INJECTOR.getInstance(StrippingReportService.class);
     private MeasureFiberReportService measureFiberReportService = INJECTOR.getInstance(MeasureFiberReportService.class);
     private SilkExceptionReportService silkExceptionReportService = INJECTOR.getInstance(SilkExceptionReportService.class);
-    private PackagePlanService packagePlanService = INJECTOR.getInstance(PackagePlanService.class);
 
     @Override
     public Completable rxStart() {
@@ -42,7 +40,6 @@ public class WorkerVerticle extends AbstractVerticle {
 //                vertx.eventBus().consumer("mes-auto:report:strippingReport", strippingReportService::strippingReport).rxCompletionHandler(),
                 vertx.eventBus().consumer("mes-auto:report:measureFiberReport", measureFiberReportService::measureFiberReport).rxCompletionHandler(),
                 vertx.eventBus().consumer("mes-auto:report:silkExceptionReport", silkExceptionReportService::silkExceptionReport).rxCompletionHandler(),
-                vertx.eventBus().consumer("mes-auto:report:packagePlanBoard", packagePlanService::packagePlanBoard).rxCompletionHandler(),
 
                 vertx.eventBus().<String>consumer("mes-auto:report:doffingSilkCarRecordReport", reply -> Single.just(reply.body()).map(MAPPER::readTree).map(jsonNode -> {
                             final SilkCarRecordQuery silkCarRecordQuery = SilkCarRecordQuery.builder()

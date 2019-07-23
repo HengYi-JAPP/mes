@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.*;
 
 import java.util.Collection;
 import java.util.Optional;
