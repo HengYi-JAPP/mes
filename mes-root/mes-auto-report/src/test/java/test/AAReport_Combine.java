@@ -22,7 +22,8 @@ public class AAReport_Combine {
     @SneakyThrows
     public static void main(String[] args) {
         final String[] extensions = {"xlsx"};
-        final Collection<File> files = FileUtils.listFiles(FileUtils.getFile("/home/jzb/C车间7月"), extensions, false);
+//        final Collection<File> files = FileUtils.listFiles(FileUtils.getFile("/home/jzb/C车间7月"), extensions, false);
+        final Collection<File> files = FileUtils.listFiles(FileUtils.getFile("/home/jzb/F.7"), extensions, false);
         final StatisticReportCombine report = new StatisticReportCombine(files);
         @Cleanup final Workbook wb = new XSSFWorkbook();
         PoiUtil.fillSheet1(wb.createSheet(), report);
