@@ -39,6 +39,7 @@ public abstract class AbstractStatisticReport implements Serializable {
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     public static class Item implements Serializable {
         @Getter
+        @EqualsAndHashCode.Include
         private boolean bigSilkCar;
         @EqualsAndHashCode.Include
         private LineDTO line;

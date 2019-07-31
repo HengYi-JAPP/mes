@@ -42,12 +42,12 @@ public class AAReport_3000 {
 //        final LocalDate endLd = LocalDate.of(2019, 3, 31);
         final Workshop workshop = Workshops.C;
         final LocalDate startLd = LocalDate.of(2019, 7, 1);
-        final LocalDate endLd = LocalDate.of(2019, 7, 7);
+        final LocalDate endLd = LocalDate.of(2019, 7, 31);
         final Collection<StatisticReportDay> days = Stream.iterate(startLd, d -> d.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(startLd, endLd) + 1).parallel()
                 .map(it -> statisticReportService.generate(workshop.getId(), it).block())
                 .collect(toList());
-        days.parallelStream().forEach(StatisticReportDay::testXlsx);
+//        days.parallelStream().forEach(StatisticReportDay::testXlsx);
 
         final StatisticReportDay day = IterableUtils.get(days, 0);
         final StatisticReportRange range = new StatisticReportRange(day.getWorkshop(), startLd, endLd, days);
