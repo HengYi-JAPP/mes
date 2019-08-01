@@ -14,7 +14,6 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
@@ -24,9 +23,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author jzb 2019-03-17
  */
-public class Auto9200D1_2 {
+public class Auto9200D1 {
     public static void main(String[] args) {
-        Stream.of("D1", "D2").forEach(Auto9200D1_2::doffingSpec);
+        Stream.of("D1").forEach(Auto9200D1::doffingSpec);
     }
 
     @SneakyThrows
@@ -56,7 +55,7 @@ public class Auto9200D1_2 {
                 return silkCarPosition;
             }).filter(it -> {
                 final int col = it.getCol();
-                if (col == 3) {
+                if (col == 4) {
                     return false;
                 }
                 return true;
@@ -84,13 +83,14 @@ public class Auto9200D1_2 {
         result.setSpindleNum(spindleNum);
         final List<LineMachineSilkSpec> lineMachineSilkSpecs = Lists.newArrayList();
         result.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        IntStream.rangeClosed(1, 5).forEach(col -> {
-            lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, orderBy, col, col));
-        });
-        IntStream.rangeClosed(1, 5).forEach(col -> {
-            final int spindle = col + 5;
+        for (int col = 6; col >= 2; col--) {
+            final int spindle = 6 - col + 1;
+            lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, orderBy, col, spindle));
+        }
+        for (int col = 6; col >= 2; col--) {
+            final int spindle = 12 - col;
             lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, orderBy, col, spindle));
-        });
+        }
         return result;
     }
 

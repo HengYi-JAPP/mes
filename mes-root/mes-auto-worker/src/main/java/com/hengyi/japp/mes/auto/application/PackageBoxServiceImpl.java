@@ -160,6 +160,17 @@ public class PackageBoxServiceImpl implements PackageBoxService {
         return auth$.andThen(result$);
     }
 
+    @Override
+    public Completable unInWarehouse(Principal principal, String id) {
+        return packageBoxRepository.find(id).flatMap(packageBox -> {
+            packageBox.setInWarehouse(false);
+            return operatorRepository.find(principal).flatMap(operator -> {
+                packageBox.log(operator);
+                return packageBoxRepository.save(packageBox);
+            });
+        }).ignoreElement();
+    }
+
     private void checkConfig(Collection<SilkCarRuntime> silkCarRuntimes, SmallPackageBoxEvent.CommandConfig config) {
         final var silkCarCodes = silkCarRuntimes.parallelStream()
                 .filter(it -> J.emptyIfNull(it.getSilkRuntimes()).size() < 1)
