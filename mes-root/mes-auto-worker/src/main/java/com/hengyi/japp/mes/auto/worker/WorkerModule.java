@@ -84,6 +84,7 @@ public class WorkerModule extends AbstractModule {
         bind(SilkBarcodeGenerateTemplateService.class).to(SilkBarcodeGenerateTemplateServiceImpl.class);
         bind(ExceptionRecordService.class).to(ExceptionRecordServiceImpl.class);
         bind(NotificationService.class).to(NotificationServiceImpl.class);
+        bind(SilkCarRecordDestinationService.class).to(SilkCarRecordDestinationServiceImpl.class);
 
         bind(DictionaryService.class).to(DictionaryServiceImpl.class);
         bind(DictionaryRepository.class).to(DictionaryRepositoryMongo.class);
@@ -124,6 +125,7 @@ public class WorkerModule extends AbstractModule {
         bind(SilkBarcodeGenerateTemplateRepository.class).to(SilkBarcodeGenerateTemplateRepositoryMongo.class);
         bind(ExceptionRecordRepository.class).to(ExceptionRecordRepositoryMongo.class);
         bind(NotificationRepository.class).to(NotificationRepositoryMongo.class);
+        bind(SilkCarRecordDestinationRepository.class).to(SilkCarRecordDestinationRepositoryMongo.class);
 
         bind(RuiguanService.class).to(RuiguanServiceImpl.class);
         bind(RiambService.class).to(RiambServiceImpl.class);

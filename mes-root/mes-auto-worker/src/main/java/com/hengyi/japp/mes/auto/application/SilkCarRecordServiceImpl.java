@@ -37,6 +37,7 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     private final AuthService authService;
     private final DoffingSpecService doffingSpecService;
     private final SilkCarRecordRepository silkCarRecordRepository;
+    private final SilkCarRecordDestinationRepository silkCarRecordDestinationRepository;
     private final LineRepository lineRepository;
     private final SilkCarRepository silkCarRepository;
     private final GradeRepository gradeRepository;
@@ -46,10 +47,11 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private SilkCarRecordServiceImpl(AuthService authService, DoffingSpecService doffingSpecService, SilkCarRecordRepository silkCarRecordRepository, LineRepository lineRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkBarcodeRepository silkBarcodeRepository, SilkRepository silkRepository, OperatorRepository operatorRepository) {
+    private SilkCarRecordServiceImpl(AuthService authService, DoffingSpecService doffingSpecService, SilkCarRecordRepository silkCarRecordRepository, SilkCarRecordDestinationRepository silkCarRecordDestinationRepository, LineRepository lineRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkBarcodeRepository silkBarcodeRepository, SilkRepository silkRepository, OperatorRepository operatorRepository) {
         this.authService = authService;
         this.doffingSpecService = doffingSpecService;
         this.silkCarRecordRepository = silkCarRecordRepository;
+        this.silkCarRecordDestinationRepository = silkCarRecordDestinationRepository;
         this.lineRepository = lineRepository;
         this.silkCarRepository = silkCarRepository;
         this.gradeRepository = gradeRepository;
@@ -173,7 +175,12 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             if (!"POY".equals(product.getName())) {
                 throw new RuntimeException("POY可以推加弹确认！");
             }
-            return event$.flatMapCompletable(event -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event));
+            final Completable saveDestination$ = silkCarRecordDestinationRepository.find(command.getDestination()).flatMap(silkCarRecordDestination -> {
+                silkCarRecord.setDestination(silkCarRecordDestination);
+                return silkCarRecordRepository.save(silkCarRecord);
+            }).ignoreElement();
+            final Completable saveEvent$ = event$.flatMapCompletable(event -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event));
+            return saveEvent$.andThen(saveDestination$);
         });
     }
 
