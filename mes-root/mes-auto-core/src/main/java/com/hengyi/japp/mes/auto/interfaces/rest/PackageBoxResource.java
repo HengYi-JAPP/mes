@@ -87,6 +87,12 @@ public class PackageBoxResource {
         return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecords()));
     }
 
+    @Path("packageBoxes/{id}/silkCarRecordsSmall")
+    @GET
+    public Flowable<SilkCarRecord> silkCarRecordsSmall(@PathParam("id") String id) {
+        return packageBoxRepository.find(id).flattenAsFlowable(it -> J.emptyIfNull(it.getSilkCarRecordsSmall()));
+    }
+
     @Path("packageBoxes/{id}")
     @DELETE
     public Completable delete(Principal principal, @PathParam("id") String id) {
@@ -109,6 +115,12 @@ public class PackageBoxResource {
     @PUT
     public Single<PackageBox> list(Principal principal, @PathParam("id") String id, PackageBoxMeasureInfoUpdateCommand command) {
         return packageBoxService.update(principal, id, command);
+    }
+
+    @Path("packageBoxes/{id}/inWarehouse")
+    @DELETE
+    public Completable unInWarehouse(Principal principal, @PathParam("id") String id) {
+        return packageBoxService.unInWarehouse(principal, id);
     }
 
     /**
@@ -171,6 +183,7 @@ public class PackageBoxResource {
                                                                  @QueryParam("gradeId") String gradeId,
                                                                  @QueryParam("batchId") String batchId,
                                                                  @QueryParam("productId") String productId,
+                                                                 @QueryParam("automaticPackeLine") String automaticPackeLine,
                                                                  @QueryParam("creatorId") String creatorId) {
         final LocalDate startLd = Optional.ofNullable(startDate)
                 .filter(J::nonBlank)
@@ -193,6 +206,7 @@ public class PackageBoxResource {
                 .workshopId(workshopId)
                 .gradeId(gradeId)
                 .batchId(batchId)
+                .automaticPackeLine(automaticPackeLine)
                 .productId(productId)
                 .creatorId(creatorId)
                 .netWeight(netWeight)

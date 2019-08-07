@@ -11,13 +11,14 @@ import io.reactivex.Single;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.apache.commons.collections4.IterableUtils;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2018-07-29
@@ -34,9 +35,11 @@ public class SilkRuntime extends SilkCarPosition {
     private Grade grade;
     @JsonIgnore
     private DyeingResultCalcModel dyeingResultCalcModel = new DyeingResultCalcModel();
+    private DyeingResultInfo selfDyeingResultInfo;
     private DyeingResultInfo firstDyeingResultInfo;
     private DyeingResultInfo crossDyeingResultInfo;
     private DyeingResultInfo multiDyeingResultInfo;
+//    private DyeingResultInfo finalDyeingResultInfo;
 
     public void addExceptions(Collection<SilkException> silkExceptions) {
         exceptions = Sets.newHashSet(J.emptyIfNull(exceptions));
@@ -54,12 +57,15 @@ public class SilkRuntime extends SilkCarPosition {
     }
 
     public void calcDyeing() {
+        selfDyeingResultInfo = dyeingResultCalcModel.getSelfDyeingResultInfo(this);
         firstDyeingResultInfo = dyeingResultCalcModel.getFirstDyeingResultInfo();
         crossDyeingResultInfo = dyeingResultCalcModel.getCrossDyeingResultInfo();
     }
 
     @Data
     public static class DyeingResultCalcModel implements Serializable {
+        // 这辆车自身的染判结果
+        private Collection<DyeingResult> selfDyeingResults;
         private Collection<DyeingResult> dyeingResults;
 
         public void add(DyeingResult dyeingResult) {
@@ -68,6 +74,38 @@ public class SilkRuntime extends SilkCarPosition {
             } else {
                 dyeingResults.add(dyeingResult);
             }
+        }
+
+        public DyeingResultInfo getSelfDyeingResultInfo(SilkRuntime silkRuntime) {
+            if (J.isEmpty(selfDyeingResults)) {
+                return null;
+            }
+            final List<DyeingResult> selecteds = selfDyeingResults.parallelStream()
+                    .filter(dyeingResult -> Objects.equals(silkRuntime.getSilk(), dyeingResult.getSilk()))
+                    .collect(toList());
+            if (J.isEmpty(selecteds)) {
+                return null;
+            }
+            final DyeingResultInfo dyeingResultInfo = new DyeingResultInfo();
+            final DyeingResult unSubmittedDyeingResult = selecteds.stream().filter(it -> !it.isSubmitted()).findFirst().orElse(null);
+            if (unSubmittedDyeingResult != null) {
+                dyeingResultInfo.setDyeingResult(unSubmittedDyeingResult);
+                return dyeingResultInfo;
+            }
+            final Grade grade = selecteds.parallelStream().min((o1, o2) -> {
+                final Integer sortBy1 = Optional.ofNullable(o1.getGrade()).map(Grade::getSortBy).orElse(0);
+                final Integer sortBy2 = Optional.ofNullable(o2.getGrade()).map(Grade::getSortBy).orElse(0);
+                return sortBy1 - sortBy2;
+            }).map(DyeingResult::getGrade).orElse(null);
+            dyeingResultInfo.setGrade(grade);
+            final DyeingResult exceptionDyeingResult = selecteds.stream().filter(it -> it.isHasException()).findFirst().orElse(null);
+            if (exceptionDyeingResult != null) {
+                dyeingResultInfo.setDyeingResult(exceptionDyeingResult);
+            } else {
+                final DyeingResult dyeingResult = IterableUtils.get(selecteds, 0);
+                dyeingResultInfo.setDyeingResult(dyeingResult);
+            }
+            return dyeingResultInfo;
         }
 
         public Grade minGrade() {

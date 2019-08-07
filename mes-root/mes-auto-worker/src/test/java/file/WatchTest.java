@@ -12,6 +12,7 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import lombok.SneakyThrows;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -24,6 +25,9 @@ import static com.hengyi.japp.mes.auto.worker.Worker.INJECTOR;
 public class WatchTest {
     @SneakyThrows
     public static void main(String[] args) {
+        final Date date = new Date(1564619835771l);
+        System.out.println(date);
+
         final VertxOptions vertxOptions = new VertxOptions().setMaxEventLoopExecuteTime(TimeUnit.DAYS.toNanos(1));
         final Vertx vertx = Vertx.vertx(vertxOptions);
         INJECTOR = Guice.createInjector(new GuiceModule(vertx), new WorkerModule());

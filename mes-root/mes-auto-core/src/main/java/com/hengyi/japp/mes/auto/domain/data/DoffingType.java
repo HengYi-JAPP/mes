@@ -20,4 +20,8 @@ public enum DoffingType {
      * 取样丝落筒
      */
     PHYSICAL_INFO,
+    /**
+     * 大丝车落筒
+     */
+    BIG_SILK_CAR,
 }

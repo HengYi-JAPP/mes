@@ -19,6 +19,12 @@ public class SilkCarQuery {
     private final int pageSize = 50;
     @Getter
     private final String q;
+    @Getter
+    private final String type;
+    @Getter
+    private final int row;
+    @Getter
+    private final int col;
 
     @Builder
     public static class Result {

@@ -6,6 +6,7 @@ import com.github.ixtf.japp.vertx.Jvertx;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import io.reactivex.Completable;
@@ -120,4 +121,14 @@ public class SilkCarRuntimeAppendEvent extends EventSource {
         }
     }
 
+    @Data
+    public static class BigSilkCarDoffingAppendCommand implements Serializable {
+        @NotNull
+        private SilkCarRecordDTO silkCarRecord;
+        @Min(1)
+        private float lineMachineCount;
+        @NotNull
+        @Size(min = 1)
+        private List<EntityByCodeDTO> checkSilks;
+    }
 }

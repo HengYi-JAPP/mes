@@ -25,9 +25,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author jzb 2019-03-17
  */
-public class Auto9200C2_3 {
+public class Auto9200C3 {
     public static void main(String[] args) {
-        Stream.of("C2", "C3").forEach(Auto9200C2_3::doffingSpec);
+        Stream.of("C3").forEach(Auto9200C3::doffingSpec);
     }
 
     @SneakyThrows
@@ -80,22 +80,22 @@ public class Auto9200C2_3 {
         List<LineMachineSilkSpec> lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
         int[] array = IntStream.rangeClosed(halfDoffing1.start, halfDoffing1.end).toArray();
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 4, array[0]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 4, array[1]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 4, array[2]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 4, array[3]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 1, array[4]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 1, array[5]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 1, array[6]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 1, array[7]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 4, array[8]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 4, array[9]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 4, array[10]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 4, array[11]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 1, array[12]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 1, array[13]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 1, array[14]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 1, array[15]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 1, array[0]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 1, array[1]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 1, array[2]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 1, array[3]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 4, array[4]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 4, array[5]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 4, array[6]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 4, array[7]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 1, array[8]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 1, array[9]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 1, array[10]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 1, array[11]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 4, array[12]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 4, array[13]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 4, array[14]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 4, array[15]));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -104,22 +104,22 @@ public class Auto9200C2_3 {
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
         array = IntStream.rangeClosed(halfDoffing2.start, halfDoffing2.end).toArray();
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 5, array[0]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 5, array[1]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 5, array[2]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 5, array[3]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 2, array[4]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 2, array[5]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 2, array[6]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 2, array[7]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 5, array[8]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 5, array[9]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 5, array[10]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 5, array[11]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 2, array[12]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 2, array[13]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 2, array[14]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 2, array[15]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 2, array[0]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 2, array[1]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 2, array[2]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 2, array[3]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 5, array[4]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 5, array[5]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 5, array[6]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 5, array[7]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 2, array[8]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 2, array[9]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 2, array[10]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 2, array[11]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 5, array[12]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 5, array[13]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 5, array[14]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 5, array[15]));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -128,22 +128,22 @@ public class Auto9200C2_3 {
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
         array = IntStream.rangeClosed(halfDoffing3.start, halfDoffing3.end).toArray();
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 6, array[0]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 6, array[1]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 6, array[2]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 6, array[3]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 3, array[4]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 3, array[5]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 3, array[6]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 3, array[7]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 6, array[8]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 6, array[9]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 6, array[10]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 6, array[11]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 3, array[12]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 3, array[13]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 3, array[14]));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 3, array[15]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 3, array[0]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 3, array[1]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 3, array[2]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 3, array[3]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 1, 6, array[4]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 2, 6, array[5]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 3, 6, array[6]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.B, 4, 6, array[7]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 3, array[8]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 3, array[9]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 3, array[10]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 3, array[11]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 1, 6, array[12]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 2, 6, array[13]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 3, 6, array[14]));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(SilkCarSideType.A, 4, 6, array[15]));
         return result;
     }
 

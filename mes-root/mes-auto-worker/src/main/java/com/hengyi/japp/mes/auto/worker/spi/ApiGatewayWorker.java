@@ -31,6 +31,13 @@ public class ApiGatewayWorker extends AbstractApiGateway implements ApiGateway {
 
     @Override
     public void submitApmSpan(ApmTraceSpan apmSpan) {
+//                    final RabbitMQClient rabbitMQClient = Jvertx.getProxy(RabbitMQClient.class);
+//                    vertx.setPeriodic(5000, l -> {
+//                        final JsonObject message = new JsonObject().put("body", "test" + " l");
+//                        final Completable log$ = rabbitMQClient.rxBasicPublish(MES_AUTO_APM_EXCHANGE, "", message);
+//                        rabbitMQClient.rxStart().andThen(log$).subscribe();
+//                    });
+//        System.out.println(apmSpan);
     }
 
     @Override

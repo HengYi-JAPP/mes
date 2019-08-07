@@ -50,6 +50,11 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
                 .ifPresent(it -> doc.add(new StringField("code", it, Field.Store.NO)));
         doc.add(new StringField("type", packageBox.getType().name(), Field.Store.NO));
         doc.add(new StringField("palletCode", J.defaultString(packageBox.getPalletCode()), Field.Store.NO));
+        Optional.ofNullable(packageBox.getAutomaticPackeLine())
+                //  .filter(J::nonBlank)
+                .ifPresent(it -> {
+                    doc.add(new StringField("automaticPackeLine", it, Field.Store.NO));
+                });
         doc.add(new DoublePoint("netWeight", packageBox.getNetWeight()));
         doc.add(new DoublePoint("grossWeight", packageBox.getGrossWeight()));
 
@@ -131,7 +136,7 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
     public Query build(PackageBoxQueryForMeasure packageBoxQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
         addQuery(bqBuilder, "inWarehouse", false);
-
+        addQuery(bqBuilder, "automaticPackeLine", packageBoxQuery.getAutomaticPackeLine());
         addQuery(bqBuilder, "workshop", packageBoxQuery.getWorkshopId());
         addQuery(bqBuilder, "batch", packageBoxQuery.getBatchId());
         addQuery(bqBuilder, "grade", packageBoxQuery.getGradeId());
