@@ -226,7 +226,7 @@ public class PoiUtil {
     }
 
 
-    private static Row addHeads(Sheet sheet, String[] heads) {
+    public static Row addHeads(Sheet sheet, String[] heads) {
         final Row row = getRow(0, sheet);
         for (int i = 0, l = heads.length; i < l; i++) {
             final String head = heads[i];

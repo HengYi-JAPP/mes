@@ -2,7 +2,10 @@ package com.hengyi.japp.mes.auto.application.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.vertx.Jvertx;
-import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.Grade;
+import com.hengyi.japp.mes.auto.domain.Operator;
+import com.hengyi.japp.mes.auto.domain.SilkCar;
+import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
@@ -187,10 +190,10 @@ public class SilkCarRuntimeInitEvent extends EventSource {
         @NotNull
         private EntityDTO workshop;
         @NotNull
+        private EntityDTO grade;
+        @NotNull
         @Size(min = 1)
         private List<CheckSilkDTO> checkSilks;
-        @NotNull
-        private EntityDTO grade;
     }
 
     @Data
@@ -198,12 +201,12 @@ public class SilkCarRuntimeInitEvent extends EventSource {
         @NotNull
         private EntityByCodeDTO silkCar;
         @NotNull
-        private Workshop workshop;
+        private EntityDTO workshop;
+        @NotNull
+        private EntityDTO grade;
         @NotNull
         @Size(min = 1)
         private List<CheckSilkDTO> checkSilks;
-        @NotNull
-        private EntityDTO grade;
     }
 
     @Data

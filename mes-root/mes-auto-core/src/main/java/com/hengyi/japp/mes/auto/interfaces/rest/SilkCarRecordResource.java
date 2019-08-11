@@ -6,15 +6,23 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.SilkCarRecordService;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
+import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
+import com.hengyi.japp.mes.auto.application.event.ToDtyConfirmEvent;
+import com.hengyi.japp.mes.auto.application.event.ToDtyEvent;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
+import com.hengyi.japp.mes.auto.domain.SilkCarRuntime;
+import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.List;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -33,6 +41,54 @@ public class SilkCarRecordResource {
     private SilkCarRecordResource(SilkCarRecordService silkCarRecordService, SilkCarRecordRepository silkCarRecordRepository) {
         this.silkCarRecordService = silkCarRecordService;
         this.silkCarRecordRepository = silkCarRecordRepository;
+    }
+
+    @Path("v2/ManualDoffingCheckSilks")
+    @POST
+    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCheckSilksCommand command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("v2/ManualDoffingEvents")
+    @POST
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.ManualDoffingCommand command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("v2/AutoDoffingAdaptCheckSilks")
+    @POST
+    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCheckSilksCommandV2 command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("v2/AutoDoffingAdaptEvents")
+    @POST
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingAdaptCommandV2 command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("v3/AutoDoffingAdaptCheckSilks")
+    @POST
+    public Single<List<CheckSilkDTO>> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingOverWriteCheckSilksCommand command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("v3/AutoDoffingAdaptEvents")
+    @POST
+    public Single<SilkCarRuntime> handle(Principal principal, SilkCarRuntimeInitEvent.AutoDoffingOverWriteCommand command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("ToDtyEvents")
+    @POST
+    public Completable handle(Principal principal, ToDtyEvent.Command command) {
+        return silkCarRecordService.handle(principal, command);
+    }
+
+    @Path("ToDtyConfirmEvents")
+    @POST
+    public Completable handle(Principal principal, ToDtyConfirmEvent.Command command) {
+        return silkCarRecordService.handle(principal, command);
     }
 
     @Path("silkCarRecords")
