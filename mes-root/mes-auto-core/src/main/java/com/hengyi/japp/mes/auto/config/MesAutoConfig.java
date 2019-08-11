@@ -50,7 +50,7 @@ public class MesAutoConfig {
         carpoolSilkCarModelOrderType = Optional.ofNullable(rootConfig.getString("carpoolSilkCarModelOrderType"))
                 .filter(J::nonBlank)
                 .map(CarpoolSilkCarModelOrderType::valueOf)
-                .orElse(CarpoolSilkCarModelOrderType.DEFAULT);
+                .orElse(CarpoolSilkCarModelOrderType.BOTTOM_LEFT_S);
         pdaConfig = rootConfig.getJsonObject("pda");
         openConfig = rootConfig.getJsonObject("open");
         corsConfig = new CorsConfig(rootConfig.getJsonObject("cors"));
