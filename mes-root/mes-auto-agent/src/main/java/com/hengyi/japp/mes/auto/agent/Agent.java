@@ -60,8 +60,7 @@ public class Agent {
     private static VertxOptions vertxOptions() {
         final VertxOptions vertxOptions = new VertxOptions()
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(10));
-        Optional.ofNullable(System.getProperty("vertx.cluster.host"))
-                .filter(J::nonBlank)
+        Optional.ofNullable(System.getProperty("vertx.cluster.host")).filter(J::nonBlank)
                 .ifPresent(vertxOptions.getEventBusOptions()::setHost);
         return vertxOptions;
     }

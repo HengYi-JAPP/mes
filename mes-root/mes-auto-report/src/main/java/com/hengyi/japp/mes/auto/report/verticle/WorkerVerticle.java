@@ -2,7 +2,6 @@ package com.hengyi.japp.mes.auto.report.verticle;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.report.PackagePlanService;
 import com.hengyi.japp.mes.auto.report.application.*;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
@@ -45,12 +44,10 @@ public class WorkerVerticle extends AbstractVerticle {
                 vertx.eventBus().consumer("mes-auto:report:packagePlanBoard", packagePlanService::packagePlanBoard).rxCompletionHandler(),
 
                 vertx.eventBus().<String>consumer("mes-auto:report:doffingSilkCarRecordReport", reply -> Single.just(reply.body()).map(MAPPER::readTree).map(jsonNode -> {
-                            final SilkCarRecordQuery silkCarRecordQuery = SilkCarRecordQuery.builder()
-                                    .workshopId(jsonNode.get("workshopId").asText(null))
-                                    .startDate(LocalDate.parse(jsonNode.get("startDate").asText()))
-                                    .endDate(LocalDate.parse(jsonNode.get("endDate").asText()))
-                                    .build();
-                            final Collection<String> silkCarRecordIds = queryService.query(silkCarRecordQuery);
+                    final String workshopId = jsonNode.get("workshopId").asText(null);
+                    final long startDateTime = jsonNode.get("startDate").asLong();
+                    final long endDateTime = jsonNode.get("endDate").asLong();
+                    final Collection<String> silkCarRecordIds = queryService.querySilkCarRecordIds(workshopId, startDateTime, endDateTime);
                             final DoffingSilkCarRecordReport doffingSilkCarRecordReport = new DoffingSilkCarRecordReport(silkCarRecordIds);
                             return MAPPER.writeValueAsString(doffingSilkCarRecordReport.toJsonNode());
                         }).subscribe(reply::reply, err -> {

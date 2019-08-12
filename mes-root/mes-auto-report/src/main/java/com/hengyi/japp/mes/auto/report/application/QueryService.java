@@ -60,4 +60,6 @@ public interface QueryService {
     IndexReader indexReader(Class clazz);
 
     Collection<String> query(SilkCarRecordQuery silkCarRecordQuery);
+
+    Collection<String> querySilkCarRecordIds(String workshopId, long startDateTime, long endDateTime);
 }

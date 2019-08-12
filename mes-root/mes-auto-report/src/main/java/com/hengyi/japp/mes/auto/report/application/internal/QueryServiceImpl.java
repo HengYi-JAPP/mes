@@ -63,4 +63,21 @@ public class QueryServiceImpl implements QueryService {
                 .map(it -> it.get("id"))
                 .collect(toList());
     }
+
+    @SneakyThrows
+    @Override
+    public Collection<String> querySilkCarRecordIds(String workshopId, long startL, long endL) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        Optional.ofNullable(workshopId).filter(J::nonBlank)
+                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
+        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
+
+        @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
+        final IndexSearcher searcher = new IndexSearcher(indexReader);
+        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
+        return Arrays.stream(topDocs.scoreDocs)
+                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
+                .map(it -> it.get("id"))
+                .collect(toList());
+    }
 }
