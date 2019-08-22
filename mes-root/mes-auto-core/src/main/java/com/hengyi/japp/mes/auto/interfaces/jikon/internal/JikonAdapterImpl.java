@@ -195,8 +195,8 @@ public class JikonAdapterImpl implements JikonAdapter {
             }
         }
 
+        final List<String> reasons = Lists.newArrayList();
         if (AutomaticPackeFlage_NO.equals(dto.getAutomaticPackeFlage())) {
-            final List<String> reasons = Lists.newArrayList();
             if (J.nonEmpty(dyeingUnSubmitteds)) {
                 reasons.add("染判结果未出");
             }
@@ -214,8 +214,8 @@ public class JikonAdapterImpl implements JikonAdapter {
                     });
                 }
             }
-            applicationEvents.fire(silkCarRuntime, dto, reasons);
         }
+        applicationEvents.fire(silkCarRuntime, dto, reasons);
 
         dto.setBindNum("" + items.size());
         dto.setList(items);
