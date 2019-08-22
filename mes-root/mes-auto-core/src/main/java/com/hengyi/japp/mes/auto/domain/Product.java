@@ -22,6 +22,7 @@ public class Product extends LoggableMongoEntity {
     private String name;
     @ToString.Include
     private String code;
+    private boolean canToDty;
 
     @JsonIgnore
     private Collection<SilkException> dyeingExceptions;

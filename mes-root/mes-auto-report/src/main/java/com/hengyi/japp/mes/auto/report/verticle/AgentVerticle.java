@@ -1,6 +1,7 @@
 package com.hengyi.japp.mes.auto.report.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
+import com.hengyi.japp.mes.auto.Util;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import io.reactivex.Completable;
@@ -35,10 +36,7 @@ public class AgentVerticle extends AbstractVerticle {
         });
 
         router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON).handler(rc -> {
-            final JsonObject message = new JsonObject()
-                    .put("workshopId", rc.queryParams().get("workshopId"))
-                    .put("startDate", rc.queryParams().get("startDate"))
-                    .put("endDate", rc.queryParams().get("endDate"));
+            final JsonObject message = Util.encode(rc);
             final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
             vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions)
                     .map(Message::body)

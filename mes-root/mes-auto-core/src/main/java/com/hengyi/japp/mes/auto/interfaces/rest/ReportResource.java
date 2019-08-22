@@ -51,14 +51,4 @@ public class ReportResource {
         return vertx.eventBus().<String>rxSend("mes-auto:report:measurePackageBoxReport", command).map(Message::body);
     }
 
-//    @Path("doffingSilkCarRecordReport")
-//    @GET
-//    public Single<String> doffingSilkCarRecordReport(@QueryParam("workshopId") @NotBlank String workshopId,
-//                                                     @QueryParam("startDate") @NotBlank String startDateString,
-//                                                     @QueryParam("endDate") @NotBlank String endDateString) {
-//        final JsonObject message = new JsonObject().put("workshopId", workshopId).put("startDate", startDateString).put("endDate", endDateString);
-//        final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofMinutes(5).toMillis());
-//        return vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions).map(Message::body);
-//    }
-
 }

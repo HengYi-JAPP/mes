@@ -6,6 +6,7 @@ import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.application.event.ToDtyConfirmEvent;
 import com.hengyi.japp.mes.auto.application.event.ToDtyEvent;
@@ -152,8 +153,10 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
             final Batch batch = silkCarRecord.getBatch();
             final Product product = batch.getProduct();
+            // todo 推加弹相关事件，需要可配置
+//            if (!product.isCanToDty()) {
             if (!"POY".equals(product.getName())) {
-                throw new RuntimeException("POY可以推加弹！");
+                throw new RuntimeException(product.getName() + " 不可以推加弹！");
             }
             return event$.flatMapCompletable(event -> silkCarRuntimeRepository.addEventSource(silkCarRecord, event));
         });
@@ -172,8 +175,17 @@ public class SilkCarRecordServiceImpl implements SilkCarRecordService {
             final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
             final Batch batch = silkCarRecord.getBatch();
             final Product product = batch.getProduct();
+            // todo 推加弹相关事件，需要可配置
+//            if (!product.isCanToDty()) {
             if (!"POY".equals(product.getName())) {
-                throw new RuntimeException("POY可以推加弹确认！");
+                throw new RuntimeException(product.getName() + " 不可以推加弹确认！");
+            }
+            final boolean nonToDty = J.emptyIfNull(silkCarRuntime.getEventSources()).parallelStream()
+                    .filter(it -> !it.isDeleted() && EventSourceType.ToDtyEvent == it.getType())
+                    .findFirst()
+                    .isEmpty();
+            if (nonToDty) {
+                throw new RuntimeException("推加弹未扫码，不可以推加弹确认！");
             }
             final Completable saveDestination$ = silkCarRecordDestinationRepository.find(command.getDestination()).flatMap(silkCarRecordDestination -> {
                 silkCarRecord.setDestination(silkCarRecordDestination);

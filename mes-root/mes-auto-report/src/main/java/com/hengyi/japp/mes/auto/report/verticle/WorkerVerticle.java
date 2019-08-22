@@ -9,6 +9,7 @@ import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReport
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportRange;
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,18 +44,19 @@ public class WorkerVerticle extends AbstractVerticle {
                 vertx.eventBus().consumer("mes-auto:report:silkExceptionReport", silkExceptionReportService::silkExceptionReport).rxCompletionHandler(),
                 vertx.eventBus().consumer("mes-auto:report:packagePlanBoard", packagePlanService::packagePlanBoard).rxCompletionHandler(),
 
-                vertx.eventBus().<String>consumer("mes-auto:report:doffingSilkCarRecordReport", reply -> Single.just(reply.body()).map(MAPPER::readTree).map(jsonNode -> {
-                    final String workshopId = jsonNode.get("workshopId").asText(null);
-                    final long startDateTime = jsonNode.get("startDate").asLong();
-                    final long endDateTime = jsonNode.get("endDate").asLong();
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:doffingSilkCarRecordReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final JsonObject queryParams = msg.getJsonObject("queryParams");
+                    final String workshopId = queryParams.getJsonArray("workshopId").getString(0);
+                    final long startDateTime = queryParams.getJsonArray("startDateTime").getLong(0);
+                    final long endDateTime = queryParams.getJsonArray("endDateTime").getLong(0);
                     final Collection<String> silkCarRecordIds = queryService.querySilkCarRecordIds(workshopId, startDateTime, endDateTime);
-                            final DoffingSilkCarRecordReport doffingSilkCarRecordReport = new DoffingSilkCarRecordReport(silkCarRecordIds);
-                            return MAPPER.writeValueAsString(doffingSilkCarRecordReport.toJsonNode());
-                        }).subscribe(reply::reply, err -> {
-                            log.error("", err);
-                            reply.fail(400, err.getLocalizedMessage());
-                        })
-                ).rxCompletionHandler(),
+                    final DoffingSilkCarRecordReport doffingSilkCarRecordReport = new DoffingSilkCarRecordReport(silkCarRecordIds);
+                    return MAPPER.writeValueAsString(doffingSilkCarRecordReport.toJsonNode());
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
 
                 vertx.eventBus().<String>consumer("mes-auto:report:silkCarRuntimeSilkCarCodes", reply -> Single.fromCallable(() -> {
                             final JsonNode jsonNode = MAPPER.readTree(reply.body());

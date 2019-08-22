@@ -34,7 +34,7 @@ public class ToDtyConfirmEvent extends EventSource {
 
     @Override
     protected Completable _undo(Operator operator) {
-        throw new IllegalAccessError();
+        return Completable.complete();
     }
 
     @Override
