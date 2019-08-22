@@ -12,10 +12,7 @@ import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.domain.Workshop;
 import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
-import com.hengyi.japp.mes.auto.repository.GradeRepository;
-import com.hengyi.japp.mes.auto.repository.OperatorRepository;
-import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
-import com.hengyi.japp.mes.auto.repository.SilkCarRepository;
+import com.hengyi.japp.mes.auto.repository.*;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +29,16 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Singleton
 public class AdminServiceImpl implements AdminService {
     private final SilkCarRuntimeService silkCarRuntimeService;
+    private final WorkshopRepository workshopRepository;
     private final SilkCarRepository silkCarRepository;
     private final GradeRepository gradeRepository;
     private final PackageBoxRepository packageBoxRepository;
     private final OperatorRepository operatorRepository;
 
     @Inject
-    private AdminServiceImpl(SilkCarRuntimeService silkCarRuntimeService, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository) {
+    private AdminServiceImpl(SilkCarRuntimeService silkCarRuntimeService, WorkshopRepository workshopRepository, SilkCarRepository silkCarRepository, GradeRepository gradeRepository, PackageBoxRepository packageBoxRepository, OperatorRepository operatorRepository) {
         this.silkCarRuntimeService = silkCarRuntimeService;
+        this.workshopRepository = workshopRepository;
         this.silkCarRepository = silkCarRepository;
         this.gradeRepository = gradeRepository;
         this.packageBoxRepository = packageBoxRepository;
@@ -82,8 +81,10 @@ public class AdminServiceImpl implements AdminService {
         event.setCommand(MAPPER.convertValue(command, JsonNode.class));
         final Single<SilkCarRuntime> result$ = silkCarRepository.findByCode(command.getSilkCar().getCode()).flatMap(silkCar -> {
             event.setSilkCar(silkCar);
-            final AdminAutoSilkCarModel silkCarModel = new AdminAutoSilkCarModel(silkCar, command.getWorkshop());
-            return silkCarModel.generateSilkRuntimes(command.getCheckSilks());
+            return workshopRepository.find(command.getWorkshop()).flatMap(workshop -> {
+                final AdminAutoSilkCarModel silkCarModel = new AdminAutoSilkCarModel(silkCar, workshop);
+                return silkCarModel.generateSilkRuntimes(command.getCheckSilks());
+            });
         }).flatMap(silkRuntimes -> {
             event.setSilkRuntimes(silkRuntimes);
             return gradeRepository.find(command.getGrade().getId());
