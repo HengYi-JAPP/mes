@@ -2,13 +2,15 @@ dependencies {
     compile "com.github.ixtf.japp:zxing",
             "com.github.ixtf.japp:print",
             "com.google.inject:guice",
-            "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
             "javax:javaee-api",
             "org.hibernate.validator:hibernate-validator",
             "org.glassfish:javax.el",
-            "commons-daemon:commons-daemon",
-            "redis.clients:jedis:3.0.1"
+            "redis.clients:jedis:3.1.0"
 }
 
-apply plugin: 'application'
+shadowJar {
+    destinationDirectory = file("daemon")
+    archiveFileName = "${project.name}.jar"
+}
+
 mainClassName = "com.hengyi.japp.mes.auto.print.Print"
