@@ -7,10 +7,8 @@ redis:
   #host: "10.2.0.213"
 
 printerConfig:
-  # 打印机标示，确保唯一
-  id: 2d354fe0e98e456caa1ef14ef7589080
   # 打印机名称
-  name: CD标签打印机器
+  name: test
 
 silkPrintConfig:
   # 打印纸张大小，单位 MM

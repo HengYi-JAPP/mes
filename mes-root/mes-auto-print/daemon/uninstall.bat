@@ -1,15 +1,9 @@
-@echo off
+﻿@echo off
 
-rem 设置服务
-set SERVICE_NAME=mes-auto-printer
+set SERVICE_NAME=mes-auto-print
 
-rem 设置路径
-set BASE_DIR=%cd%
-set SRV=%BASE_DIR%\windows\prunsrv.exe
-
-rem 输出信息
-echo SERVICE_NAME: %SERVICE_NAME%
-echo prunsrv path: %SRV%
+set DIR=%cd%
+set SRV=%DIR%\prunsrv.exe
 
 %SRV% //DS//%SERVICE_NAME%
 
