@@ -21,12 +21,14 @@ public class PaperConfig implements Serializable {
     private float colGap;
 
     public PageFormat getPageFormat() {
-        PageFormat pageFormat = new PageFormat();
+        final PageFormat pageFormat = new PageFormat();
         pageFormat.setOrientation(PageFormat.PORTRAIT);
-        Paper p = new Paper();
-        p.setSize(width, height);
-        p.setImageableArea(mmToPix(x), mmToPix(y), mmToPix(width - x * 2), mmToPix(height - y));
-        pageFormat.setPaper(p);
+        final Paper paper = new Paper();
+        final float paperWithPix = getWithPix();
+        final float paperHeightPix = getHeightPix();
+        paper.setSize(paperWithPix, paperHeightPix); // Paper Size,A4 590, 840
+        paper.setImageableArea(0, 0, paperWithPix, paperHeightPix); // Print Area
+        pageFormat.setPaper(paper);
         return pageFormat;
     }
 

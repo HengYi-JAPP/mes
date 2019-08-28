@@ -14,6 +14,7 @@ import com.hengyi.japp.mes.auto.print.config.SilkPrintConfig;
 import com.hengyi.japp.mes.auto.print.config.ZxingConfig;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
@@ -22,10 +23,13 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.print.*;
+import java.awt.print.Book;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterJob;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.print.Jprint.mmToPix;
@@ -47,17 +51,6 @@ public class SilkPrintable implements Printable {
         final double size = command.getSilks().size();
         final double pages = size / 4;
         this.numPages = (int) Math.ceil(pages);
-    }
-
-    private static PrintService findPrintService(String printerName) {
-        PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
-
-        for (PrintService printService : printServices) {
-            if (printService.getName().trim().equals(printerName)) {
-                return printService;
-            }
-        }
-        return null;
     }
 
     @Override
@@ -114,7 +107,7 @@ public class SilkPrintable implements Printable {
 
     @SneakyThrows
     private BufferedImage silkBarCodeImage(String content) {
-        //配置参数
+        // 配置参数
         Map<EncodeHintType, Object> hints = Maps.newHashMap();
         hints.put(EncodeHintType.MARGIN, 0);
         hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
@@ -134,29 +127,26 @@ public class SilkPrintable implements Printable {
     }
 
     public void PrintLabel() throws Exception {
-        Book book = new Book();
-        PageFormat pf = new PageFormat();
-        pf.setOrientation(PageFormat.PORTRAIT);
-        Paper p = new Paper();
+        final Book book = new Book();
         final PaperConfig paperConfig = config.getPaperConfig();
-        final float paperWithPix = paperConfig.getWithPix();
-        final float paperHeightPix = paperConfig.getHeightPix();
-        p.setSize(paperWithPix, paperHeightPix); // Paper Size,A4 590, 840
-        p.setImageableArea(0, 0, paperWithPix, paperHeightPix); // Print Area
-        pf.setPaper(p);
-        book.append(this, pf, numPages);
-        PrintService printService = PrintServiceLookup.lookupDefaultPrintService();
-        if (printService != null) {
-            log.info("检查到默认打印服務:" + printService.toString());
-        } else {
-            //printService = SilkPrintable.findPrintService(this.config.getPrinterConfig().getLocalname());
-            printService = SilkPrintable.findPrintService("MES_PRINT");//找不到默认打印机名字的时候
-            log.info("没有找到默认打印机使用定义标签打印机名字：" + printService.toString());
-        }
-        PrinterJob job = PrinterJob.getPrinterJob();
+        book.append(this, paperConfig.getPageFormat(), numPages);
+        final PrintService printService = Optional.ofNullable(PrintServiceLookup.lookupDefaultPrintService())
+                .orElseGet(() -> findPrintService("MES_PRINT"));
+        final PrinterJob job = PrinterJob.getPrinterJob();
         job.setPrintService(printService);
         job.setPageable(book);
         job.print();
+    }
+
+    private PrintService findPrintService(String printerName) {
+        final PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
+        if (J.isEmpty(printServices)) {
+            return null;
+        }
+        return Arrays.stream(printServices).parallel()
+                .filter(it -> Objects.equals(StringUtils.trim(it.getName()), printerName))
+                .findFirst()
+                .orElse(null);
     }
 
 }
