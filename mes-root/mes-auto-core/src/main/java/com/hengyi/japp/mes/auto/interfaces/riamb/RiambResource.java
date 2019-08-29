@@ -33,17 +33,10 @@ public class RiambResource {
     @Path("silkCarRecords/codes/{code}")
     @GET
     public Single<RiambFetchSilkCarRecordResultDTO> fetchSilkCarRecord(Principal principal, @PathParam("code") @NotBlank String code) {
+        final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code);
         return riambService.fetchSilkCarRecord(principal, code)
-                .doOnSuccess(it -> {
-                    final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code)
-                            .append("\n").append(MAPPER.writeValueAsString(it)).append("成功!");
-                    LOG.info(sb.toString());
-                })
-                .doOnError(ex -> {
-                    final StringBuilder sb = new StringBuilder("RiambResource.fetchSilkCarRecord: ").append(code)
-                            .append("\n").append("失败!");
-                    LOG.error(sb.toString(), ex);
-                });
+                .doOnSuccess(it -> LOG.info(sb.append("\n").append(MAPPER.writeValueAsString(it)).append("成功!").toString()))
+                .doOnError(ex -> LOG.error(sb.append("\n").append("失败!").toString(), ex));
     }
 
     @Path("SilkDetachEvents")

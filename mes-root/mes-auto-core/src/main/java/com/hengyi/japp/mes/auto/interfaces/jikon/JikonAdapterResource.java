@@ -37,10 +37,10 @@ public class JikonAdapterResource {
     @POST
     public Single<String> getSilkSpindleInfo(String request) throws Exception {
         final StringBuilder sb = new StringBuilder("JikonAdapterSilkCarInfoFetchEvent").append(request);
-        log.info(sb.toString());
         final JikonAdapterSilkCarInfoFetchEvent.Command command = MAPPER.readValue(request, JikonAdapterSilkCarInfoFetchEvent.Command.class);
         return jikonAdapter.handle(PRINCIPAL, command)
-                .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
+                .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()))
+                .doOnError(ex -> log.error(sb.append("\n").append("失败!").toString(), ex));
     }
 
     @ApmTrace(type = "JikonAdapterSilkDetachEvent")
@@ -48,10 +48,10 @@ public class JikonAdapterResource {
     @POST
     public Single<String> relieveBindSilkCar(String request) throws Exception {
         final StringBuilder sb = new StringBuilder("JikonAdapterSilkDetachEvent").append(request);
-        log.info(sb.toString());
         final JikonAdapterSilkDetachEvent.Command command = MAPPER.readValue(request, JikonAdapterSilkDetachEvent.Command.class);
         return jikonAdapter.handle(PRINCIPAL, command)
-                .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
+                .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()))
+                .doOnError(ex -> log.error(sb.append("\n").append("失败!").toString(), ex));
     }
 
     @ApmTrace(type = "JikonAdapterPackageBoxEvent")
@@ -59,9 +59,9 @@ public class JikonAdapterResource {
     @POST
     public Single<String> getSilkBoxAndspilkInfo(String request) throws Exception {
         final StringBuilder sb = new StringBuilder("JikonAdapterPackageBoxEvent").append(request);
-        log.info(sb.toString());
         final JikonAdapterPackageBoxEvent.Command command = MAPPER.readValue(request, JikonAdapterPackageBoxEvent.Command.class);
         return jikonAdapter.handle(PRINCIPAL, command)
-                .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
+                .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()))
+                .doOnError(ex -> log.error(sb.append("\n").append("失败!").toString(), ex));
     }
 }

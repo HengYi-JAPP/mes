@@ -1,7 +1,15 @@
 package com.hengyi.japp.mes.auto;
 
+import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.domain.DyeingResult;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.MultiMap;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.core.eventbus.Message;
+import io.vertx.reactivex.core.http.HttpServerResponse;
+import io.vertx.reactivex.ext.auth.User;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -12,12 +20,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static io.vertx.config.yaml.YamlProcessor.YAML_MAPPER;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author jzb 2018-06-20
@@ -32,6 +44,52 @@ public class Util {
 
     public static boolean isHr(String s) {
         return StringUtils.isBlank(s) ? false : hrIdP.matcher(s).matches();
+    }
+
+
+    public static void commonSend(RoutingContext rc, String address) {
+        commonSend(rc, address, new DeliveryOptions());
+    }
+
+    public static void commonSend(RoutingContext rc, String address, Duration duration) {
+        final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(duration.toMillis());
+        commonSend(rc, address, deliveryOptions);
+    }
+
+    public static void commonSend(RoutingContext rc, String address, DeliveryOptions deliveryOptions) {
+        rc.vertx().eventBus().rxSend(address, encode(rc), deliveryOptions).subscribe(reply -> {
+            final HttpServerResponse response = rc.response();
+            final MultiMap headers = reply.headers();
+            headers.entries().forEach(it -> response.putHeader(it.getKey(), it.getValue()));
+            response.end(buffer(reply));
+        }, rc::fail);
+    }
+
+    private static JsonObject encode(RoutingContext rc) {
+        final JsonObject principal = Optional.ofNullable(rc.user()).map(User::principal).orElse(null);
+        final Map<String, String> pathParams = rc.pathParams();
+        final Map<String, List<String>> queryParams = rc.queryParams().names().parallelStream().collect(toMap(Function.identity(), rc.queryParams()::getAll));
+        return new JsonObject().put("principal", principal)
+                .put("pathParams", pathParams)
+                .put("queryParams", queryParams)
+                .put("body", rc.getBodyAsString());
+    }
+
+    private static Buffer buffer(Message<Object> reply) {
+        final Object body = reply.body();
+        if (body == null) {
+            return Buffer.buffer();
+        }
+        if (body instanceof String) {
+            final String result = (String) body;
+            if (J.isBlank(result)) {
+                return Buffer.buffer();
+            } else {
+                return Buffer.buffer(result);
+            }
+        }
+        final byte[] bytes = (byte[]) body;
+        return Buffer.buffer(bytes);
     }
 
     @SneakyThrows
