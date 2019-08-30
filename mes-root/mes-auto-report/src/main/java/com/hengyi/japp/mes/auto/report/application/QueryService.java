@@ -60,4 +60,7 @@ public interface QueryService {
     IndexReader indexReader(Class clazz);
 
     Collection<String> query(SilkCarRecordQuery silkCarRecordQuery);
+
+    @SneakyThrows
+    Collection<String> querySilkCarRecordIds(String workshopId, long startL, long endL);
 }
