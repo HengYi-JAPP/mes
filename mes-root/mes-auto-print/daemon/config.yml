@@ -1,0 +1,34 @@
+﻿# 丝锭条码打印
+debug: true
+redis:
+  # 逸景
+  host: "10.61.0.14"
+  # 高新
+  #host: "10.2.0.213"
+
+printerConfig:
+  # 打印机名称
+  name: test
+
+silkPrintConfig:
+  # 打印纸张大小，单位 MM
+  paperConfig:
+    width: 104.5
+    height: 26.8
+    x: 0
+    y: 0
+  corpPrefix:
+    YJHY
+
+  # 文本大小，单位 MM
+  fontConfig:
+    size: 7
+  # 条码大小，单位 MM
+  barcodeConfig:
+    y: 20
+    width: 40
+    height: 15
+  # zxing条码生成，单位 px
+  zxingConfig:
+    width: 334
+    height: 300

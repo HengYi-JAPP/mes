@@ -86,7 +86,7 @@ public class ApplicationEventsRabbit implements ApplicationEvents {
     @SneakyThrows
     @Override
     public void fire(SilkCarRuntime silkCarRuntime, GetSilkSpindleInfoDTO dto, List<String> reasons) {
-        final Map<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime, "reasons", reasons);
+        final Map<String, Object> map = ImmutableMap.of("silkCarRuntime", silkCarRuntime, "dto", dto, "reasons", reasons);
         final String message = MAPPER.writeValueAsString(map);
         vertx.eventBus().publish("mes-auto://websocket/boards/JikonAdapterSilkCarInfoFetchReasons", message);
     }

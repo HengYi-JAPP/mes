@@ -35,7 +35,6 @@ public class SilkPrintPubSub extends JedisPubSub {
             return;
         }
         try {
-//            System.out.println(message);
             final JsonNode silksNode = MAPPER.readTree(message);
             final JsonNode commandNode = MAPPER.createObjectNode().set("silks", silksNode);
             final SilkPrintCommand command = MAPPER.convertValue(commandNode, SilkPrintCommand.class);

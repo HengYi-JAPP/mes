@@ -546,7 +546,7 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
             return SilkCarModel.carpool(Single.just(it)).flatMap(silkCarModel -> silkCarModel.generateSilkRuntimes(command.getCheckSilks()));
         }).flatMap(it -> {
             event.setSilkRuntimes(it);
-            return gradeRepository.find(command.getGrade().getId());
+            return gradeRepository.find(command.getGrade());
         }).flatMap(grade -> {
             event.setGrade(grade);
             return operatorRepository.find(principal);

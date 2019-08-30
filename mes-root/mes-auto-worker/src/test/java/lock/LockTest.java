@@ -12,7 +12,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Date;
 import java.util.Optional;
@@ -25,10 +24,10 @@ public class LockTest {
 
     @SneakyThrows
     public static void main(String[] args) {
-        System.out.println(Jcodec.uuid58());
-        final LocalDateTime ldt = LocalDateTime.of(2019, Month.MARCH, 21, 6, 34, 21);
-        System.out.println(J.date(ldt).getTime());
-
+        System.out.println(Jcodec.uuid());
+//        final LocalDateTime ldt = LocalDateTime.of(2019, Month.MARCH, 21, 6, 34, 21);
+//        System.out.println(J.date(ldt).getTime());
+//
 //        final Path indexPath = Paths.get("/home/jzb/logs/SilkBarcode");
 //        indexWriter = new IndexWriter(FSDirectory.open(indexPath), new IndexWriterConfig(new SmartChineseAnalyzer()));
 //        testdd();
