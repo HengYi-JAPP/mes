@@ -6,12 +6,12 @@ import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -33,6 +33,15 @@ public abstract class AbstractStatisticReport implements Serializable {
     protected Collection<Item> items;
     protected Collection<PackageBoxDTO> unDiffPackageBoxes;
     protected Collection<Item> customDiffItems;
+
+    @SneakyThrows
+    public byte[] toByteArray() {
+        @Cleanup final Workbook wb = new XSSFWorkbook();
+        PoiUtil.fillSheet1(wb.createSheet(), this);
+        @Cleanup final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        wb.write(baos);
+        return baos.toByteArray();
+    }
 
     @Data
     @NoArgsConstructor

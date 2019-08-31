@@ -9,6 +9,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.ToDtyConfirmEvent;
 import com.hengyi.japp.mes.auto.application.event.ToDtyEvent;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
+import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -104,6 +105,12 @@ public class SilkCarRecordResource {
                 .endDate(LocalDate.parse(endDate))
                 .build();
         return silkCarRecordRepository.query(silkCarRecordQuery);
+    }
+
+    @Path("silkCarRecords/{id}")
+    @GET
+    public Single<SilkCarRecord> get(@PathParam("id") @NotBlank String id) {
+        return silkCarRecordRepository.find(id);
     }
 
     @Path("silkCarRecords/{id}/events")
