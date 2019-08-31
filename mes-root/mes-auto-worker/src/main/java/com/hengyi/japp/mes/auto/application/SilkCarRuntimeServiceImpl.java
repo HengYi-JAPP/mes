@@ -173,22 +173,24 @@ public class SilkCarRuntimeServiceImpl implements SilkCarRuntimeService {
 
     @Override
     public Completable delete(Principal principal, SilkCarRuntimeDeleteCommand command) {
-        final Completable result$ = find(command.getSilkCarRecord()).flatMapCompletable(silkCarRuntime -> {
-            final List<EventSource> eventSourceList = J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
-                    .filter(it -> !it.isDeleted())
-                    .filter(it -> !it.getOperator().getId().equals(principal.getName()))
-                    .collect(toList());
-            if (J.nonEmpty(eventSourceList)) {
-                throw new RuntimeException("已经有其他人对丝车操作，无法删除");
-            }
-            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
-            if (silkCarRecord.getCarpoolDateTime() != null) {
-                throw new RuntimeException("拼车，无法删除");
-            }
-            return silkCarRuntimeRepository.delete(silkCarRuntime);
-        });
-        final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
-        return checks$.andThen(result$);
+        return Completable.error(new RuntimeException("无法删除，请解绑丝锭，然后拼车处理"));
+//        final Completable result$ = find(command.getSilkCarRecord()).flatMapCompletable(silkCarRuntime -> {
+//            final List<EventSource> eventSourceList = J.emptyIfNull(silkCarRuntime.getEventSources()).stream()
+//                    .filter(it -> !it.isDeleted())
+//                    .filter(it -> !it.getOperator().getId().equals(principal.getName()))
+//                    .collect(toList());
+//            if (J.nonEmpty(eventSourceList)) {
+//                throw new RuntimeException("已经有其他人对丝车操作，无法删除");
+//            }
+//            final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+//            if (silkCarRecord.getCarpoolDateTime() != null) {
+//                throw new RuntimeException("拼车，无法删除");
+//            }
+//            throw new RuntimeException("无法删除，请解绑丝锭，然后拼车处理");
+////            return silkCarRuntimeRepository.delete(silkCarRuntime);
+//        });
+//        final Completable checks$ = authService.checkRole(principal, RoleType.DOFFING);
+//        return checks$.andThen(result$);
     }
 
     @Override

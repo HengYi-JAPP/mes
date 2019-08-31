@@ -184,13 +184,13 @@ public class SilkCarRuntimeRepositoryRedis implements SilkCarRuntimeRepository {
         }).doOnComplete(() -> applicationEvents.fire(code, eventSource));
     }
 
-    @Override
-    public Completable delete(SilkCarRuntime silkCarRuntime) {
-        final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
-        final SilkCar silkCar = silkCarRecord.getSilkCar();
-        final String redisKey = SilkCarRuntimeRepository.redisKey(silkCar.getCode());
-        final Completable delSilkCarRecord$ = silkCarRecordRepository.delete(silkCarRecord);
-        final Completable delSilkCarRuntime$ = redisClient.rxDel(redisKey).ignoreElement();
-        return delSilkCarRecord$.andThen(delSilkCarRuntime$);
-    }
+//    @Override
+//    public Completable delete(SilkCarRuntime silkCarRuntime) {
+//        final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
+//        final SilkCar silkCar = silkCarRecord.getSilkCar();
+//        final String redisKey = SilkCarRuntimeRepository.redisKey(silkCar.getCode());
+//        final Completable delSilkCarRecord$ = silkCarRecordRepository.delete(silkCarRecord);
+//        final Completable delSilkCarRuntime$ = redisClient.rxDel(redisKey).ignoreElement();
+//        return delSilkCarRecord$.andThen(delSilkCarRuntime$);
+//    }
 }

@@ -2,7 +2,6 @@ package com.hengyi.japp.mes.auto.repository;
 
 import com.hengyi.japp.mes.auto.application.query.SilkQuery;
 import com.hengyi.japp.mes.auto.domain.Silk;
-import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -26,7 +25,7 @@ public interface SilkRepository {
 
     void index(Silk silk);
 
-    Completable delete(Silk silk);
+//    Completable delete(Silk silk);
 
     Silk find_(String id);
 

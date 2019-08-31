@@ -53,5 +53,5 @@ public interface SilkCarRuntimeRepository {
         return addEventSource(silkCarRuntime.getSilkCarRecord(), eventSource);
     }
 
-    Completable delete(SilkCarRuntime silkCarRuntime);
+//    Completable delete(SilkCarRuntime silkCarRuntime);
 }

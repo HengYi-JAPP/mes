@@ -34,5 +34,6 @@ public class BatchUpdateCommand implements Serializable {
     @Min(0)
     private double tubeWeight;
     private String note;
+    private boolean multiDyeing;
 
 }

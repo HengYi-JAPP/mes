@@ -10,7 +10,6 @@ import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.exception.JJsonEntityNotExsitException;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkLucene;
-import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -91,10 +90,10 @@ public class SilkRepositoryMongo extends MongoEntityRepository<Silk> implements 
         silkLucene.index(silk);
     }
 
-    @Override
-    public Completable delete(Silk silk) {
-        return silk._delete().doOnComplete(() -> silkLucene.delete(silk.getId()));
-    }
+//    @Override
+//    public Completable delete(Silk silk) {
+//        return silk._delete().doOnComplete(() -> silkLucene.delete(silk.getId()));
+//    }
 
     @Override
     public Silk find_(String id) {

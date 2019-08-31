@@ -1,19 +1,16 @@
 package com.hengyi.japp.mes.auto.report.verticle;
 
 import com.github.ixtf.japp.vertx.Jvertx;
-import com.hengyi.japp.mes.auto.Util;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import io.reactivex.Completable;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
-import io.vertx.reactivex.core.eventbus.Message;
 import io.vertx.reactivex.ext.web.Router;
 
 import java.time.Duration;
 
+import static com.hengyi.japp.mes.auto.Util.commonSend;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -35,21 +32,11 @@ public class AgentVerticle extends AbstractVerticle {
             rc.response().end();
         });
 
-        router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON).handler(rc -> {
-            final JsonObject message = Util.encode(rc);
-            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
-            vertx.eventBus().<String>rxSend("mes-auto:report:doffingSilkCarRecordReport", message.encode(), deliveryOptions)
-                    .map(Message::body)
-                    .subscribe(rc.response()::end, rc::fail);
-        });
+        router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:doffingSilkCarRecordReport", Duration.ofHours(1)));
 
-        router.get("/share/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON).handler(rc -> {
-            final JsonObject jsonObject = new JsonObject().put("workshopId", rc.queryParams().get("workshopId"));
-            final DeliveryOptions deliveryOptions = new DeliveryOptions().setSendTimeout(Duration.ofHours(1).toMillis());
-            vertx.eventBus().<String>rxSend("mes-auto:report:silkCarRuntimeSilkCarCodes", jsonObject.encode(), deliveryOptions)
-                    .map(Message::body)
-                    .subscribe(rc.response()::end, rc::fail);
-        });
+        router.get("/share/reports/silkCarRuntimeSilkCarCodes").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:silkCarRuntimeSilkCarCodes", Duration.ofHours(1)));
 
         final HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setDecompressionSupported(true)

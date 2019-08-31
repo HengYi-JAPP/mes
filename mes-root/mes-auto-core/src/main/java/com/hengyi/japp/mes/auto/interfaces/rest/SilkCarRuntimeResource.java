@@ -244,7 +244,9 @@ public class SilkCarRuntimeResource {
             final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
             final SilkCar silkCar = silkCarRecord.getSilkCar();
             if (silkCarRecord.getDoffingType() != null) {
-                throw new SilkCarStatusException(silkCar);
+                if (!silkCarRecord.getBatch().isMultiDyeing()) {
+                    throw new SilkCarStatusException(silkCar);
+                }
             }
             return silkCarRuntimeService.handle(event, silkCarRuntime, silkRuntimes);
         }));

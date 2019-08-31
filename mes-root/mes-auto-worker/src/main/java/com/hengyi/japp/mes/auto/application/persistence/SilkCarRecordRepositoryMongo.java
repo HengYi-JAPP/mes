@@ -1,17 +1,13 @@
 package com.hengyi.japp.mes.auto.application.persistence;
 
-import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
-import com.hengyi.japp.mes.auto.domain.SilkRuntime;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
-import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkCarRecordLucene;
-import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -59,19 +55,19 @@ public class SilkCarRecordRepositoryMongo extends MongoEntityRepository<SilkCarR
         lucene.index(silkCarRecord);
     }
 
-    @Override
-    public Completable delete(SilkCarRecord silkCarRecord) {
-        if (silkCarRecord.getCarpoolDateTime() != null) {
-            throw new RuntimeException("拼车,无法删除");
-        }
-        final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
-
-        final Completable delSilkCarRecord$ = silkCarRecord._delete().doOnComplete(() -> lucene.delete(silkCarRecord.getId()));
-        final Completable delSilks$ = Flowable.fromIterable(silkCarRecord.initSilks())
-                .map(SilkRuntime::getSilk)
-                .flatMapCompletable(silkRepository::delete);
-        return Completable.mergeArray(delSilkCarRecord$, delSilks$);
-    }
+//    @Override
+//    public Completable delete(SilkCarRecord silkCarRecord) {
+//        if (silkCarRecord.getCarpoolDateTime() != null) {
+//            throw new RuntimeException("拼车,无法删除");
+//        }
+//        final SilkRepository silkRepository = Jvertx.getProxy(SilkRepository.class);
+//
+//        final Completable delSilkCarRecord$ = silkCarRecord._delete().doOnComplete(() -> lucene.delete(silkCarRecord.getId()));
+//        final Completable delSilks$ = Flowable.fromIterable(silkCarRecord.initSilks())
+//                .map(SilkRuntime::getSilk)
+//                .flatMapCompletable(silkRepository::delete);
+//        return Completable.mergeArray(delSilkCarRecord$, delSilks$);
+//    }
 
     @Override
     public Maybe<SilkCarRecord> findByAutoId(String id) {

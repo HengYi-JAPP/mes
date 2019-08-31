@@ -46,6 +46,7 @@ public class BatchServiceImpl implements BatchService {
         batch.setTubeColor(command.getTubeColor());
         batch.setTubeWeight(command.getTubeWeight());
         batch.setSilkWeight(command.getSilkWeight());
+        batch.setMultiDyeing(command.isMultiDyeing());
 
         return productRepository.find(command.getProduct().getId())
                 .flatMap(product -> {
