@@ -174,6 +174,10 @@ public class WorkerModule extends AbstractModule {
         final JsonObject mongoOptions = config.getMongoOptions();
         final ServerAddress serverAddress = new ServerAddress(mongoOptions.getString("host"), mongoOptions.getInteger("port"));
         final String db_name = mongoOptions.getString("db_name", "DEFAULT_DB");
+        final MongoClientOptions.Builder builder = MongoClientOptions.builder()
+                .connectionsPerHost(500)
+                .threadsAllowedToBlockForConnectionMultiplier(100)
+                .maxConnectionIdleTime(6000);
 
         return Optional.ofNullable(mongoOptions.getString("username"))
                 .filter(J::nonBlank)
@@ -181,9 +185,9 @@ public class WorkerModule extends AbstractModule {
                     final String authSource = mongoOptions.getString("authSource");
                     final String password = mongoOptions.getString("password");
                     final MongoCredential mongoCredential = MongoCredential.createCredential(username, authSource, password.toCharArray());
-                    return new com.mongodb.MongoClient(serverAddress, mongoCredential, MongoClientOptions.builder().build());
+                    return new com.mongodb.MongoClient(serverAddress, mongoCredential, builder.build());
                 })
-                .orElseGet(() -> new com.mongodb.MongoClient(serverAddress))
+                .orElseGet(() -> new com.mongodb.MongoClient(serverAddress, builder.build()))
                 .getDatabase(db_name);
     }
 

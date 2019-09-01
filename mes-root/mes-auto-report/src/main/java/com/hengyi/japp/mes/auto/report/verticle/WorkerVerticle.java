@@ -55,13 +55,11 @@ public class WorkerVerticle extends AbstractVerticle {
                     final long startDateTime = Optional.ofNullable(queryParams)
                             .map(it -> it.getJsonArray("startDateTime"))
                             .map(it -> it.getString(0))
-                            .map(NumberUtils::toLong)
-                            .get();
+                            .map(NumberUtils::toLong).get();
                     final long endDateTime = Optional.ofNullable(queryParams)
                             .map(it -> it.getJsonArray("endDateTime"))
                             .map(it -> it.getString(0))
-                            .map(NumberUtils::toLong)
-                            .get();
+                            .map(NumberUtils::toLong).get();
                     final Collection<String> silkCarRecordIds = queryService.querySilkCarRecordIds(workshopId, startDateTime, endDateTime);
                     final DoffingSilkCarRecordReport doffingSilkCarRecordReport = new DoffingSilkCarRecordReport(silkCarRecordIds);
                     return MAPPER.writeValueAsString(doffingSilkCarRecordReport.toJsonNode());
@@ -118,17 +116,15 @@ public class WorkerVerticle extends AbstractVerticle {
                     final LocalDate startLd = Optional.ofNullable(queryParams)
                             .map(it -> it.getJsonArray("startDate"))
                             .map(it -> it.getString(0))
-                            .map(LocalDate::parse)
-                            .get();
+                            .map(LocalDate::parse).get();
                     final LocalDate endLd = Optional.ofNullable(queryParams)
                             .map(it -> it.getJsonArray("endDate"))
                             .map(it -> it.getString(0))
-                            .map(LocalDate::parse)
-                            .get();
+                            .map(LocalDate::parse).get();
                     final StatisticReportService statisticReportService = INJECTOR.getInstance(StatisticReportService.class);
                     final StatisticReportRange report = statisticReportService.rangeDisk(workshopId, startLd, endLd);
                     final String fileName = String.join(".",
-                            report.getWorkshop().getName(),
+                            report.getWorkshop().getCode(),
                             startLd.equals(endLd) ? "" + startLd : String.join("~", "" + startLd, "" + endLd),
                             "xlsx"
                     );
