@@ -175,9 +175,9 @@ public class WorkerModule extends AbstractModule {
         final ServerAddress serverAddress = new ServerAddress(mongoOptions.getString("host"), mongoOptions.getInteger("port"));
         final String db_name = mongoOptions.getString("db_name", "DEFAULT_DB");
         final MongoClientOptions.Builder builder = MongoClientOptions.builder()
-                .connectionsPerHost(500)
-                .threadsAllowedToBlockForConnectionMultiplier(100)
-                .maxConnectionIdleTime(6000);
+//                .connectionsPerHost(500)
+//                .maxConnectionIdleTime(6000)
+                .threadsAllowedToBlockForConnectionMultiplier(100);
 
         return Optional.ofNullable(mongoOptions.getString("username"))
                 .filter(J::nonBlank)
