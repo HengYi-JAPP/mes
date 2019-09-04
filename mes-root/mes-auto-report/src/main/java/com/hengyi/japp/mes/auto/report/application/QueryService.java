@@ -61,6 +61,7 @@ public interface QueryService {
 
     Collection<String> query(SilkCarRecordQuery silkCarRecordQuery);
 
-    @SneakyThrows
     Collection<String> querySilkCarRecordIds(String workshopId, long startL, long endL);
+
+    Collection<String> querySilkCarRecordIdsByEventSourceCanHappen(String workshopId, long startDateTime, long endDateTime);
 }

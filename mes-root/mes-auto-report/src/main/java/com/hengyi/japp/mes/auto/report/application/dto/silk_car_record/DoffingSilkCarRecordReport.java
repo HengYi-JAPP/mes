@@ -37,12 +37,12 @@ public class DoffingSilkCarRecordReport implements Serializable {
                 .flatMap(SilkCarRecordAggregate::from)
                 .filter(it -> Objects.nonNull(it.getDoffingDateTime())).toStream()
                 .collect(groupingBy(it -> it.getBatch().getString(ID_COL)))
-                .entrySet().parallelStream()
+                .entrySet().stream()
                 .flatMap(entry -> {
                     final Document batch = QueryService.findFromCache(Batch.class, entry.getKey()).get();
-                    return entry.getValue().parallelStream()
+                    return entry.getValue().stream()
                             .collect(groupingBy(it -> it.getGrade().getString(ID_COL)))
-                            .entrySet().parallelStream()
+                            .entrySet().stream()
                             .map(entry2 -> {
                                 final Document grade = QueryService.findFromCache(Grade.class, entry2.getKey()).get();
                                 return new GroupBy_Batch_Grade(batch, grade, entry2.getValue());

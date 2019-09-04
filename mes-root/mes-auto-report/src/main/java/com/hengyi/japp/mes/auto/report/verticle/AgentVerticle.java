@@ -35,20 +35,20 @@ public class AgentVerticle extends AbstractVerticle {
             rc.response().end();
         });
 
-        router.post("/statisticReport/generate").produces(APPLICATION_JSON)
+        router.post("/api/reports/statisticReport/generate").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:statisticReport:generate", setMinutes(5)));
-        router.post("/statisticReport/fromDisk").produces(APPLICATION_JSON)
+        router.post("/api/reports/statisticReport/fromDisk").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:statisticReport:fromDisk"));
-        router.post("/statisticReport/rangeDisk").produces(APPLICATION_JSON)
+        router.post("/api/reports/statisticReport/rangeDisk").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:statisticReport:rangeDisk"));
 
-        router.post("/dyeingReport").produces(APPLICATION_JSON)
+        router.post("/api/reports/dyeingReport").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:dyeingReport", setMinutes(5)));
-        router.post("/strippingReport").produces(APPLICATION_JSON)
+        router.post("/api/reports/strippingReport").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:strippingReport", setMinutes(10)));
-        router.post("/measureFiberReport").produces(APPLICATION_JSON)
+        router.post("/api/reports/measureFiberReport").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:measureFiberReport", setMinutes(5)));
-        router.post("/silkExceptionReport").produces(APPLICATION_JSON)
+        router.post("/api/reports/silkExceptionReport").produces(APPLICATION_JSON)
                 .handler(rc -> common(rc, "mes-auto:report:silkExceptionReport", setMinutes(3)));
 
         router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON).handler(rc -> {
