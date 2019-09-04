@@ -27,10 +27,7 @@ import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -165,6 +162,15 @@ public class PackageBoxResource {
                 .budatClassIds(budatClassIds)
                 .build();
         return packageBoxRepository.query(packageBoxQuery);
+    }
+
+    @Path("timestampPackageBoxes")
+    @GET
+    public Flowable<PackageBox> unInWarehouse(Principal principal, @QueryParam("startTimestamp") long startTimestamp, @QueryParam("endTimestamp") Long endTimestamp) {
+        final Long endL = Optional.ofNullable(endTimestamp)
+                .filter(it -> it < 1)
+                .orElse(new Date().getTime());
+        return packageBoxRepository.timestampPackageBoxes(startTimestamp, endL);
     }
 
     /**

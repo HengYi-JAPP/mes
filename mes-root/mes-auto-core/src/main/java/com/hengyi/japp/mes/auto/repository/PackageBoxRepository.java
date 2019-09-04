@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.repository;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 /**
@@ -22,4 +23,6 @@ public interface PackageBoxRepository {
     Single<PackageBoxQueryForMeasure.Result> query(PackageBoxQueryForMeasure packageBoxQuery);
 
     Single<PackageBox> findOrCreateByCode(String code);
+
+    Flowable<PackageBox> timestampPackageBoxes(long startTimestamp, long endTimestamp);
 }

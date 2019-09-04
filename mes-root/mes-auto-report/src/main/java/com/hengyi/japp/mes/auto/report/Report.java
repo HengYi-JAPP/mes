@@ -54,7 +54,7 @@ public class Report {
             poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
             poolConfig.setNumTestsPerEvictionRun(3);
             poolConfig.setBlockWhenExhausted(true);
-            JEDIS_POOL = new JedisPool(poolConfig, redisOptions.getHost(), 6379);
+            JEDIS_POOL = new JedisPool(poolConfig, redisOptions.getHost(), 6379, 100000);
 
             return Completable.mergeArray(
                     deployWorker(vertx).ignoreElement(),

@@ -17,15 +17,20 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.redis.RedisClient;
+import lombok.Cleanup;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
-import org.apache.lucene.search.SortedNumericSortField;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil.unDeletedQuery;
 import static com.mongodb.client.model.Filters.eq;
@@ -115,6 +120,27 @@ public class PackageBoxRepositoryMongo extends MongoEntityRepository<PackageBox>
             }
             return rxCreateMongoEntiy(list.get(0));
         });
+    }
+
+    @SneakyThrows
+    @Override
+    public Flowable<PackageBox> timestampPackageBoxes(long startTimestamp, long endTimestamp) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        bqBuilder.add(LongPoint.newRangeQuery("createDateTime", startTimestamp, endTimestamp), BooleanClause.Occur.MUST);
+        @Cleanup final IndexReader indexReader = packageBoxLucene.indexReader();
+        final IndexSearcher searcher = new IndexSearcher(indexReader);
+        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
+        if (topDocs.totalHits < 1) {
+            return Flowable.empty();
+        }
+        if (topDocs.totalHits > 2000) {
+            return Flowable.error(new RuntimeException("大于2000条"));
+        }
+        final List<String> ids = Arrays.stream(topDocs.scoreDocs)
+                .map(scoreDoc -> packageBoxLucene.toDocument(searcher, scoreDoc))
+                .map(it -> it.get("id"))
+                .collect(Collectors.toList());
+        return Flowable.fromIterable(ids).flatMapSingle(this::find);
     }
 
     @Override

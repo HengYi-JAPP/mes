@@ -174,7 +174,7 @@ public abstract class BaseLucene<T extends JsonEntity> {
     }
 
     @SneakyThrows
-    private Document toDocument(IndexSearcher searcher, ScoreDoc scoreDoc) {
+    public Document toDocument(IndexSearcher searcher, ScoreDoc scoreDoc) {
         return searcher.doc(scoreDoc.doc);
     }
 
