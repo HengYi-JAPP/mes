@@ -1,6 +1,5 @@
 package test;
 
-import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.hengyi.japp.mes.auto.GuiceModule;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
@@ -13,7 +12,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import test.AAReport_3000.Workshops;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static com.hengyi.japp.mes.auto.report.Report.JEDIS_POOL;
@@ -45,9 +44,24 @@ public class LuceneTest {
     }
 
     public static void main(String[] args) {
-        final LocalDateTime startLdt = LocalDateTime.of(2019, 8, 22, 7, 22);
-        final LocalDateTime endLdt = LocalDateTime.of(2019, 8, 23, 7, 22);
-        final StrippingReport report = StrippingReport.create(Workshops.D.getId(), J.date(startLdt).getTime(), J.date(endLdt).getTime());
-        System.out.println(report.toJsonNode());
+        final long startDateTime = new Date(1566432000000l).getTime();
+        final long endDateTime = new Date(1566345600000l).getTime();
+        final StrippingReport report = StrippingReport.create(Workshops.D.getId(), startDateTime, endDateTime);
+//        final Collection<String> ids = RedisService.listSilkCarRuntimeSilkCarRecordIds();
+//        final StrippingReport report = new StrippingReport(Workshops.D.getId(), startDateTime, endDateTime, ids);
+//        report.getGroupByOperators().stream()
+//                .filter(it -> Objects.equals(it.getOperator().getId(), ANONYMOUS))
+//                .findFirst()
+//                .stream()
+//                .flatMap(it -> it.getGroupByProducts().stream())
+//                .findFirst()
+//                .ifPresent(it -> {
+//                    final int silkCarRecordCount = it.getSilkCarRecordCount();
+//                    System.out.println(ANONYMOUS + " = " + silkCarRecordCount);
+//                });
+
+//        final LocalDateTime startLdt = LocalDateTime.of(2019, 8, 22, 7, 22);
+//        final LocalDateTime endLdt = LocalDateTime.of(2019, 8, 23, 7, 22);
+//        System.out.println(report.toJsonNode());
     }
 }

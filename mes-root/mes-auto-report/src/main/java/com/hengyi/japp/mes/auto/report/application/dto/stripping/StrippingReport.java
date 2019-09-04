@@ -13,6 +13,7 @@ import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.SilkCarRecordAggregate;
 import lombok.Data;
+import lombok.Getter;
 import org.bson.Document;
 import reactor.core.publisher.Flux;
 
@@ -33,9 +34,10 @@ public class StrippingReport {
     private final String workshopId;
     private final long startDateTime;
     private final long endDateTime;
+    @Getter
     private final Collection<GroupBy_Operator> groupByOperators;
 
-    private StrippingReport(String workshopId, long startDateTime, long endDateTime, Collection<String> silkCarRecordIds) {
+    public StrippingReport(String workshopId, long startDateTime, long endDateTime, Collection<String> silkCarRecordIds) {
         this.workshopId = workshopId;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
@@ -78,17 +80,26 @@ public class StrippingReport {
         if (!Objects.equals(workshopId, batch.getString("workshop"))) {
             return BLANK;
         }
+        final long time = silkCarRecordAggregate.getStartDateTime().getTime();
+        if (time >= endDateTime) {
+            return BLANK;
+        }
         final Optional<EventSource.DTO> optional = findEventSourceDTO(silkCarRecordAggregate.getEventSourceDtos());
         if (optional.isPresent()) {
             final EventSource.DTO dto = optional.get();
             final long fireL = dto.getFireDateTime().getTime();
-            if (fireL >= startDateTime && fireL <= endDateTime) {
+            if (fireL >= this.startDateTime && fireL < endDateTime) {
                 return dto.getOperator().getId();
             } else {
                 return BLANK;
             }
+        } else {
+            if (silkCarRecordAggregate.getEndDateTime() == null) {
+                return BLANK;
+            } else {
+                return ANONYMOUS;
+            }
         }
-        return ANONYMOUS;
     }
 
     private Optional<EventSource.DTO> findEventSourceDTO(Collection<EventSource.DTO> eventSourceDtos) {
