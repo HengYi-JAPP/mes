@@ -10,6 +10,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeAppendEvent;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
@@ -37,6 +38,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     protected final Document document;
     protected final String id;
     protected final String doffingOperatorId;
+    protected final DoffingType doffingType;
     protected final Date doffingDateTime;
     protected final String carpoolOperatorId;
     protected final Date carpoolDateTime;
@@ -53,6 +55,10 @@ public abstract class SilkCarRecordAggregate implements Serializable {
         this.document = document;
         id = document.getString(ID_COL);
         doffingOperatorId = document.getString("doffingOperator");
+        doffingType = Optional.ofNullable(document.getString("doffingType"))
+                .filter(J::nonBlank)
+                .map(DoffingType::valueOf)
+                .orElse(null);
         doffingDateTime = document.getDate("doffingDateTime");
         carpoolOperatorId = document.getString("carpoolOperator");
         carpoolDateTime = document.getDate("carpoolDateTime");

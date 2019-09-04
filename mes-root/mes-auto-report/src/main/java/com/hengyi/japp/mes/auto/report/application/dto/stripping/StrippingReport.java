@@ -8,6 +8,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.Product;
+import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.SilkCarRecordAggregate;
@@ -40,7 +41,9 @@ public class StrippingReport {
         this.endDateTime = endDateTime;
         groupByOperators = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds))
                 .flatMap(SilkCarRecordAggregate::from)
-                .filter(it -> Objects.nonNull(it.getDoffingDateTime())).toStream()
+                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType())
+                        || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
+                .toStream()
                 .collect(groupingBy(this::operatorId))
                 .entrySet().stream()
                 .filter(entry -> !Objects.equals(BLANK, entry.getKey()))
