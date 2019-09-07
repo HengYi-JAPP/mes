@@ -51,15 +51,15 @@ public class PdaVerticle extends AbstractVerticle {
         final JWTAuth jwtAuth = JWTAuth.create(vertx, config.getJwtAuthOptions());
         router.route("/api/*").handler(JWTAuthHandler.create(jwtAuth));
 
-        router.post("/api/statisticReport/generate").produces(APPLICATION_JSON)
+        router.post("/api/reports/statisticReport/generate").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:generate"));
-        router.post("/api/statisticReport/fromDisk").produces(APPLICATION_JSON)
+        router.post("/api/reports/statisticReport/fromDisk").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:fromDisk"));
-        router.post("/api/statisticReport/rangeDisk").produces(APPLICATION_JSON)
+        router.post("/api/reports/statisticReport/rangeDisk").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:rangeDisk"));
-        router.get("/api/statisticReport/download").produces(APPLICATION_OCTET_STREAM)
+        router.get("/api/reports/statisticReport/download").produces(APPLICATION_OCTET_STREAM)
                 .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:download"));
-        router.post("/api/statisticReport/combines").produces(APPLICATION_OCTET_STREAM).handler(rc -> vertx.rxExecuteBlocking(f -> Flowable.fromIterable(rc.fileUploads())
+        router.post("/api/reports/statisticReport/combines").produces(APPLICATION_OCTET_STREAM).handler(rc -> vertx.rxExecuteBlocking(f -> Flowable.fromIterable(rc.fileUploads())
                 .map(FileUpload::uploadedFileName)
                 .flatMapSingle(vertx.fileSystem()::rxReadFile)
                 .map(Buffer::getBytes)
@@ -78,14 +78,14 @@ public class PdaVerticle extends AbstractVerticle {
                     response.end(Buffer.buffer(reply.body()));
                 }, rc::fail));
 
-//        router.post("/dyeingReport").produces(APPLICATION_JSON)
-//                .handler(rc -> commonSend(rc, "mes-auto:report:dyeingReport", Duration.ofMinutes(5)));
-//        router.post("/strippingReport").produces(APPLICATION_JSON)
-//                .handler(rc -> commonSend(rc, "mes-auto:report:strippingReport", Duration.ofMinutes(10)));
-//        router.post("/measureFiberReport").produces(APPLICATION_JSON)
-//                .handler(rc -> commonSend(rc, "mes-auto:report:measureFiberReport", Duration.ofMinutes(5)));
-//        router.post("/silkExceptionReport").produces(APPLICATION_JSON)
-//                .handler(rc -> commonSend(rc, "mes-auto:report:silkExceptionReport", Duration.ofMinutes(5)));
+        router.post("/api/reports/strippingReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:strippingReport", Duration.ofMinutes(10)));
+        router.post("/api/reports/dyeingReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:dyeingReport", Duration.ofMinutes(5)));
+        router.post("/api/reports/measureFiberReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:measureFiberReport", Duration.ofMinutes(5)));
+        router.post("/api/reports/silkExceptionReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:silkExceptionReport", Duration.ofMinutes(5)));
 
         router.get("/api/reports/doffingSilkCarRecordReport").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:doffingSilkCarRecordReport", Duration.ofHours(1)));

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 
+import javax.persistence.Cacheable;
 import java.beans.PropertyDescriptor;
 import java.util.Objects;
 import java.util.Optional;
@@ -83,6 +84,10 @@ public class MongoUtil {
     }
 
     public static <T extends MongoEntity> boolean collectionCache(Class<T> entityClass) {
+        final Cacheable cacheable = entityClass.getAnnotation(Cacheable.class);
+        if (cacheable != null) {
+            return true;
+        }
         final MongoCache mongoCache = entityClass.getAnnotation(MongoCache.class);
         if (mongoCache != null) {
             return true;

@@ -2,22 +2,20 @@ package test;
 
 import com.google.inject.Guice;
 import com.hengyi.japp.mes.auto.GuiceModule;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.report.ReportModule;
-import com.hengyi.japp.mes.auto.report.application.QueryService;
-import com.hengyi.japp.mes.auto.report.application.StatisticReportService;
+import com.hengyi.japp.mes.auto.report.application.dto.stripping.StrippingReport;
 import io.vertx.reactivex.core.Vertx;
-import org.bson.Document;
-import reactor.core.publisher.Flux;
+import io.vertx.redis.RedisOptions;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import test.AAReport_3000.Workshops;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.time.Duration;
+import java.util.Date;
 
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
-import static java.util.stream.Collectors.toList;
+import static com.hengyi.japp.mes.auto.report.Report.JEDIS_POOL;
 
 /**
  * @author jzb 2019-06-04
@@ -29,24 +27,41 @@ public class LuceneTest {
         // sshfs -o allow_other root@10.2.0.215:/data/mes/auto/db /data/mes-3000/auto/db
         System.setProperty("japp.mes.auto.path", "/data/mes-3000/auto");
         INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
+
+        final JedisPoolConfig poolConfig = new JedisPoolConfig();
+        final RedisOptions redisOptions = INJECTOR.getInstance(MesAutoConfig.class).getRedisOptions();
+        poolConfig.setMaxTotal(128);
+        poolConfig.setMaxIdle(128);
+        poolConfig.setMinIdle(16);
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestOnReturn(true);
+        poolConfig.setTestWhileIdle(true);
+        poolConfig.setMinEvictableIdleTimeMillis(Duration.ofSeconds(60).toMillis());
+        poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
+        poolConfig.setNumTestsPerEvictionRun(3);
+        poolConfig.setBlockWhenExhausted(true);
+        JEDIS_POOL = new JedisPool(poolConfig, redisOptions.getHost(), 6379, 100000);
     }
 
     public static void main(String[] args) {
-        final StatisticReportService statisticReportService = INJECTOR.getInstance(StatisticReportService.class);
-        final Collection<String> ids = statisticReportService.packageBoxIds(Workshops.C.getId(), LocalDate.of(2019, 7, 7));
+        final long startDateTime = new Date(1566432000000l).getTime();
+        final long endDateTime = new Date(1566345600000l).getTime();
+        final StrippingReport report = StrippingReport.create(Workshops.D.getId(), startDateTime, endDateTime);
+//        final Collection<String> ids = RedisService.listSilkCarRuntimeSilkCarRecordIds();
+//        final StrippingReport report = new StrippingReport(Workshops.D.getId(), startDateTime, endDateTime, ids);
+//        report.getGroupByOperators().stream()
+//                .filter(it -> Objects.equals(it.getOperator().getId(), ANONYMOUS))
+//                .findFirst()
+//                .stream()
+//                .flatMap(it -> it.getGroupByProducts().stream())
+//                .findFirst()
+//                .ifPresent(it -> {
+//                    final int silkCarRecordCount = it.getSilkCarRecordCount();
+//                    System.out.println(ANONYMOUS + " = " + silkCarRecordCount);
+//                });
 
-        final List<Document> docs = Flux.fromIterable(ids)
-                .flatMap(id -> QueryService.find(PackageBox.class, id))
-                .filter(document -> {
-                    final Double netWeight = document.getDouble("netWeight");
-                    return document.getString("code").contains("GC021511")
-                            && "FOREIGN".equals(document.getString("saleType"))
-                            && netWeight.intValue() == 549;
-                })
-                .collectList().block();
-        System.out.println(docs.size());
-        final List<String> codes = docs.stream().map(document -> document.getString("code")).collect(toList());
-        Collections.sort(codes);
-        codes.forEach(System.out::println);
+//        final LocalDateTime startLdt = LocalDateTime.of(2019, 8, 22, 7, 22);
+//        final LocalDateTime endLdt = LocalDateTime.of(2019, 8, 23, 7, 22);
+//        System.out.println(report.toJsonNode());
     }
 }

@@ -10,6 +10,7 @@ import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeAppendEvent;
 import com.hengyi.japp.mes.auto.application.event.SilkCarRuntimeInitEvent;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
@@ -37,6 +38,7 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     protected final Document document;
     protected final String id;
     protected final String doffingOperatorId;
+    protected final DoffingType doffingType;
     protected final Date doffingDateTime;
     protected final String carpoolOperatorId;
     protected final Date carpoolDateTime;
@@ -53,6 +55,10 @@ public abstract class SilkCarRecordAggregate implements Serializable {
         this.document = document;
         id = document.getString(ID_COL);
         doffingOperatorId = document.getString("doffingOperator");
+        doffingType = Optional.ofNullable(document.getString("doffingType"))
+                .filter(J::nonBlank)
+                .map(DoffingType::valueOf)
+                .orElse(null);
         doffingDateTime = document.getDate("doffingDateTime");
         carpoolOperatorId = document.getString("carpoolOperator");
         carpoolDateTime = document.getDate("carpoolDateTime");
@@ -74,6 +80,23 @@ public abstract class SilkCarRecordAggregate implements Serializable {
         );
     }
 
+    private Collection<SilkRuntime.DTO> fetchInitSilkRuntimes() {
+        final ImmutableList.Builder<SilkRuntime.DTO> builder = ImmutableList.builder();
+        final SilkCarRuntimeInitEvent.DTO initEventDto = SilkCarRuntimeInitEvent.DTO.from(document.getString("initEvent"));
+        builder.addAll(initEventDto.getSilkRuntimes());
+        final Collection<SilkRuntime.DTO> appends = eventSourceDtos.parallelStream()
+                .filter(it -> !it.isDeleted() && EventSourceType.SilkCarRuntimeAppendEvent == it.getType())
+                .flatMap(it -> {
+                    final SilkCarRuntimeAppendEvent.DTO event = (SilkCarRuntimeAppendEvent.DTO) it;
+                    return J.emptyIfNull(event.getSilkRuntimes()).parallelStream();
+                })
+                .collect(toList());
+        builder.addAll(appends);
+        return builder.build();
+    }
+
+    protected abstract Collection<EventSource.DTO> fetchEventSources();
+
     @SneakyThrows
     public static ObjectNode toJsonNode(SilkRuntime.DTO dto) {
         final ObjectNode objectNode = MAPPER.createObjectNode()
@@ -87,6 +110,22 @@ public abstract class SilkCarRecordAggregate implements Serializable {
         }
         objectNode.set("silk", MAPPER.readTree(silk.toJson()));
         return objectNode;
+    }
+
+    @SneakyThrows
+    protected EventSource.DTO toEventSource(String s) {
+        return toEventSource(MAPPER.readTree(s));
+    }
+
+    protected EventSource.DTO toEventSource(JsonNode jsonNode) {
+        final EventSourceType type = EventSourceType.valueOf(jsonNode.get("type").asText());
+        return type.toDto(jsonNode);
+    }
+
+    public boolean hasEventSource(EventSourceType type) {
+        return eventSourceDtos.parallelStream()
+                .filter(it -> !it.isDeleted() && it.getType() == type)
+                .findFirst().isPresent();
     }
 
     @SneakyThrows
@@ -104,39 +143,6 @@ public abstract class SilkCarRecordAggregate implements Serializable {
             objectNode.set("deleteOperator", MAPPER.readTree(deleteOperator.toJson()));
         }
         return objectNode;
-    }
-
-    private Collection<SilkRuntime.DTO> fetchInitSilkRuntimes() {
-        final ImmutableList.Builder<SilkRuntime.DTO> builder = ImmutableList.builder();
-        final SilkCarRuntimeInitEvent.DTO initEventDto = SilkCarRuntimeInitEvent.DTO.from(document.getString("initEvent"));
-        builder.addAll(initEventDto.getSilkRuntimes());
-        final Collection<SilkRuntime.DTO> appends = eventSourceDtos.parallelStream()
-                .filter(it -> EventSourceType.SilkCarRuntimeAppendEvent == it.getType())
-                .flatMap(it -> {
-                    final SilkCarRuntimeAppendEvent.DTO event = (SilkCarRuntimeAppendEvent.DTO) it;
-                    return J.emptyIfNull(event.getSilkRuntimes()).parallelStream();
-                })
-                .collect(toList());
-        builder.addAll(appends);
-        return builder.build();
-    }
-
-    protected abstract Collection<EventSource.DTO> fetchEventSources();
-
-    @SneakyThrows
-    protected EventSource.DTO toEventSource(String s) {
-        return toEventSource(MAPPER.readTree(s));
-    }
-
-    protected EventSource.DTO toEventSource(JsonNode jsonNode) {
-        final EventSourceType type = EventSourceType.valueOf(jsonNode.get("type").asText());
-        return type.toDto(jsonNode);
-    }
-
-    public boolean hasEventSource(EventSourceType type) {
-        return eventSourceDtos.parallelStream()
-                .filter(it -> !it.isDeleted() && it.getType() == type)
-                .findFirst().isPresent();
     }
 
     public abstract SilkCarRecordAggregateType getType();

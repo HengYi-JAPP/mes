@@ -104,7 +104,7 @@ public abstract class EventSource implements Serializable, Comparable<EventSourc
     @Data
     @ToString(onlyExplicitlyIncluded = true)
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    public static class DTO implements Serializable {
+    public static class DTO implements Serializable, Comparable<DTO> {
         @ToString.Include
         @EqualsAndHashCode.Include
         private String eventId;
@@ -131,6 +131,11 @@ public abstract class EventSource implements Serializable, Comparable<EventSourc
                     return t;
                 });
             });
+        }
+
+        @Override
+        public int compareTo(DTO o) {
+            return this.fireDateTime.compareTo(o.fireDateTime);
         }
     }
 

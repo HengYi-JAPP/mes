@@ -1,5 +1,6 @@
 package com.hengyi.japp.mes.auto.domain;
 
+import com.hengyi.japp.mes.auto.application.persistence.annotations.MongoCache;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -12,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@MongoCache
 public class PackageClass extends LoggableMongoEntity {
     @ToString.Include
     @NotBlank

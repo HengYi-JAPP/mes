@@ -22,6 +22,7 @@ import org.apache.lucene.store.FSDirectory;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
@@ -71,6 +72,25 @@ public class QueryServiceImpl implements QueryService {
         Optional.ofNullable(workshopId).filter(J::nonBlank)
                 .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
         bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
+
+        @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
+        final IndexSearcher searcher = new IndexSearcher(indexReader);
+        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
+        return Arrays.stream(topDocs.scoreDocs)
+                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
+                .map(it -> it.get("id"))
+                .collect(toList());
+    }
+
+    @SneakyThrows
+    @Override
+    public Collection<String> querySilkCarRecordIdsByEventSourceCanHappen(String workshopId, long startL, long endL) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        Optional.ofNullable(workshopId).filter(J::nonBlank)
+                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
+        final long currentL = new Date().getTime();
+        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", endL, currentL), BooleanClause.Occur.MUST_NOT);
+        bqBuilder.add(LongPoint.newRangeQuery("endDateTime", 0, startL), BooleanClause.Occur.MUST_NOT);
 
         @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
         final IndexSearcher searcher = new IndexSearcher(indexReader);
