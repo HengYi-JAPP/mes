@@ -46,7 +46,7 @@ public class AgentVerticle extends AbstractVerticle {
         });
 
         router.post("/api/reports/statisticReport/generate").produces(APPLICATION_JSON)
-                .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:generate"));
+                .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:generate", Duration.ofMinutes(5)));
         router.post("/api/reports/statisticReport/fromDisk").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:fromDisk"));
         router.post("/api/reports/statisticReport/rangeDisk").produces(APPLICATION_JSON)

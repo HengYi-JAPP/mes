@@ -39,8 +39,9 @@ public class WarehouseResource {
     @POST
     public Single<String> fetch(String request) {
         final StringBuilder sb = new StringBuilder("WarehousePackageBoxFetchEvent").append(request);
-        final WarehousePackageBoxFetchEvent.Command command = MAPPER.readValue(request, WarehousePackageBoxFetchEvent.Command.class);
-        return warehouseService.handle(PRINCIPAL, command).map(MAPPER::writeValueAsString)
+        return Single.fromCallable(() -> MAPPER.readValue(request, WarehousePackageBoxFetchEvent.Command.class))
+                .flatMap(command -> warehouseService.handle(PRINCIPAL, command))
+                .map(MAPPER::writeValueAsString)
                 .doOnError(e -> log.info(sb.append("\n").append("失败").toString()))
                 .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
     }
@@ -60,8 +61,8 @@ public class WarehouseResource {
     @POST
     public Completable packageBoxFlipEvent(String request) {
         final StringBuilder sb = new StringBuilder("WarehousePackageBoxFlipEvent").append(request);
-        final PackageBoxFlipEvent.WarehouseCommand command = MAPPER.readValue(request, PackageBoxFlipEvent.WarehouseCommand.class);
-        return warehouseService.handle(PRINCIPAL, command).ignoreElement()
+        return Single.fromCallable(() -> MAPPER.readValue(request, PackageBoxFlipEvent.WarehouseCommand.class))
+                .flatMap(command -> warehouseService.handle(PRINCIPAL, command)).ignoreElement()
                 .doOnError(e -> log.info(sb.append("\n").append("失败").toString()))
                 .doOnComplete(() -> log.info(sb.append("\n").append("成功").toString()));
     }
