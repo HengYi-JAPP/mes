@@ -6,6 +6,7 @@ import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarType;
 import com.hengyi.japp.mes.auto.dto.EntityByCodeDTO;
 import com.hengyi.japp.mes.auto.exception.BatchChangedException;
+import com.hengyi.japp.mes.auto.exception.MultiBatchException;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Flowable;
@@ -52,6 +53,9 @@ public class BigSilkCarAppendModel {
                     final int checkSize = silkBarcodes.size();
                     Validate.isTrue(lineMachineCount == checkSize, "机台数错误");
                     final Batch silkBarcodeBatch = checkAndGetBatch(silkBarcodes);
+                    if (!Objects.equals(silkCarRuntime.getSilkCarRecord().getBatch(), silkBarcodeBatch)) {
+                        throw new MultiBatchException();
+                    }
                     return Flowable.fromIterable(silkBarcodes).flatMap(silkBarcode -> {
                         final LineMachine lineMachine = silkBarcode.getLineMachine();
                         final LineMachineProductPlan productPlan = lineMachine.getProductPlan();

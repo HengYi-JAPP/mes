@@ -9,7 +9,6 @@ import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.*;
@@ -35,7 +34,6 @@ public class WarehouseResource {
         this.warehouseService = warehouseService;
     }
 
-    @SneakyThrows
     @ApmTrace(type = "WarehousePackageBoxFetchEvent")
     @Path("PackageBoxFetchEvent")
     @POST
@@ -47,7 +45,6 @@ public class WarehouseResource {
                 .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
     }
 
-    @SneakyThrows
     @ApmTrace(type = "WarehousePackageBoxUnFetchEvent")
     @Path("packageBoxes/codes/{code}")
     @DELETE
@@ -58,7 +55,6 @@ public class WarehouseResource {
                 .doOnComplete(() -> log.info(sb.append("\n").append("成功").toString()));
     }
 
-    @SneakyThrows
     @ApmTrace(type = "WarehousePackageBoxFlipEvent")
     @Path("PackageBoxFlipEvent")
     @POST
