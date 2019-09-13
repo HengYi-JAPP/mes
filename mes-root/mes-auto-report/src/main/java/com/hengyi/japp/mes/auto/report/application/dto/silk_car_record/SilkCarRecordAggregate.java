@@ -130,12 +130,13 @@ public abstract class SilkCarRecordAggregate implements Serializable {
 
     @SneakyThrows
     public static ObjectNode toJsonNode(EventSource.DTO dto) {
-        final ObjectNode objectNode = MAPPER.createObjectNode()
-                .put("eventId", dto.getEventId())
-                .put("type", dto.getType().name())
-                .put("fireDateTime", dto.getFireDateTime().getTime())
-                .put("deleted", dto.isDeleted())
-                .put("deleteDateTime", Optional.ofNullable(dto.getDeleteDateTime()).map(Date::getTime).orElse(null));
+        final ObjectNode objectNode = MAPPER.convertValue(dto, ObjectNode.class);
+//        final ObjectNode objectNode = MAPPER.createObjectNode()
+//                .put("eventId", dto.getEventId())
+//                .put("type", dto.getType().name())
+//                .put("fireDateTime", dto.getFireDateTime().getTime())
+//                .put("deleted", dto.isDeleted())
+//                .put("deleteDateTime", Optional.ofNullable(dto.getDeleteDateTime()).map(Date::getTime).orElse(null));
         final Document operator = QueryService.findFromCache(Operator.class, dto.getOperator()).get();
         objectNode.set("operator", MAPPER.readTree(operator.toJson()));
         if (dto.isDeleted()) {

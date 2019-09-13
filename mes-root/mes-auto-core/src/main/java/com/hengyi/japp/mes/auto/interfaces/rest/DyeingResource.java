@@ -113,7 +113,7 @@ public class DyeingResource {
     public Flowable<DyeingResult> timeline(@QueryParam("type") @DefaultValue("FIRST") String type,
                                            @QueryParam("lineMachineId") String lineMachineId,
                                            @QueryParam("spindle") @DefaultValue("1") @Min(1) int spindle,
-                                           @QueryParam("size") @DefaultValue("50") @Min(1) int size,
+                                           @QueryParam("size") @DefaultValue("10") @Min(1) int size,
                                            @QueryParam("currentId") String currentId) {
         return dyeingService.listTimeline(type, currentId, lineMachineId, spindle, size);
     }

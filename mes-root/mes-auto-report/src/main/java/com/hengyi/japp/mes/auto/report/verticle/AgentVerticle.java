@@ -13,6 +13,10 @@ import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.http.HttpServerResponse;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.handler.BodyHandler;
+import io.vertx.reactivex.ext.web.handler.CookieHandler;
+import io.vertx.reactivex.ext.web.handler.ResponseContentTypeHandler;
+import org.apache.commons.io.FileUtils;
 
 import java.time.Duration;
 
@@ -30,7 +34,9 @@ public class AgentVerticle extends AbstractVerticle {
         final MesAutoConfig config = INJECTOR.getInstance(MesAutoConfig.class);
 
         final Router router = Router.router(vertx);
-        Jvertx.enableCommon(router);
+        router.route().handler(BodyHandler.create().setUploadsDirectory(FileUtils.getTempDirectoryPath()));
+        router.route().handler(ResponseContentTypeHandler.create());
+        router.route().handler(CookieHandler.create());
         Jvertx.enableCors(router, config.getCorsConfig().getDomainPatterns());
         router.route().failureHandler(Jvertx::failureHandler);
 

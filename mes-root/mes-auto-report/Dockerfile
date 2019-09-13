@@ -6,6 +6,8 @@ ENV VERTICLE_HOME /usr/verticles
 ENV VERTICLE_FILE mes-auto-report-fat.jar
 COPY $VERTICLE_FILE $VERTICLE_HOME/
 
+EXPOSE 9090
+
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]
 CMD ["exec java --add-modules java.se \

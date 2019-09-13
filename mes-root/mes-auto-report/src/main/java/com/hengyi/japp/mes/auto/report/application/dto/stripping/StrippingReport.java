@@ -28,9 +28,9 @@ import static java.util.stream.Collectors.*;
  * @author jzb 2019-09-04
  */
 public class StrippingReport {
-    public static final String ANONYMOUS = "anonymous";
-    private static final Collection<String> PRODUCT_PROCESS_IDS = Set.of("5bffac20e189c40001863d76", "5bffad09e189c40001864331");
+    private static final String ANONYMOUS = "anonymous";
     private static final String BLANK = "";
+    private static final Collection<String> PRODUCT_PROCESS_IDS = Set.of("5bffac20e189c40001863d76", "5bffad09e189c40001864331");
     private final String workshopId;
     private final long startDateTime;
     private final long endDateTime;
@@ -43,8 +43,7 @@ public class StrippingReport {
         this.endDateTime = endDateTime;
         groupByOperators = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds))
                 .flatMap(SilkCarRecordAggregate::from)
-                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType())
-                        || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
+                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType()) || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
                 .toStream()
                 .collect(groupingBy(this::operatorId))
                 .entrySet().stream()
@@ -150,7 +149,9 @@ public class StrippingReport {
         }
 
         public JsonNode toJsonNode() {
-            final Map<String, Object> map = Map.of("operator", this.operator, "groupByProducts", groupByProducts);
+            final ArrayNode groupByProductsNode = MAPPER.createArrayNode();
+            J.emptyIfNull(groupByProducts).stream().map(GroupBy_Product::toJsonNode).forEach(groupByProductsNode::add);
+            final Map<String, Object> map = Map.of("operator", this.operator, "groupByProducts", groupByProductsNode);
             return MAPPER.convertValue(map, JsonNode.class);
         }
     }
@@ -158,14 +159,23 @@ public class StrippingReport {
     @Data
     public static class GroupBy_Product {
         private final Product product = new Product();
+        private final Collection<SilkCarRecordAggregate> silkCarRecordAggregates;
         private final int silkCarRecordCount;
         private final int silkCount;
 
-        public GroupBy_Product(Document product, List<SilkCarRecordAggregate> silkCarRecordAggregates) {
+        public GroupBy_Product(Document product, Collection<SilkCarRecordAggregate> silkCarRecordAggregates) {
             this.product.setId(product.getString(ID_COL));
             this.product.setName(product.getString("name"));
-            silkCarRecordCount = silkCarRecordAggregates.size();
-            silkCount = silkCarRecordAggregates.parallelStream().collect(summingInt(it -> it.getInitSilkRuntimeDtos().size()));
+            this.silkCarRecordAggregates = J.emptyIfNull(silkCarRecordAggregates);
+            silkCarRecordCount = this.silkCarRecordAggregates.size();
+            silkCount = this.silkCarRecordAggregates.parallelStream().collect(summingInt(it -> it.getInitSilkRuntimeDtos().size()));
+        }
+
+        public JsonNode toJsonNode() {
+            final ArrayNode silkCarRecordAggregatesNode = MAPPER.createArrayNode();
+            J.emptyIfNull(silkCarRecordAggregates).stream().map(SilkCarRecordAggregate::toJsonNode).forEach(silkCarRecordAggregatesNode::add);
+            final Map<String, Object> map = Map.of("product", product, "silkCarRecordCount", silkCarRecordCount, "silkCount", silkCount, "silkCarRecordAggregates", silkCarRecordAggregatesNode);
+            return MAPPER.convertValue(map, JsonNode.class);
         }
     }
 
