@@ -29,6 +29,8 @@ public class PackageBoxMeasureInfoUpdateCommand implements Serializable {
     @NotNull
     private Date budat;
     @NotNull
+    private EntityDTO grade;
+    @NotNull
     private EntityDTO budatClass;
     @NotNull
     private EntityDTO sapT001l;
