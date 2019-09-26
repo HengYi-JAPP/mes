@@ -4,6 +4,9 @@ import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.report.application.StatisticReportService;
+import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyConfirmReport;
+import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyReport;
+import com.hengyi.japp.mes.auto.report.application.dto.dyeing.DyeingReport;
 import com.hengyi.japp.mes.auto.report.application.dto.inspection.InspectionReport;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportCombine;
@@ -39,9 +42,6 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 public class WorkerVerticle extends AbstractVerticle {
     private QueryService queryService = INJECTOR.getInstance(QueryService.class);
-//    private DyeingReportService dyeingReportService = INJECTOR.getInstance(DyeingReportService.class);
-//    private MeasureFiberReportService measureFiberReportService = INJECTOR.getInstance(MeasureFiberReportService.class);
-//    private SilkExceptionReportService silkExceptionReportService = INJECTOR.getInstance(SilkExceptionReportService.class);
 
     @Override
     public Completable rxStart() {
@@ -58,6 +58,18 @@ public class WorkerVerticle extends AbstractVerticle {
                     log.error("", err);
                     reply.fail(400, err.getLocalizedMessage());
                 })).rxCompletionHandler(),
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:dyeingReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final JsonObject postBody = new JsonObject(msg.getString("body"));
+                    final String workshopId = postBody.getString("workshopId");
+                    final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
+                    final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
+                    final DyeingReport report = DyeingReport.create(workshopId, startDateTime, endDateTime);
+                    return MAPPER.writeValueAsString(report.toJsonNode());
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
                 vertx.eventBus().<JsonObject>consumer("mes-auto:report:inspectionReport", reply -> Single.fromCallable(() -> {
                     final JsonObject msg = reply.body();
                     final JsonObject postBody = new JsonObject(msg.getString("body"));
@@ -65,6 +77,30 @@ public class WorkerVerticle extends AbstractVerticle {
                     final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
                     final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
                     final InspectionReport report = InspectionReport.create(workshopId, startDateTime, endDateTime);
+                    return MAPPER.writeValueAsString(report.toJsonNode());
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:toDtyReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final JsonObject postBody = new JsonObject(msg.getString("body"));
+                    final String workshopId = postBody.getString("workshopId");
+                    final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
+                    final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
+                    final ToDtyReport report = ToDtyReport.create(workshopId, startDateTime, endDateTime);
+                    return MAPPER.writeValueAsString(report.toJsonNode());
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:toDtyConfirmReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final JsonObject postBody = new JsonObject(msg.getString("body"));
+                    final String workshopId = postBody.getString("workshopId");
+                    final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
+                    final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
+                    final ToDtyConfirmReport report = ToDtyConfirmReport.create(workshopId, startDateTime, endDateTime);
                     return MAPPER.writeValueAsString(report.toJsonNode());
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
