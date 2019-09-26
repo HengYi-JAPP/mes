@@ -4,6 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.report.application.StatisticReportService;
+import com.hengyi.japp.mes.auto.report.application.dto.inspection.InspectionReport;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportCombine;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
@@ -52,6 +53,18 @@ public class WorkerVerticle extends AbstractVerticle {
                     final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
                     final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
                     final StrippingReport report = StrippingReport.create(workshopId, startDateTime, endDateTime);
+                    return MAPPER.writeValueAsString(report.toJsonNode());
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:inspectionReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final JsonObject postBody = new JsonObject(msg.getString("body"));
+                    final String workshopId = postBody.getString("workshopId");
+                    final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
+                    final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
+                    final InspectionReport report = InspectionReport.create(workshopId, startDateTime, endDateTime);
                     return MAPPER.writeValueAsString(report.toJsonNode());
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
@@ -141,7 +154,7 @@ public class WorkerVerticle extends AbstractVerticle {
                             startLd.equals(endLd) ? "" + startLd : String.join("~", "" + startLd, "" + endLd),
                             "xlsx"
                     );
-                    return Pair.of(URLEncoder.encode(fileName, UTF_8.name()), report.toByteArray());
+                    return Pair.of(URLEncoder.encode(fileName, UTF_8), report.toByteArray());
                 }).subscribe(pair -> {
                     final DeliveryOptions deliveryOptions = new DeliveryOptions().addHeader("Content-Disposition", "attachment;filename=" + pair.getKey());
                     reply.reply(pair.getValue(), deliveryOptions);
