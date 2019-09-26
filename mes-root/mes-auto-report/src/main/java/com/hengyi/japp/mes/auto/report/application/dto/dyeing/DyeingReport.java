@@ -93,7 +93,7 @@ public class DyeingReport {
             this.operator.setName(operator.getString("name"));
             this.operator.setHrId(operator.getString("hrId"));
             groupByDyeingTypes = dyeingPrepares.stream()
-                    .collect(groupingBy(it -> it.getString("")))
+                    .collect(groupingBy(it -> it.getString("type")))
                     .entrySet().stream()
                     .map(entry -> {
                         final DyeingType dyeingType = DyeingType.valueOf(entry.getKey());
