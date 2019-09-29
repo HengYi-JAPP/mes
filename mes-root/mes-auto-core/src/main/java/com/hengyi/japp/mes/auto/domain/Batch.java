@@ -38,6 +38,10 @@ public class Batch extends LoggableMongoEntity implements Comparable<Batch> {
     private String tubeColor;
     private double tubeWeight;
     private String note;
+    /**
+     * 可以直接提交 多次织袜
+     */
+    private boolean multiDyeing;
 
     @Override
     public int compareTo(Batch o) {
