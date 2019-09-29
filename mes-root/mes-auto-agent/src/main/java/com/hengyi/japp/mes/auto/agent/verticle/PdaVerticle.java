@@ -82,6 +82,12 @@ public class PdaVerticle extends AbstractVerticle {
                 .handler(rc -> commonSend(rc, "mes-auto:report:strippingReport", Duration.ofMinutes(10)));
         router.post("/api/reports/inspectionReport").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:inspectionReport", Duration.ofMinutes(10)));
+        router.post("/api/reports/autoInspectionReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:autoInspectionReport", Duration.ofMinutes(10)));
+        router.post("/api/reports/toDtyReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:toDtyReport", Duration.ofMinutes(10)));
+        router.post("/api/reports/toDtyConfirmReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:toDtyConfirmReport", Duration.ofMinutes(10)));
         router.post("/api/reports/dyeingReport").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:dyeingReport", Duration.ofMinutes(5)));
         router.post("/api/reports/measureFiberReport").produces(APPLICATION_JSON)

@@ -357,6 +357,9 @@ public class PackageBoxServiceImpl implements PackageBoxService {
                 return sapT001lRepository.find(command.getSapT001l().getId());
             }).flatMap(it -> {
                 packageBox.setSapT001l(it);
+                return gradeRepository.find(command.getGrade());
+            }).flatMap(it -> {
+                packageBox.setGrade(it);
                 return operatorRepository.find(principal);
             }).flatMap(it -> {
                 packageBox.log(it);
