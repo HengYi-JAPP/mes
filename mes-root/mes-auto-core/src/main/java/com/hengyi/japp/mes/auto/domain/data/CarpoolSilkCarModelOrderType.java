@@ -94,13 +94,5 @@ public enum CarpoolSilkCarModelOrderType {
         }
     }
 
-    public static void main(String[] args) {
-        final SilkCar silkCar = new SilkCar();
-        silkCar.setRow(4);
-        silkCar.setCol(6);
-        final List<SilkCarPosition> orderedSilkPositions = BOTTOM_RIGHT_S.getOrderedSilkPositions(silkCar);
-        System.out.println(orderedSilkPositions);
-    }
-
     public abstract List<SilkCarPosition> getOrderedSilkPositions(SilkCar silkCar);
 }
