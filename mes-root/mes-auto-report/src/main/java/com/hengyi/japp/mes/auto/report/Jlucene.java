@@ -4,6 +4,7 @@ import com.github.ixtf.japp.core.J;
 import lombok.SneakyThrows;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
@@ -45,9 +46,12 @@ public class Jlucene {
         return builder;
     }
 
+    public static BooleanQuery.Builder addRangeQuery(BooleanQuery.Builder builder, String fieldName, long startL, long endL) {
+        return builder.add(LongPoint.newRangeQuery(fieldName, startL, endL), BooleanClause.Occur.MUST);
+    }
+
     @SneakyThrows
     public static Document toDocument(IndexSearcher searcher, ScoreDoc scoreDoc) {
         return searcher.doc(scoreDoc.doc);
     }
-
 }
