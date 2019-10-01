@@ -52,6 +52,11 @@ public class SilkCarRecord extends MongoEntity {
     private String eventsJsonString;
 
     private Date endDateTime;
+    /**
+     * 丝车去向
+     * 如：推加弹确认
+     */
+    private SilkCarRecordDestination destination;
 
     public Date getStartDateTime() {
         return Optional.ofNullable(getDoffingDateTime()).orElse(getCarpoolDateTime());
