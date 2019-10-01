@@ -13,12 +13,20 @@ import redis.clients.jedis.JedisPool;
 public class Print {
     public static final Injector INJECTOR = Guice.createInjector(new PrintModule());
 
-    public static void main(String[] args) {
+    public static void start(String[] args) {
         final JedisPool jedisPool = INJECTOR.getInstance(JedisPool.class);
         try (Jedis jedis = jedisPool.getResource()) {
             final SilkPrintPubSub silkPrintPubSub = INJECTOR.getInstance(SilkPrintPubSub.class);
             jedis.subscribe(silkPrintPubSub, silkPrintPubSub.getCHANNEL());
         }
+    }
+
+    public static void stop(String[] args) {
+        System.exit(0);
+    }
+
+    public static void main(String[] args) {
+        Print.start(null);
     }
 
 }
