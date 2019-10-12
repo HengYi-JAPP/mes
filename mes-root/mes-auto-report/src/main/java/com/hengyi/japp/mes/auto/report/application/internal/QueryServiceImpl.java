@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
+import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.report.Jlucene;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
@@ -20,6 +21,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -93,6 +95,40 @@ public class QueryServiceImpl implements QueryService {
         bqBuilder.add(LongPoint.newRangeQuery("endDateTime", 0, startL), BooleanClause.Occur.MUST_NOT);
 
         @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
+        final IndexSearcher searcher = new IndexSearcher(indexReader);
+        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
+        return Arrays.stream(topDocs.scoreDocs)
+                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
+                .map(it -> it.get("id"))
+                .collect(toList());
+    }
+
+    @SneakyThrows
+    @Override
+    public Collection<String> queryPackageBoxIds(String workshopId, LocalDate startBudat, LocalDate endBudat) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        Optional.ofNullable(workshopId).filter(J::nonBlank)
+                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
+        Jlucene.addRangeQuery(bqBuilder, "budat", J.date(startBudat).getTime(), J.date(endBudat.plusDays(1)).getTime());
+
+        @Cleanup final IndexReader indexReader = indexReader(PackageBox.class);
+        final IndexSearcher searcher = new IndexSearcher(indexReader);
+        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
+        return Arrays.stream(topDocs.scoreDocs)
+                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
+                .map(it -> it.get("id"))
+                .collect(toList());
+    }
+
+    @SneakyThrows
+    @Override
+    public Collection<String> queryPackageBoxIds(String workshopId, long startDateTime, long endDateTime) {
+        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
+        Optional.ofNullable(workshopId).filter(J::nonBlank)
+                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
+        Jlucene.addRangeQuery(bqBuilder, "createDateTime", startDateTime, endDateTime);
+
+        @Cleanup final IndexReader indexReader = indexReader(PackageBox.class);
         final IndexSearcher searcher = new IndexSearcher(indexReader);
         final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
         return Arrays.stream(topDocs.scoreDocs)
