@@ -9,8 +9,8 @@ import com.hengyi.japp.mes.auto.domain.data.DoffingType;
 import com.hengyi.japp.mes.auto.report.ReportModule;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
-import com.hengyi.japp.mes.auto.report.application.dto.ExceptionRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.PackageBoxReport_ByOperator;
+import com.hengyi.japp.mes.auto.report.application.dto.silkException.ExceptionRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.SilkCarRecordAggregate;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.redis.RedisOptions;
@@ -24,7 +24,6 @@ import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -72,11 +71,10 @@ public class LuceneTest {
 //        PoiTest.PackageBoxReport(FileUtils.getFile(dir, "打包.xlsx"));
 //        System.out.println("PackageBoxReport end");
 
-        Arrays.stream(WORKSHOP_ID).forEach(LuceneTest::AccReport);
+//        Arrays.stream(WORKSHOP_ID).forEach(LuceneTest::AccReport);
+        PoiTest.InspectionReport(new File("/home/jzb/test/InspectionReport/外观.xlsx"));
+        PoiTest.DoffingReport(new File("/home/jzb/test/DoffingReport/落筒.xlsx"));
         System.out.println("InspectionReport end");
-//        PoiTest.InspectionReport(new File("/home/jzb/test/InspectionReport/外观.xlsx"));
-//        PoiTest.DoffingReport(new File("/home/jzb/test/DoffingReport/落筒.xlsx"));
-//        System.out.println("InspectionReport end");
     }
 
     private static void ExceptionRecordReport(String workshopId) {
@@ -108,20 +106,23 @@ public class LuceneTest {
     }
 
     private static void AccReport(String workshopId) {
-        final LocalDate startLd = LocalDate.of(2019, Month.SEPTEMBER, 1);
-        final long startDateTime = J.date(startLd).getTime();
-        final LocalDate endLd = LocalDate.of(2019, Month.OCTOBER, 1);
-        final long endDateTime = J.date(endLd).getTime() - 1;
-        final AccReport accReport = new AccReport(workshopId, startDateTime, endDateTime);
+        Mono.fromCallable(() -> {
+            final LocalDate startLd = LocalDate.of(2019, Month.SEPTEMBER, 1);
+            final long startDateTime = J.date(startLd).getTime();
+            final LocalDate endLd = LocalDate.of(2019, Month.OCTOBER, 1);
+            final long endDateTime = J.date(endLd).getTime() - 1;
+            final AccReport accReport = new AccReport(workshopId, startDateTime, endDateTime);
 
-        final QueryService queryService = INJECTOR.getInstance(QueryService.class);
-        final Collection<String> ids = RedisService.listSilkCarRuntimeSilkCarRecordIds();
-        ids.addAll(queryService.querySilkCarRecordIdsByEventSourceCanHappen(workshopId, startDateTime, endDateTime));
-        final AccReport report = Flux.fromIterable(J.emptyIfNull(ids))
-                .flatMap(SilkCarRecordAggregate::from)
-                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType()) || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
-                .reduce(accReport, (acc, cur) -> acc.collect(cur)).block();
-        report.save(workshopId);
+            final QueryService queryService = INJECTOR.getInstance(QueryService.class);
+            final Collection<String> ids = RedisService.listSilkCarRuntimeSilkCarRecordIds();
+            ids.addAll(queryService.querySilkCarRecordIdsByEventSourceCanHappen(workshopId, startDateTime, endDateTime));
+            final AccReport report = Flux.fromIterable(J.emptyIfNull(ids))
+                    .flatMap(SilkCarRecordAggregate::from)
+                    .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType()) || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
+                    .reduce(accReport, (acc, cur) -> acc.collect(cur)).block();
+            report.save(workshopId);
+            return true;
+        }).retry(5).block();
     }
 
 //    private static void InspectionReport(String workshopId) {

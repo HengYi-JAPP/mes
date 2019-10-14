@@ -110,16 +110,19 @@ public class PoiTest {
             Row row = sheet.createRow(rowIdx);
             addHeaders(row, "人员", "产品", "车数", "颗数");
             for (JsonNode node : jsonNode) {
-                row = sheet.createRow(++rowIdx);
                 final JsonNode operator = node.get("operator");
-                Cell cell = Jpoi.cell(row, 'A');
-                cell.setCellValue(operator.get("name").asText());
-                cell = Jpoi.cell(row, 'B');
-                cell.setCellValue(node.get("silkCarRecordCount").asLong());
-                cell = Jpoi.cell(row, 'C');
-                cell.setCellValue(node.get("silkCount").asLong());
-//                cell = Jpoi.cell(row, 'D');
-//                cell.setCellValue(node.get("netWeightSum").asDouble());
+                for (JsonNode products : node.get("products")) {
+                    row = sheet.createRow(++rowIdx);
+                    final JsonNode product = products.get("product");
+                    Cell cell = Jpoi.cell(row, 'A');
+                    cell.setCellValue(operator.get("name").asText());
+                    cell = Jpoi.cell(row, 'B');
+                    cell.setCellValue(product.get("name").asText());
+                    cell = Jpoi.cell(row, 'C');
+                    cell.setCellValue(products.get("silkCarRecordCount").asLong());
+                    cell = Jpoi.cell(row, 'D');
+                    cell.setCellValue(products.get("silkCount").asLong());
+                }
             }
         }
         @Cleanup final FileOutputStream os = new FileOutputStream(file);
@@ -137,16 +140,19 @@ public class PoiTest {
             Row row = sheet.createRow(rowIdx);
             addHeaders(row, "人员", "产品", "车数", "颗数");
             for (JsonNode node : jsonNode) {
-                row = sheet.createRow(++rowIdx);
                 final JsonNode operator = node.get("operator");
-                Cell cell = Jpoi.cell(row, 'A');
-                cell.setCellValue(operator.get("name").asText());
-                cell = Jpoi.cell(row, 'B');
-                cell.setCellValue(node.get("silkCarRecordCount").asLong());
-                cell = Jpoi.cell(row, 'C');
-                cell.setCellValue(node.get("silkCount").asLong());
-//                cell = Jpoi.cell(row, 'D');
-//                cell.setCellValue(node.get("netWeightSum").asDouble());
+                for (JsonNode products : node.get("products")) {
+                    row = sheet.createRow(++rowIdx);
+                    final JsonNode product = products.get("product");
+                    Cell cell = Jpoi.cell(row, 'A');
+                    cell.setCellValue(operator.get("name").asText());
+                    cell = Jpoi.cell(row, 'B');
+                    cell.setCellValue(product.get("name").asText());
+                    cell = Jpoi.cell(row, 'C');
+                    cell.setCellValue(products.get("silkCarRecordCount").asLong());
+                    cell = Jpoi.cell(row, 'D');
+                    cell.setCellValue(products.get("silkCount").asLong());
+                }
             }
         }
         @Cleanup final FileOutputStream os = new FileOutputStream(file);

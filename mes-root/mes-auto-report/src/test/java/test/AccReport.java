@@ -119,8 +119,6 @@ public class AccReport {
         @EqualsAndHashCode.Include
         private final Operator operator = new Operator();
         private final Map<String, GroupBy_Batch> batchMap = Maps.newConcurrentMap();
-        private int silkCarRecordCount;
-        private int silkCount;
 
         public GroupBy_Operator(String id) {
             final Document operator = QueryService.find(Operator.class, id).block();

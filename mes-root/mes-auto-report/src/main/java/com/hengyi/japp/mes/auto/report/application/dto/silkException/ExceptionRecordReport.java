@@ -1,4 +1,4 @@
-package com.hengyi.japp.mes.auto.report.application.dto;
+package com.hengyi.japp.mes.auto.report.application.dto.silkException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -15,10 +15,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import reactor.core.publisher.Flux;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
@@ -44,13 +41,7 @@ public class ExceptionRecordReport {
             final String lineId = lineMachine.getString("line");
             final Document line = QueryService.findFromCache(Line.class, lineId).get();
             if (Objects.equals(workshopId, line.getString("workshop"))) {
-                final String creatorId = cur.getString("creator");
-                acc.compute(creatorId, (k, v) -> {
-                    if (v == null) {
-                        v = new GroupBy_Operator(creatorId);
-                    }
-                    return v.collect(cur);
-                });
+                acc.compute(cur.getString("creator"), (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(cur));
             }
             return acc;
         }).map(Map::values).block();
