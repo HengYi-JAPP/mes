@@ -3,12 +3,13 @@ package com.hengyi.japp.mes.auto.report.application.dto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.domain.ExceptionRecord;
-import com.hengyi.japp.mes.auto.domain.Operator;
+import com.google.common.collect.Maps;
+import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.report.Report;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -17,12 +18,11 @@ import reactor.core.publisher.Flux;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
 import static com.mongodb.client.model.Filters.*;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-10-12
@@ -38,15 +38,22 @@ public class ExceptionRecordReport {
         this.workshopId = workshopId;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        groupByOperators = exceptionRecord$.toStream()
-                .collect(groupingBy(it -> it.getString("creator")))
-                .entrySet().stream()
-                .map(entry -> {
-                    final String operatorId = entry.getKey();
-                    final Document operator = QueryService.find(Operator.class, operatorId).block();
-                    return new GroupBy_Operator(operator, entry.getValue());
-                })
-                .collect(toList());
+        groupByOperators = exceptionRecord$.reduce(Maps.<String, GroupBy_Operator>newConcurrentMap(), (acc, cur) -> {
+            final String lineMachineId = cur.getString("lineMachine");
+            final Document lineMachine = QueryService.findFromCache(LineMachine.class, lineMachineId).get();
+            final String lineId = lineMachine.getString("line");
+            final Document line = QueryService.findFromCache(Line.class, lineId).get();
+            if (Objects.equals(workshopId, line.getString("workshop"))) {
+                final String creatorId = cur.getString("creator");
+                acc.compute(creatorId, (k, v) -> {
+                    if (v == null) {
+                        v = new GroupBy_Operator(creatorId);
+                    }
+                    return v.collect(cur);
+                });
+            }
+            return acc;
+        }).map(Map::values).block();
     }
 
     public static ExceptionRecordReport create(String workshopId, long startDateTime, long endDateTime) {
@@ -66,20 +73,84 @@ public class ExceptionRecordReport {
     }
 
     @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     public static class GroupBy_Operator {
+        @EqualsAndHashCode.Include
         private final Operator operator = new Operator();
-        private final int silkCount;
+        private final Map<String, GroupBy_Batch> batchMap = Maps.newConcurrentMap();
 
-        public GroupBy_Operator(Document operator, Collection<Document> exceptionRecords) {
+        public GroupBy_Operator(String id) {
+            final Document operator = QueryService.find(Operator.class, id).block();
             this.operator.setId(operator.getString(ID_COL));
             this.operator.setName(operator.getString("name"));
             this.operator.setHrId(operator.getString("hrId"));
-            silkCount = exceptionRecords.size();
+        }
+
+        public GroupBy_Operator collect(Document exceptionRecord) {
+            final String silkId = exceptionRecord.getString("silk");
+            final String batchId = QueryService.find(Silk.class, silkId).map(it -> it.getString("batch")).block();
+            batchMap.compute(batchId, (k, v) -> {
+                if (v == null) {
+                    v = new GroupBy_Batch(batchId);
+                }
+                return v.collect(exceptionRecord);
+            });
+            return this;
         }
 
         public JsonNode toJsonNode() {
-            final Map<String, Object> map = Map.of("operator", this.operator, "silkCount", silkCount);
+            final Collection<GroupBy_Product> products = Flux.fromIterable(batchMap.values())
+                    .reduce(Maps.<Product, GroupBy_Product>newConcurrentMap(), (acc, cur) -> {
+                        final Product product = cur.getBatch().getProduct();
+                        acc.compute(product, (k, v) -> {
+                            if (v == null) {
+                                v = new GroupBy_Product(product);
+                            }
+                            return v.collect(cur);
+                        });
+                        return acc;
+                    }).map(Map::values).block();
+            final Map<String, Object> map = Map.of("operator", this.operator, "products", products);
             return MAPPER.convertValue(map, JsonNode.class);
+        }
+    }
+
+    @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    public static class GroupBy_Batch {
+        @EqualsAndHashCode.Include
+        private final Batch batch = new Batch();
+        private int silkCount = 0;
+
+        public GroupBy_Batch(String batchId) {
+            final Document batch = QueryService.findFromCache(Batch.class, batchId).get();
+            this.batch.setId(batch.getString(ID_COL));
+            this.batch.setBatchNo(batch.getString("batchNo"));
+            this.batch.setSpec(batch.getString("spec"));
+            this.batch.setSilkWeight(batch.getDouble("silkWeight"));
+            final Product product = new Product();
+            this.batch.setProduct(product);
+            final Document document = QueryService.findFromCache(Product.class, batch.getString("product")).get();
+            product.setId(document.getString(ID_COL));
+            product.setName(document.getString("name"));
+        }
+
+        public GroupBy_Batch collect(Document exceptionRecord) {
+            silkCount++;
+            return this;
+        }
+    }
+
+    @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    public static class GroupBy_Product {
+        @EqualsAndHashCode.Include
+        private final Product product;
+        private int silkCount = 0;
+
+        public GroupBy_Product collect(GroupBy_Batch collect) {
+            silkCount += collect.silkCount;
+            return this;
         }
     }
 }

@@ -4,7 +4,7 @@ import com.github.ixtf.japp.core.J;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.report.application.StatisticReportService;
-import com.hengyi.japp.mes.auto.report.application.dto.PackageBoxReport;
+import com.hengyi.japp.mes.auto.report.application.dto.PackageBoxReport_ByOperator;
 import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyConfirmReport;
 import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyReport;
 import com.hengyi.japp.mes.auto.report.application.dto.dyeing.DyeingReport;
@@ -113,7 +113,7 @@ public class WorkerVerticle extends AbstractVerticle {
                     final String workshopId = postBody.getString("workshopId");
                     final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
                     final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
-                    final PackageBoxReport report = PackageBoxReport.create(workshopId, startDateTime, endDateTime);
+                    final PackageBoxReport_ByOperator report = PackageBoxReport_ByOperator.create(workshopId, startDateTime, endDateTime);
                     return MAPPER.writeValueAsString(report.toJsonNode());
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);

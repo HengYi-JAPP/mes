@@ -1,21 +1,28 @@
 package test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Maps;
 import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.application.event.EventSourceType;
 import com.hengyi.japp.mes.auto.application.event.ProductProcessSubmitEvent;
+import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.Operator;
+import com.hengyi.japp.mes.auto.domain.Product;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.SilkCarRecordAggregate;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.bson.Document;
+import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.util.*;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
 import static java.util.stream.Collectors.toList;
 
@@ -41,8 +48,7 @@ public class AccReport {
         if (inspectionOperatorId != null) {
             InspectionMap.compute(inspectionOperatorId, (k, v) -> {
                 if (v == null) {
-                    final Document operator = QueryService.find(Operator.class, inspectionOperatorId).block();
-                    v = new GroupBy_Operator(operator);
+                    v = new GroupBy_Operator(inspectionOperatorId);
                 }
                 return v.collect(silkCarRecordAggregate);
             });
@@ -51,8 +57,7 @@ public class AccReport {
         if (doffingOperatorId != null) {
             DoffingMap.compute(doffingOperatorId, (k, v) -> {
                 if (v == null) {
-                    final Document operator = QueryService.find(Operator.class, doffingOperatorId).block();
-                    v = new GroupBy_Operator(operator);
+                    v = new GroupBy_Operator(doffingOperatorId);
                 }
                 return v.collect(silkCarRecordAggregate);
             });
@@ -62,8 +67,15 @@ public class AccReport {
 
     @SneakyThrows
     public void save(String workshopId) {
-        MAPPER.writeValue(new File("/home/jzb/test/InspectionReport/" + workshopId + ".json"), InspectionMap.values());
-        MAPPER.writeValue(new File("/home/jzb/test/DoffingReport/" + workshopId + ".json"), DoffingMap.values());
+        final List<JsonNode> doffingList = DoffingMap.values().stream().map(GroupBy_Operator::toJsonNode).collect(toList());
+        final File doffingReportDir = FileUtils.getFile("/home/jzb/test/DoffingReport");
+        FileUtils.forceMkdir(doffingReportDir);
+        YAML_MAPPER.writeValue(FileUtils.getFile(doffingReportDir, workshopId + ".yml"), doffingList);
+
+        final List<JsonNode> inspectionList = InspectionMap.values().stream().map(GroupBy_Operator::toJsonNode).collect(toList());
+        final File inspectionReportDir = FileUtils.getFile("/home/jzb/test/InspectionReport");
+        FileUtils.forceMkdir(inspectionReportDir);
+        YAML_MAPPER.writeValue(FileUtils.getFile(inspectionReportDir, workshopId + ".yml"), inspectionList);
     }
 
     private String InspectionOperatorId(SilkCarRecordAggregate silkCarRecordAggregate) {
@@ -102,21 +114,89 @@ public class AccReport {
     }
 
     @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     public static class GroupBy_Operator {
+        @EqualsAndHashCode.Include
         private final Operator operator = new Operator();
+        private final Map<String, GroupBy_Batch> batchMap = Maps.newConcurrentMap();
         private int silkCarRecordCount;
         private int silkCount;
 
-        public GroupBy_Operator(Document operator) {
+        public GroupBy_Operator(String id) {
+            final Document operator = QueryService.find(Operator.class, id).block();
             this.operator.setId(operator.getString(ID_COL));
             this.operator.setName(operator.getString("name"));
             this.operator.setHrId(operator.getString("hrId"));
         }
 
         public GroupBy_Operator collect(SilkCarRecordAggregate silkCarRecordAggregate) {
+            final Document batch = silkCarRecordAggregate.getBatch();
+            batchMap.compute(batch.getString(ID_COL), (k, v) -> {
+                if (v == null) {
+                    v = new GroupBy_Batch(batch);
+                }
+                return v.collect(silkCarRecordAggregate);
+            });
+            return this;
+        }
+
+        public JsonNode toJsonNode() {
+            final Collection<GroupBy_Product> products = Flux.fromIterable(batchMap.values())
+                    .reduce(Maps.<Product, GroupBy_Product>newConcurrentMap(), (acc, cur) -> {
+                        final Product product = cur.getBatch().getProduct();
+                        acc.compute(product, (k, v) -> {
+                            if (v == null) {
+                                v = new GroupBy_Product(product);
+                            }
+                            return v.collect(cur);
+                        });
+                        return acc;
+                    }).map(Map::values).block();
+            final Map<String, Object> map = Map.of("operator", this.operator, "products", products);
+            return MAPPER.convertValue(map, JsonNode.class);
+        }
+    }
+
+    @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    public static class GroupBy_Batch {
+        @EqualsAndHashCode.Include
+        private final Batch batch = new Batch();
+        private int silkCarRecordCount = 0;
+        private int silkCount = 0;
+
+        public GroupBy_Batch(Document batch) {
+            this.batch.setId(batch.getString(ID_COL));
+            this.batch.setBatchNo(batch.getString("batchNo"));
+            this.batch.setSpec(batch.getString("spec"));
+            this.batch.setSilkWeight(batch.getDouble("silkWeight"));
+            final Product product = new Product();
+            this.batch.setProduct(product);
+            final Document document = QueryService.findFromCache(Product.class, batch.getString("product")).get();
+            product.setId(document.getString(ID_COL));
+            product.setName(document.getString("name"));
+        }
+
+        public GroupBy_Batch collect(SilkCarRecordAggregate silkCarRecordAggregate) {
             silkCarRecordCount++;
             silkCount += silkCarRecordAggregate.getInitSilkRuntimeDtos().size();
             return this;
         }
     }
+
+    @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    public static class GroupBy_Product {
+        @EqualsAndHashCode.Include
+        private final Product product;
+        private int silkCarRecordCount = 0;
+        private int silkCount = 0;
+
+        public GroupBy_Product collect(GroupBy_Batch collect) {
+            silkCarRecordCount += collect.silkCarRecordCount;
+            silkCount += collect.silkCount;
+            return this;
+        }
+    }
+
 }
