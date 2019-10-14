@@ -46,21 +46,11 @@ public class AccReport {
     public AccReport collect(SilkCarRecordAggregate silkCarRecordAggregate) {
         final String inspectionOperatorId = InspectionOperatorId(silkCarRecordAggregate);
         if (inspectionOperatorId != null) {
-            InspectionMap.compute(inspectionOperatorId, (k, v) -> {
-                if (v == null) {
-                    v = new GroupBy_Operator(inspectionOperatorId);
-                }
-                return v.collect(silkCarRecordAggregate);
-            });
+            InspectionMap.compute(inspectionOperatorId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(silkCarRecordAggregate));
         }
         final String doffingOperatorId = silkCarRecordAggregate.getDoffingOperatorId();
         if (doffingOperatorId != null) {
-            DoffingMap.compute(doffingOperatorId, (k, v) -> {
-                if (v == null) {
-                    v = new GroupBy_Operator(doffingOperatorId);
-                }
-                return v.collect(silkCarRecordAggregate);
-            });
+            DoffingMap.compute(doffingOperatorId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(silkCarRecordAggregate));
         }
         return this;
     }
@@ -129,12 +119,7 @@ public class AccReport {
 
         public GroupBy_Operator collect(SilkCarRecordAggregate silkCarRecordAggregate) {
             final Document batch = silkCarRecordAggregate.getBatch();
-            batchMap.compute(batch.getString(ID_COL), (k, v) -> {
-                if (v == null) {
-                    v = new GroupBy_Batch(batch);
-                }
-                return v.collect(silkCarRecordAggregate);
-            });
+            batchMap.compute(batch.getString(ID_COL), (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Batch(batch)).collect(silkCarRecordAggregate));
             return this;
         }
 
@@ -142,12 +127,7 @@ public class AccReport {
             final Collection<GroupBy_Product> products = Flux.fromIterable(batchMap.values())
                     .reduce(Maps.<Product, GroupBy_Product>newConcurrentMap(), (acc, cur) -> {
                         final Product product = cur.getBatch().getProduct();
-                        acc.compute(product, (k, v) -> {
-                            if (v == null) {
-                                v = new GroupBy_Product(product);
-                            }
-                            return v.collect(cur);
-                        });
+                        acc.compute(product, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Product(k)).collect(cur));
                         return acc;
                     }).map(Map::values).block();
             final Map<String, Object> map = Map.of("operator", this.operator, "products", products);

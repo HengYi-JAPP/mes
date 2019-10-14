@@ -121,12 +121,7 @@ public class InspectionReport {
 
         public GroupBy_Operator collect(SilkCarRecordAggregate silkCarRecordAggregate) {
             final Document batch = silkCarRecordAggregate.getBatch();
-            batchMap.compute(batch.getString(ID_COL), (k, v) -> {
-                if (v == null) {
-                    v = new GroupBy_Batch(batch);
-                }
-                return v.collect(silkCarRecordAggregate);
-            });
+            batchMap.compute(batch.getString(ID_COL), (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Batch(batch)).collect(silkCarRecordAggregate));
             return this;
         }
 

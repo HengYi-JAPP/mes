@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
@@ -39,13 +40,7 @@ public class PackageBoxReport_ByOperator {
         groupByOperators = Flux.fromIterable(J.emptyIfNull(packageBoxIds))
                 .flatMap(it -> QueryService.find(PackageBox.class, it))
                 .reduce(Maps.<String, GroupBy_Operator>newConcurrentMap(), (acc, cur) -> {
-                    final String creatorId = cur.getString("creator");
-                    acc.compute(creatorId, (k, v) -> {
-                        if (v == null) {
-                            v = new GroupBy_Operator(creatorId);
-                        }
-                        return v.collect(cur);
-                    });
+                    acc.compute(cur.getString("creator"), (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(cur));
                     return acc;
                 }).map(Map::values).block();
     }
@@ -85,12 +80,7 @@ public class PackageBoxReport_ByOperator {
         public GroupBy_Operator collect(Document packageBoxe) {
             final String batchId = packageBoxe.getString("batch");
             final String gradeId = packageBoxe.getString("grade");
-            batchGradeMap.compute(Pair.of(batchId, gradeId), (k, v) -> {
-                if (v == null) {
-                    v = new GroupBy_BatchGrade(batchId, gradeId);
-                }
-                return v.collect(packageBoxe);
-            });
+            batchGradeMap.compute(Pair.of(batchId, gradeId), (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_BatchGrade(batchId, gradeId)).collect(packageBoxe));
             return this;
         }
 
@@ -98,12 +88,7 @@ public class PackageBoxReport_ByOperator {
             final Collection<GroupBy_Product> products = Flux.fromIterable(batchGradeMap.values())
                     .reduce(Maps.<Product, GroupBy_Product>newConcurrentMap(), (acc, cur) -> {
                         final Product product = cur.getBatch().getProduct();
-                        acc.compute(product, (k, v) -> {
-                            if (v == null) {
-                                v = new GroupBy_Product(product);
-                            }
-                            return v.collect(cur);
-                        });
+                        acc.compute(product, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Product(k)).collect(cur));
                         return acc;
                     }).map(Map::values).block();
             final Map<String, Object> map = Map.of("operator", this.operator, "products", products);

@@ -80,12 +80,7 @@ public class ExceptionRecordReport {
         public GroupBy_Operator collect(Document exceptionRecord) {
             final String silkId = exceptionRecord.getString("silk");
             final String batchId = QueryService.find(Silk.class, silkId).map(it -> it.getString("batch")).block();
-            batchMap.compute(batchId, (k, v) -> {
-                if (v == null) {
-                    v = new GroupBy_Batch(batchId);
-                }
-                return v.collect(exceptionRecord);
-            });
+            batchMap.compute(batchId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Batch(batchId)).collect(exceptionRecord));
             return this;
         }
 
@@ -93,12 +88,7 @@ public class ExceptionRecordReport {
             final Collection<GroupBy_Product> products = Flux.fromIterable(batchMap.values())
                     .reduce(Maps.<Product, GroupBy_Product>newConcurrentMap(), (acc, cur) -> {
                         final Product product = cur.getBatch().getProduct();
-                        acc.compute(product, (k, v) -> {
-                            if (v == null) {
-                                v = new GroupBy_Product(product);
-                            }
-                            return v.collect(cur);
-                        });
+                        acc.compute(product, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Product(k)).collect(cur));
                         return acc;
                     }).map(Map::values).block();
             final Map<String, Object> map = Map.of("operator", this.operator, "products", products);
