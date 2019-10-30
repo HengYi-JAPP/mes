@@ -63,7 +63,6 @@ public class PackageBoxResource {
         return packageBoxRepository.query(query).flattenAsFlowable(it -> it.getPackageBoxes());
     }
 
-
     @Path("packageBoxAppend")
     @POST
     public Single<PackageBox> handle(Principal principal, PackageBoxAppendCommand command) {
