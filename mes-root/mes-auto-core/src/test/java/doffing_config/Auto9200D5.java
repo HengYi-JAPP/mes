@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 
 import static com.github.ixtf.japp.core.Constant.YAML_MAPPER;
 import static com.hengyi.japp.mes.auto.config.DoffingSpec.lineMachineSilkSpec;
+import static com.hengyi.japp.mes.auto.domain.data.SilkCarSideType.A;
+import static com.hengyi.japp.mes.auto.domain.data.SilkCarSideType.B;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -65,8 +67,8 @@ public class Auto9200D5 {
 
     private static List<LineMachineSpec> getLineMachineSpecs() {
         final List<LineMachineSpec> result = Lists.newArrayList();
-        result.add(getLineMachineSpec(1, SilkCarSideType.A, 24));
-        result.add(getLineMachineSpec(2, SilkCarSideType.B, 24));
+        result.add(getLineMachineSpec(1, A, 24));
+        result.add(getLineMachineSpec(2, B, 24));
         return result;
     }
 
