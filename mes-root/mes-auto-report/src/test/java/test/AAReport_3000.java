@@ -29,6 +29,7 @@ public class AAReport_3000 {
 
     static {
         // sshfs -o allow_other root@10.2.0.215:/data/mes/auto/db /data/mes-3000/auto/db
+        // sshfs -o allow_other root@10.2.0.215:/data/mes/auto/db /data/mes-9200/auto/db
         System.setProperty("japp.mes.auto.path", "/data/mes-3000/auto");
         INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
     }
