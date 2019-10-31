@@ -3,6 +3,7 @@ package com.hengyi.japp.mes.auto.application.event;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.dto.SilkCarRecordDTO;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -33,7 +34,7 @@ public class ToDtyConfirmEvent extends EventSource {
 
     @Override
     protected Completable _undo(Operator operator) {
-        throw new IllegalAccessError();
+        return Completable.complete();
     }
 
     @Override
@@ -68,6 +69,8 @@ public class ToDtyConfirmEvent extends EventSource {
     public static class Command implements Serializable {
         @NotNull
         private SilkCarRecordDTO silkCarRecord;
+        @NotNull
+        private EntityDTO destination;
     }
 
 }
