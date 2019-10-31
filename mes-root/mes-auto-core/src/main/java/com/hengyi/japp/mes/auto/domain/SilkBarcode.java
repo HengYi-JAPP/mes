@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -74,7 +75,11 @@ public class SilkBarcode extends LoggableMongoEntity {
 
     @JsonGetter
     public boolean batchChanged() {
-        return !Objects.equals(getBatch(), getLineMachine().getProductPlan().getBatch());
+        final Batch batch = Optional.ofNullable(getLineMachine())
+                .map(LineMachine::getProductPlan)
+                .map(LineMachineProductPlan::getBatch)
+                .orElse(null);
+        return !Objects.equals(getBatch(), batch);
     }
 
     public String generateCode() {

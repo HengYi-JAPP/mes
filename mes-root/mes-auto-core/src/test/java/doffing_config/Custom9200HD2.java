@@ -76,11 +76,11 @@ public class Custom9200HD2 {
         lineMachineSpec.setOrderBy(1);
         List<LineMachineSilkSpec> lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 6, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 5, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 6, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 5, 4));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 5, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 6, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 1, 6, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 6, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 1, 6, 1));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -88,11 +88,11 @@ public class Custom9200HD2 {
         lineMachineSpec.setOrderBy(2);
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 4, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 3, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 4, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 3, 4));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 3, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 4, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 1, 4, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 4, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 1, 4, 1));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -100,11 +100,11 @@ public class Custom9200HD2 {
         lineMachineSpec.setOrderBy(3);
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 2, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 1, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 2, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 3, 1, 4));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 1, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 2, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 1, 2, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 2, 2, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(A, 1, 2, 1));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -112,11 +112,11 @@ public class Custom9200HD2 {
         lineMachineSpec.setOrderBy(4);
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 6, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 5, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 6, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 5, 4));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 5, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 6, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 1, 6, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 6, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 1, 6, 1));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -124,11 +124,11 @@ public class Custom9200HD2 {
         lineMachineSpec.setOrderBy(5);
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 4, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 3, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 4, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 3, 4));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 3, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 4, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 1, 4, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 4, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 1, 4, 1));
 
         lineMachineSpec = new LineMachineSpec();
         result.add(lineMachineSpec);
@@ -136,11 +136,11 @@ public class Custom9200HD2 {
         lineMachineSpec.setOrderBy(6);
         lineMachineSilkSpecs = Lists.newArrayList();
         lineMachineSpec.setLineMachineSilkSpecs(lineMachineSilkSpecs);
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 2, 1));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 1, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 2, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 3, 1, 4));
         lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 1, 3));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 2, 4));
-        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 1, 2, 5));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 2, 2, 2));
+        lineMachineSilkSpecs.add(lineMachineSilkSpec(B, 1, 2, 1));
         return result;
     }
 
