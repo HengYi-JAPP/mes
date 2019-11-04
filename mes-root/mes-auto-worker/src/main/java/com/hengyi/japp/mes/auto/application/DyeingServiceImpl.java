@@ -18,8 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2018-08-08
@@ -51,7 +52,7 @@ public class DyeingServiceImpl implements DyeingService {
     @Override
     public Single<DyeingPrepare> create(DyeingPrepare dyeingPrepare, SilkCarRuntime silkCarRuntime, Collection<SilkRuntime> silkRuntimes) {
         final SilkCarRecord silkCarRecord = silkCarRuntime.getSilkCarRecord();
-        final Collection<Silk> silks = silkRuntimes.stream().map(SilkRuntime::getSilk).collect(Collectors.toList());
+        final Collection<Silk> silks = silkRuntimes.stream().map(SilkRuntime::getSilk).collect(toList());
         dyeingPrepare.setSilkCarRecord(silkCarRecord);
         dyeingPrepare.setSilks(silks);
         return createDyeingResults(dyeingPrepare, silkRuntimes).flatMap(dyeingResults -> {
@@ -123,17 +124,17 @@ public class DyeingServiceImpl implements DyeingService {
         final SilkCarRecord silkCarRecord1 = silkCarRuntime1.getSilkCarRecord();
         final Collection<Silk> silks1 = silkRuntimes1.stream()
                 .map(SilkRuntime::getSilk)
-                .collect(Collectors.toList());
+                .collect(toList());
         final SilkCarRecord silkCarRecord2 = silkCarRuntime2.getSilkCarRecord();
         final Collection<Silk> silks2 = silkRuntimes2.stream()
                 .map(SilkRuntime::getSilk)
-                .collect(Collectors.toList());
+                .collect(toList());
         dyeingPrepare.setSilkCarRecord1(silkCarRecord1);
         dyeingPrepare.setSilks1(silks1);
         dyeingPrepare.setSilkCarRecord2(silkCarRecord2);
         dyeingPrepare.setSilks2(silks2);
 
-        final List<SilkRuntime> silkRuntimes = Stream.concat(silkRuntimes1.stream(), silkRuntimes2.stream()).collect(Collectors.toList());
+        final List<SilkRuntime> silkRuntimes = Stream.concat(silkRuntimes1.stream(), silkRuntimes2.stream()).collect(toList());
         return createDyeingResults(dyeingPrepare, silkRuntimes).flatMap(dyeingResults -> {
             dyeingPrepare.setDyeingResults(dyeingResults);
             return dyeingPrepareRepository.save(dyeingPrepare).doOnSuccess(this::updateTimeLine);

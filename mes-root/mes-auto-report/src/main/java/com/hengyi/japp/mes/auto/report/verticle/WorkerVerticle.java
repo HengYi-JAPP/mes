@@ -8,6 +8,7 @@ import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyConfirmReport;
 import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyReport;
 import com.hengyi.japp.mes.auto.report.application.dto.dyeing.DyeingReport;
 import com.hengyi.japp.mes.auto.report.application.dto.inspection.InspectionReport;
+import com.hengyi.japp.mes.auto.report.application.dto.silkException.ExceptionRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportCombine;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
@@ -106,9 +107,20 @@ public class WorkerVerticle extends AbstractVerticle {
                     log.error("", err);
                     reply.fail(400, err.getLocalizedMessage());
                 })).rxCompletionHandler(),
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:silkExceptionReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final JsonObject postBody = new JsonObject(msg.getString("body"));
+                    final String workshopId = postBody.getString("workshopId");
+                    final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
+                    final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
+                    final ExceptionRecordReport report = ExceptionRecordReport.create(workshopId, startDateTime, endDateTime);
+                    return MAPPER.writeValueAsString(report.toJsonNode());
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
 //                vertx.eventBus().consumer("mes-auto:report:dyeingReport", dyeingReportService::dyeingReport).rxCompletionHandler(),
 //                vertx.eventBus().consumer("mes-auto:report:measureFiberReport", measureFiberReportService::measureFiberReport).rxCompletionHandler(),
-//                vertx.eventBus().consumer("mes-auto:report:silkExceptionReport", silkExceptionReportService::silkExceptionReport).rxCompletionHandler(),
 
                 vertx.eventBus().<JsonObject>consumer("mes-auto:report:doffingSilkCarRecordReport", reply -> Single.fromCallable(() -> {
                     final JsonObject msg = reply.body();

@@ -21,6 +21,7 @@ import org.apache.lucene.search.TopDocs;
 import org.bson.Document;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +59,7 @@ public class DyeingReport {
                 .collect(toList());
     }
 
-    @SneakyThrows
+    @SneakyThrows(IOException.class)
     public static DyeingReport create(String workshopId, long startDateTime, long endDateTime) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
         Jlucene.add(bqBuilder, "workshop", workshopId);
@@ -119,21 +120,10 @@ public class DyeingReport {
         public GroupBy_DyeingType(DyeingType dyeingType, Collection<Document> dyeingPrepares) {
             this.dyeingType = dyeingType;
             this.dyeingPrepares = dyeingPrepares;
-            silkCount = this.dyeingPrepares.parallelStream().collect(summingInt(this::dd));
-        }
-
-        private int dd(Document dyeingPrepare) {
-            switch (dyeingType) {
-                case CROSS_LINEMACHINE_LINEMACHINE: {
-                    final List<String> silks1 = dyeingPrepare.getList("silks1", String.class);
-                    final List<String> silks2 = dyeingPrepare.getList("silks2", String.class);
-                    return J.emptyIfNull(silks1).size() + J.emptyIfNull(silks2).size();
-                }
-                default: {
-                    final List<String> silks = dyeingPrepare.getList("silks", String.class);
-                    return J.emptyIfNull(silks).size();
-                }
-            }
+            silkCount = this.dyeingPrepares.parallelStream().collect(summingInt(it -> {
+                final List<String> list = it.getList("dyeingResults", String.class);
+                return J.emptyIfNull(list).size();
+            }));
         }
 
         public JsonNode toJsonNode() {
