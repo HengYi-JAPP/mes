@@ -66,7 +66,7 @@ public class Worker {
     @SneakyThrows
     private static VertxOptions vertxOptions() {
         final VertxOptions vertxOptions = new VertxOptions()
-                .setWorkerPoolSize(100_000)
+                .setWorkerPoolSize(1_000)
                 .setMaxEventLoopExecuteTime(TimeUnit.SECONDS.toNanos(1_000_000))
                 .setMaxWorkerExecuteTime(TimeUnit.MINUTES.toNanos(5));
         Optional.ofNullable(System.getProperty("vertx.cluster.host"))
