@@ -34,6 +34,13 @@ public class DyeingResource {
         this.dyeingPrepareRepository = dyeingPrepareRepository;
     }
 
+    @Path("dyeingPrepares/{id}/lucene")
+    @PUT
+    public Completable lucene(Principal principal, @PathParam("id") String id, DyeingResultUpdateCommand command) {
+        return dyeingPrepareRepository.find(id).flatMap(dyeingPrepareRepository::save).ignoreElement();
+//        return dyeingService.update(principal, id, command);
+    }
+
     @Path("dyeingPrepares/{id}/result")
     @PUT
     public Completable update(Principal principal, @PathParam("id") String id, DyeingResultUpdateCommand command) {
