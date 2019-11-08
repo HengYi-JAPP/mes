@@ -13,4 +13,5 @@ public interface FacevisaService {
     Single<AutoVisualInspectionSilkInfoDTO> autoVisualInspection_silkInfo(String code);
 
     Completable prepare(GetSilkSpindleInfoDTO dto);
+
 }

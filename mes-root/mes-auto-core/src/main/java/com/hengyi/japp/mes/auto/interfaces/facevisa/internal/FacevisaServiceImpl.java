@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -67,7 +67,7 @@ public class FacevisaServiceImpl implements FacevisaService {
     @Override
     public Completable prepare(GetSilkSpindleInfoDTO dto) {
         return Flowable.fromIterable(J.emptyIfNull(dto.getList())).map(item -> {
-            final HashMap<String, String> map = Maps.newHashMap();
+            final Map<String, String> map = Maps.newHashMap();
             final SilkRuntime silkRuntime = item.getSilkRuntime();
             final Silk silk = silkRuntime.getSilk();
             final LineMachine lineMachine = silk.getLineMachine();
@@ -112,9 +112,13 @@ public class FacevisaServiceImpl implements FacevisaService {
             return J.strTpl(SQL_TPL, map);
         }).toList().flatMapCompletable(sqls -> {
             log.info(sqls.toString());
-            return config.jikonDS(vertx).rxGetConnection().flatMap(sqlConnection ->
+            final Completable new$ = config.jikonDSNew(vertx).rxGetConnection().flatMap(sqlConnection ->
                     sqlConnection.rxBatch(sqls).doAfterTerminate(sqlConnection::close)
             ).ignoreElement();
+            final Completable old$ = config.jikonDS(vertx).rxGetConnection().flatMap(sqlConnection ->
+                    sqlConnection.rxBatch(sqls).doAfterTerminate(sqlConnection::close)
+            ).ignoreElement();
+            return Completable.mergeArray(new$, old$);
         }).doOnError(ex -> log.error("prepareFacevisa", ex));
     }
 }

@@ -36,9 +36,8 @@ public class DyeingResource {
 
     @Path("dyeingPrepares/{id}/lucene")
     @PUT
-    public Completable lucene(Principal principal, @PathParam("id") String id, DyeingResultUpdateCommand command) {
+    public Completable lucene(@PathParam("id") String id) {
         return dyeingPrepareRepository.find(id).flatMap(dyeingPrepareRepository::save).ignoreElement();
-//        return dyeingService.update(principal, id, command);
     }
 
     @Path("dyeingPrepares/{id}/result")

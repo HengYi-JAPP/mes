@@ -43,6 +43,7 @@ public class MesAutoConfig {
     private final JWTAuthOptions jwtAuthOptions;
     @Getter
     private final JsonObject jikonDsOptions;
+    private final JsonObject jikonDsNewOptions;
 
     public MesAutoConfig() {
         rootPath = Paths.get(System.getProperty("japp.mes.auto.path", "/home/mes/auto"));
@@ -62,6 +63,7 @@ public class MesAutoConfig {
         jwtAuthOptions = new JWTAuthOptions().addPubSecKey(pubSecKey);
 
         jikonDsOptions = rootConfig.getJsonObject("jikon_ds");
+        jikonDsNewOptions = rootConfig.getJsonObject("jikon_ds_new");
     }
 
     public Path apkPath() {
@@ -93,6 +95,10 @@ public class MesAutoConfig {
 
     public JDBCClient jikonDS(Vertx vertx) {
         return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
+    }
+
+    public JDBCClient jikonDSNew(Vertx vertx) {
+        return JDBCClient.createShared(vertx, jikonDsNewOptions, "jikonDSNew");
     }
 
     public Path reportPath(String type) {
