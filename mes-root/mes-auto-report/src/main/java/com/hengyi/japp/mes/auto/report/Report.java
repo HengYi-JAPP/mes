@@ -63,7 +63,7 @@ public class Report {
         }).subscribe();
     }
 
-    private static Single<String> deployWorker(Vertx vertx) {
+    public static Single<String> deployWorker(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()
                 .setWorker(true)
                 .setMaxWorkerExecuteTime(1)
@@ -72,7 +72,7 @@ public class Report {
         return vertx.rxDeployVerticle(WorkerVerticle.class.getName(), deploymentOptions);
     }
 
-    private static Single<String> deployAgent(Vertx vertx) {
+    public static Single<String> deployAgent(Vertx vertx) {
         final DeploymentOptions deploymentOptions = new DeploymentOptions().setInstances(4);
         return vertx.rxDeployVerticle(AgentVerticle.class.getName(), deploymentOptions);
     }

@@ -16,7 +16,6 @@ import org.bson.conversions.Bson;
 import reactor.core.publisher.Flux;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
@@ -25,74 +24,74 @@ import static com.mongodb.client.model.Filters.*;
 /**
  * @author jzb 2019-10-12
  */
-public class ExceptionRecordReport {
+public class ExceptionRecordReportByOperator {
     private final String workshopId;
     private final long startDateTime;
     private final long endDateTime;
     @Getter
-    private final Collection<GroupBy_Line> groupByLines;
+    private final Collection<GroupBy_Operator> groupByOperators;
 
-    private ExceptionRecordReport(String workshopId, long startDateTime, long endDateTime, Flux<Document> exceptionRecord$) {
+    private ExceptionRecordReportByOperator(String workshopId, long startDateTime, long endDateTime, Flux<Document> exceptionRecord$) {
         this.workshopId = workshopId;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        groupByLines = exceptionRecord$.reduce(Maps.<String, GroupBy_Line>newConcurrentMap(), (acc, cur) -> {
+        groupByOperators = exceptionRecord$.reduce(Maps.<String, GroupBy_Operator>newConcurrentMap(), (acc, cur) -> {
             final String lineMachineId = cur.getString("lineMachine");
             final Document lineMachine = QueryService.findFromCache(LineMachine.class, lineMachineId).get();
             final String lineId = lineMachine.getString("line");
             final Document line = QueryService.findFromCache(Line.class, lineId).get();
             if (Objects.equals(workshopId, line.getString("workshop"))) {
-                acc.compute(lineId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Line(line)).collect(cur));
+                acc.compute(cur.getString("creator"), (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(cur));
             }
             return acc;
         }).map(Map::values).block();
     }
 
-    public static ExceptionRecordReport create(String workshopId, long startDateTime, long endDateTime) {
+    public static ExceptionRecordReportByOperator create(String workshopId, long startDateTime, long endDateTime) {
         final MongoCollection<Document> T_ExceptionRecord = Report.mongoCollection(ExceptionRecord.class);
         final Bson startFilter = gte("cdt", new Date(startDateTime));
         final Bson endFilter = lte("cdt", new Date(endDateTime));
         final Flux<Document> exceptionRecord$ = Flux.from(T_ExceptionRecord.find(and(startFilter, endFilter)));
-        return new ExceptionRecordReport(workshopId, startDateTime, endDateTime, exceptionRecord$);
+        return new ExceptionRecordReportByOperator(workshopId, startDateTime, endDateTime, exceptionRecord$);
     }
 
     public JsonNode toJsonNode() {
         final ArrayNode arrayNode = MAPPER.createArrayNode();
-        J.emptyIfNull(groupByLines).stream()
-                .map(GroupBy_Line::toJsonNode)
+        J.emptyIfNull(groupByOperators).stream()
+                .map(GroupBy_Operator::toJsonNode)
                 .forEach(arrayNode::add);
         return arrayNode;
     }
 
     @Data
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    public static class GroupBy_Line {
+    public static class GroupBy_Operator {
         @EqualsAndHashCode.Include
-        private final Line line = new Line();
+        private final Operator operator = new Operator();
         private final Map<String, GroupBy_Batch> batchMap = Maps.newConcurrentMap();
 
-        private GroupBy_Line(Document line) {
-            this.line.setId(line.getString(ID_COL));
-            this.line.setName(line.getString("name"));
+        public GroupBy_Operator(String id) {
+            final Document operator = QueryService.find(Operator.class, id).block();
+            this.operator.setId(operator.getString(ID_COL));
+            this.operator.setName(operator.getString("name"));
+            this.operator.setHrId(operator.getString("hrId"));
         }
 
-        private GroupBy_Line collect(Document exceptionRecord) {
+        public GroupBy_Operator collect(Document exceptionRecord) {
             final String silkId = exceptionRecord.getString("silk");
-            if (J.nonBlank(silkId)) {
-                final String batchId = QueryService.find(Silk.class, silkId).map(it -> it.getString("batch")).block();
-                batchMap.compute(batchId, (k, v) -> Optional.ofNullable(v)
-                        .orElse(new GroupBy_Batch(k))
-                        .collect(exceptionRecord)
-                );
-            }
+            final String batchId = QueryService.find(Silk.class, silkId).map(it -> it.getString("batch")).block();
+            batchMap.compute(batchId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Batch(batchId)).collect(exceptionRecord));
             return this;
         }
 
-        private JsonNode toJsonNode() {
-            final Collection<JsonNode> groupByBatch = batchMap.values().stream()
-                    .map(GroupBy_Batch::toJsonNode)
-                    .collect(Collectors.toList());
-            final Map<String, Object> map = Map.of("line", line, "groupByBatch", groupByBatch);
+        public JsonNode toJsonNode() {
+            final Collection<GroupBy_Product> products = Flux.fromIterable(batchMap.values())
+                    .reduce(Maps.<Product, GroupBy_Product>newConcurrentMap(), (acc, cur) -> {
+                        final Product product = cur.getBatch().getProduct();
+                        acc.compute(product, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Product(k)).collect(cur));
+                        return acc;
+                    }).map(Map::values).block();
+            final Map<String, Object> map = Map.of("operator", this.operator, "products", products);
             return MAPPER.convertValue(map, JsonNode.class);
         }
     }
@@ -102,9 +101,9 @@ public class ExceptionRecordReport {
     public static class GroupBy_Batch {
         @EqualsAndHashCode.Include
         private final Batch batch = new Batch();
-        private final Map<String, GroupBy_SilkException> silkExceptionMap = Maps.newConcurrentMap();
+        private int silkCount = 0;
 
-        private GroupBy_Batch(String batchId) {
+        public GroupBy_Batch(String batchId) {
             final Document batch = QueryService.findFromCache(Batch.class, batchId).get();
             this.batch.setId(batch.getString(ID_COL));
             this.batch.setBatchNo(batch.getString("batchNo"));
@@ -117,45 +116,22 @@ public class ExceptionRecordReport {
             product.setName(document.getString("name"));
         }
 
-        private GroupBy_Batch collect(Document exceptionRecord) {
-            final String exceptionId = exceptionRecord.getString("exception");
-            silkExceptionMap.compute(exceptionId, (k, v) -> Optional.ofNullable(v)
-                    .orElse(new GroupBy_SilkException(k))
-                    .collect(exceptionRecord)
-            );
+        public GroupBy_Batch collect(Document exceptionRecord) {
+            silkCount++;
             return this;
-        }
-
-        private JsonNode toJsonNode() {
-            final Collection<JsonNode> groupBySilkException = silkExceptionMap.values().stream()
-                    .map(GroupBy_SilkException::toJsonNode)
-                    .collect(Collectors.toList());
-            final Map<String, Object> map = Map.of("batch", this.batch, "groupBySilkException", groupBySilkException);
-            return MAPPER.convertValue(map, JsonNode.class);
         }
     }
 
     @Data
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-    public static class GroupBy_SilkException {
+    public static class GroupBy_Product {
         @EqualsAndHashCode.Include
-        private final SilkException silkException = new SilkException();
+        private final Product product;
         private int silkCount = 0;
 
-        private GroupBy_SilkException(String exceptionId) {
-            final Document silkException = QueryService.findFromCache(SilkException.class, exceptionId).get();
-            this.silkException.setId(silkException.getString(ID_COL));
-            this.silkException.setName(silkException.getString("name"));
-        }
-
-        private GroupBy_SilkException collect(Document exceptionRecord) {
-            silkCount++;
+        public GroupBy_Product collect(GroupBy_Batch collect) {
+            silkCount += collect.silkCount;
             return this;
-        }
-
-        private JsonNode toJsonNode() {
-            final Map<String, Object> map = Map.of("silkException", silkException, "silkCount", silkCount);
-            return MAPPER.convertValue(map, JsonNode.class);
         }
     }
 }
