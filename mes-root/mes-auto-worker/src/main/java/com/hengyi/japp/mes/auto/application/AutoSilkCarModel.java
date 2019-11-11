@@ -61,8 +61,8 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
             final LineMachineSpec lineMachineSpec = config.getLineMachineSpecs().get(orderBy);
             for (int spindle : lineMachine.getSpindleSeq()) {
                 final SilkRuntime silkRuntime = new SilkRuntime();
-                if (workshop.getCode().startsWith("HF")) {
-                    final int row = orderBy;
+                if (lineMachine.getLine().getName().startsWith("HF")) {
+                    final int row = 3 - orderBy;
                     final Single<SilkRuntime> silkRuntime$ = silkRepository.create().map(silk -> {
                         silkRuntime.setSilk(silk);
                         silk.setCode(silkBarcode.generateSilkCode(spindle));
@@ -139,8 +139,8 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
     @Override
     public Single<List<CheckSilkDTO>> checkSilks() {
         // 合股丝
-        if (workshop.getCode().startsWith("HF")) {
-            Single.fromCallable(() -> {
+        if ("F".equals(workshop.getCode())) {
+            return Single.fromCallable(() -> {
                 final Stream<CheckSilkDTO> streamA = Stream.of(3, 5).map(col -> {
                     final CheckSilkDTO dto = new CheckSilkDTO();
                     dto.setSideType(SilkCarSideType.A);
@@ -154,7 +154,7 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
                     return dto;
                 });
                 final List<CheckSilkDTO> collectList = Stream.concat(streamA, streamB).collect(Collectors.toList());
-                return IntStream.rangeClosed(1, 3).mapToObj(row -> {
+                final List<CheckSilkDTO> ret = IntStream.rangeClosed(1, 3).mapToObj(row -> {
                     Collections.shuffle(collectList);
                     final CheckSilkDTO copyDTO = collectList.get(0);
                     final CheckSilkDTO dto = new CheckSilkDTO();
@@ -163,6 +163,8 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
                     dto.setCol(copyDTO.getCol());
                     return dto;
                 }).collect(Collectors.toList());
+                Collections.reverse(ret);
+                return ret;
             });
         }
         return Single.fromCallable(() -> config.checkSilks());
