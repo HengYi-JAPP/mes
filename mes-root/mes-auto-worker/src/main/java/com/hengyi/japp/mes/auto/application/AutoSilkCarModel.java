@@ -4,14 +4,20 @@ import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.ImmutableList;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarPosition;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.dto.CheckSilkDTO;
+import com.hengyi.japp.mes.auto.exception.DoffingTagException;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.hengyi.japp.mes.auto.application.AutoSilkCarModelConfigRegistry.*;
 
@@ -55,6 +61,61 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
             final LineMachineSpec lineMachineSpec = config.getLineMachineSpecs().get(orderBy);
             for (int spindle : lineMachine.getSpindleSeq()) {
                 final SilkRuntime silkRuntime = new SilkRuntime();
+                if (workshop.getCode().startsWith("HF")) {
+                    final int row = orderBy;
+                    final Single<SilkRuntime> silkRuntime$ = silkRepository.create().map(silk -> {
+                        silkRuntime.setSilk(silk);
+                        silk.setCode(silkBarcode.generateSilkCode(spindle));
+                        silk.setDoffingNum(silkBarcode.getDoffingNum());
+                        silk.setSpindle(spindle);
+                        silk.setLineMachine(lineMachine);
+                        silk.setBatch(lineMachine.getProductPlan().getBatch());
+
+                        switch (spindle) {
+                            case 1: {
+                                silkRuntime.setSideType(SilkCarSideType.A);
+                                silkRuntime.setRow(row);
+                                silkRuntime.setCol(1);
+                                return silkRuntime;
+                            }
+                            case 2: {
+                                silkRuntime.setSideType(SilkCarSideType.A);
+                                silkRuntime.setRow(row);
+                                silkRuntime.setCol(3);
+                                return silkRuntime;
+                            }
+                            case 3: {
+                                silkRuntime.setSideType(SilkCarSideType.A);
+                                silkRuntime.setRow(row);
+                                silkRuntime.setCol(5);
+                                return silkRuntime;
+                            }
+                            case 4: {
+                                silkRuntime.setSideType(SilkCarSideType.B);
+                                silkRuntime.setRow(row);
+                                silkRuntime.setCol(2);
+                                return silkRuntime;
+                            }
+                            case 5: {
+                                silkRuntime.setSideType(SilkCarSideType.B);
+                                silkRuntime.setRow(row);
+                                silkRuntime.setCol(4);
+                                return silkRuntime;
+                            }
+                            case 6: {
+                                silkRuntime.setSideType(SilkCarSideType.B);
+                                silkRuntime.setRow(row);
+                                silkRuntime.setCol(6);
+                                return silkRuntime;
+                            }
+                        }
+                        throw new DoffingTagException();
+                    });
+                    builder.add(silkRuntime$);
+                    continue;
+                }
+
+
                 final Single<SilkRuntime> silkRuntime$ = silkRepository.create().map(silk -> {
                     silkRuntime.setSilk(silk);
                     silk.setCode(silkBarcode.generateSilkCode(spindle));
@@ -77,6 +138,33 @@ public class AutoSilkCarModel extends AbstractSilkCarModel {
 
     @Override
     public Single<List<CheckSilkDTO>> checkSilks() {
+        // 合股丝
+        if ("F".equals(workshop.getCode())) {
+            Single.fromCallable(() -> {
+                final Stream<CheckSilkDTO> streamA = Stream.of(3, 5).map(col -> {
+                    final CheckSilkDTO dto = new CheckSilkDTO();
+                    dto.setSideType(SilkCarSideType.A);
+                    dto.setCol(col);
+                    return dto;
+                });
+                final Stream<CheckSilkDTO> streamB = Stream.of(2, 4, 6).map(col -> {
+                    final CheckSilkDTO dto = new CheckSilkDTO();
+                    dto.setSideType(SilkCarSideType.B);
+                    dto.setCol(col);
+                    return dto;
+                });
+                final List<CheckSilkDTO> collectList = Stream.concat(streamA, streamB).collect(Collectors.toList());
+                return IntStream.rangeClosed(1, 3).mapToObj(row -> {
+                    Collections.shuffle(collectList);
+                    final CheckSilkDTO copyDTO = collectList.get(0);
+                    final CheckSilkDTO dto = new CheckSilkDTO();
+                    dto.setRow(row);
+                    dto.setSideType(copyDTO.getSideType());
+                    dto.setCol(copyDTO.getCol());
+                    return dto;
+                }).collect(Collectors.toList());
+            });
+        }
         return Single.fromCallable(() -> config.checkSilks());
     }
 
