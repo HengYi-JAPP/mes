@@ -115,10 +115,11 @@ public class FacevisaServiceImpl implements FacevisaService {
             final Completable new$ = config.jikonDSNew(vertx).rxGetConnection().flatMap(sqlConnection ->
                     sqlConnection.rxBatch(sqls).doAfterTerminate(sqlConnection::close)
             ).ignoreElement();
-            final Completable old$ = config.jikonDS(vertx).rxGetConnection().flatMap(sqlConnection ->
-                    sqlConnection.rxBatch(sqls).doAfterTerminate(sqlConnection::close)
-            ).ignoreElement();
-            return Completable.mergeArray(new$, old$);
+//            final Completable old$ = config.jikonDS(vertx).rxGetConnection().flatMap(sqlConnection ->
+//                    sqlConnection.rxBatch(sqls).doAfterTerminate(sqlConnection::close)
+//            ).ignoreElement();
+//            return Completable.mergeArray(new$, old$);
+            return new$;
         }).doOnError(ex -> log.error("prepareFacevisa", ex));
     }
 }
