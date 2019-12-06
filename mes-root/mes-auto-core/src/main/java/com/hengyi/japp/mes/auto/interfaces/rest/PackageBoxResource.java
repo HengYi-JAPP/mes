@@ -11,8 +11,8 @@ import com.hengyi.japp.mes.auto.application.command.PackageBoxBatchPrintUpdateCo
 import com.hengyi.japp.mes.auto.application.command.PackageBoxMeasureInfoUpdateCommand;
 import com.hengyi.japp.mes.auto.application.event.SmallPackageBoxEvent;
 import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
-import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryOld;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.domain.Silk;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
@@ -59,7 +59,7 @@ public class PackageBoxResource {
     @Path("smallPackageBoxes/batchIds/{batchId}")
     @GET
     public Flowable<PackageBox> handle(Principal principal, @PathParam("batchId") String smallBatchId) {
-        final PackageBoxQuery query = PackageBoxQuery.builder().smallBatchId(smallBatchId).pageSize(Integer.MAX_VALUE).build();
+        final PackageBoxQueryOld query = PackageBoxQueryOld.builder().smallBatchId(smallBatchId).pageSize(Integer.MAX_VALUE).build();
         return packageBoxRepository.query(query).flattenAsFlowable(it -> it.getPackageBoxes());
     }
 
@@ -128,17 +128,17 @@ public class PackageBoxResource {
      */
     @Path("packageBoxes")
     @GET
-    public Single<PackageBoxQuery.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
-                                                @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
-                                                @QueryParam("workshopId") @NotBlank String workshopId,
-                                                @QueryParam("startDate") @NotBlank String startDate,
-                                                @QueryParam("endDate") @NotBlank String endDate,
-                                                @QueryParam("packageBoxType") String typeString,
-                                                @QueryParam("packageBoxCode") String packageBoxCode,
-                                                @QueryParam("budatClassId") String budatClassId,
-                                                @QueryParam("gradeId") String gradeId,
-                                                @QueryParam("batchId") String batchId,
-                                                @QueryParam("productId") String productId) {
+    public Single<PackageBoxQueryOld.Result> query(@QueryParam("first") @DefaultValue("0") @Min(0) int first,
+                                                   @QueryParam("pageSize") @DefaultValue("50") @Min(1) int pageSize,
+                                                   @QueryParam("workshopId") @NotBlank String workshopId,
+                                                   @QueryParam("startDate") @NotBlank String startDate,
+                                                   @QueryParam("endDate") @NotBlank String endDate,
+                                                   @QueryParam("packageBoxType") String typeString,
+                                                   @QueryParam("packageBoxCode") String packageBoxCode,
+                                                   @QueryParam("budatClassId") String budatClassId,
+                                                   @QueryParam("gradeId") String gradeId,
+                                                   @QueryParam("batchId") String batchId,
+                                                   @QueryParam("productId") String productId) {
         final Set<String> budatClassIds = J.nonBlank(budatClassId) ? Sets.newHashSet(budatClassId) : Collections.EMPTY_SET;
         final LocalDate startLd = Optional.ofNullable(startDate)
                 .filter(J::nonBlank)
@@ -152,7 +152,7 @@ public class PackageBoxResource {
                 .filter(J::nonBlank)
                 .map(PackageBoxType::valueOf)
                 .orElse(null);
-        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+        final PackageBoxQueryOld packageBoxQuery = PackageBoxQueryOld.builder()
                 .first(first)
                 .pageSize(pageSize)
                 .budatRange(new LocalDateRange(startLd, endLd.plusDays(1)))
@@ -236,7 +236,7 @@ public class PackageBoxResource {
                     result.put("measureResult", it);
                     return Completable.complete();
                 });
-        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+        final PackageBoxQueryOld packageBoxQuery = PackageBoxQueryOld.builder()
                 .first(first)
                 .pageSize(pageSize)
                 .budatRange(ldRange)

@@ -1,32 +1,24 @@
 package com.hengyi.japp.mes.auto.report.application;
 
-import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.exception.DailyReportNotExistException;
-import com.hengyi.japp.mes.auto.report.Jlucene;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.AbstractStatisticReport.WorkshopDTO;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDiff;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportRange;
-import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TopDocs;
+import org.apache.commons.lang3.tuple.Pair;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -40,11 +32,11 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class StatisticReportService {
     private final File baseDir;
-    private final QueryService queryService;
+    private final SearchService searchService;
 
     @Inject
-    private StatisticReportService(MesAutoConfig mesAutoConfig, QueryService queryService) {
-        this.queryService = queryService;
+    private StatisticReportService(MesAutoConfig mesAutoConfig, SearchService searchService) {
+        this.searchService = searchService;
         baseDir = mesAutoConfig.reportPath("PackageBoxStatisticReport").toFile();
     }
 
@@ -66,20 +58,15 @@ public class StatisticReportService {
 
     @SneakyThrows
     public Collection<String> packageBoxIds(final String workshopId, final LocalDate ld) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Jlucene.add(bqBuilder, "inWarehouse", true);
-        Jlucene.add(bqBuilder, "workshop", workshopId);
-        final long startL = J.date(ld).getTime();
-        final long endL = J.date(ld.plusDays(1)).getTime() - 1;
-        bqBuilder.add(LongPoint.newRangeQuery("budat", startL, endL), BooleanClause.Occur.MUST);
-
-        @Cleanup final IndexReader indexReader = queryService.indexReader(PackageBox.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        return Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
+        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .inWarehouse(true)
+                .workshopId(workshopId)
+                .startBudat(ld)
+                .endBudat(ld.plusDays(1))
+                .build();
+        final Pair<Long, Collection<String>> pair = searchService.query(packageBoxQuery);
+        return pair.getRight();
     }
 
     public Mono<StatisticReportDay> fromDisk(String workshopId, LocalDate ld) {

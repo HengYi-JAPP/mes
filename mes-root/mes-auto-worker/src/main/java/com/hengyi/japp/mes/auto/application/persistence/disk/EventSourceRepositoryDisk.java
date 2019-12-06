@@ -8,7 +8,6 @@ import com.hengyi.japp.mes.auto.repository.EventSourceRepository;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.eventbus.Message;
-import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -26,12 +25,10 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Singleton
 public class EventSourceRepositoryDisk implements EventSourceRepository {
     private final Path eventSourceRootPath;
-    private final RabbitMQClient rabbitClient;
 
     @Inject
-    private EventSourceRepositoryDisk(@Named("eventSourceRootPath") Path eventSourceRootPath, RabbitMQClient rabbitClient) {
+    private EventSourceRepositoryDisk(@Named("eventSourceRootPath") Path eventSourceRootPath) {
         this.eventSourceRootPath = eventSourceRootPath;
-        this.rabbitClient = rabbitClient;
     }
 
     @Override

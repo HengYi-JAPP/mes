@@ -50,6 +50,7 @@ public class JikonAdapterResource {
         final StringBuilder sb = new StringBuilder("JikonAdapterSilkDetachEvent").append(request);
         final JikonAdapterSilkDetachEvent.Command command = MAPPER.readValue(request, JikonAdapterSilkDetachEvent.Command.class);
         return jikonAdapter.handle(PRINCIPAL, command)
+                .retry(3)
                 .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()))
                 .doOnError(ex -> log.error(sb.append("\n").append("失败!").toString(), ex));
     }

@@ -8,9 +8,10 @@ import com.hengyi.japp.mes.auto.application.PackageBoxService;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntityRepository;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
-import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryOld;
 import com.hengyi.japp.mes.auto.domain.*;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.repository.PackageBoxRepository;
 import com.hengyi.japp.mes.auto.search.lucene.PackageBoxLucene;
 import io.reactivex.Flowable;
@@ -38,12 +39,14 @@ import static com.mongodb.client.model.Filters.eq;
 public class PackageBoxRepositoryMongo extends MongoEntityRepository<PackageBox> implements PackageBoxRepository {
     private final RedisClient redisClient;
     private final PackageBoxLucene packageBoxLucene;
+    private final SearchService searchService;
 
     @Inject
-    private PackageBoxRepositoryMongo(MongoEntiyManager mongoEntiyManager, RedisClient redisClient, PackageBoxLucene packageBoxLucene) {
+    private PackageBoxRepositoryMongo(MongoEntiyManager mongoEntiyManager, RedisClient redisClient, PackageBoxLucene packageBoxLucene, SearchService searchService) {
         super(mongoEntiyManager);
         this.redisClient = redisClient;
         this.packageBoxLucene = packageBoxLucene;
+        this.searchService = searchService;
     }
 
     @Override
@@ -61,7 +64,10 @@ public class PackageBoxRepositoryMongo extends MongoEntityRepository<PackageBox>
         } else {
             single = Single.just(packageBox);
         }
-        return single.flatMap(super::save).doOnSuccess(packageBoxLucene::index);
+        return single.flatMap(super::save).doOnSuccess(it -> {
+            packageBoxLucene.index(it);
+            searchService.index(it);
+        });
     }
 
     private Single<String> generateCode(PackageBox packageBox) {
@@ -115,10 +121,10 @@ public class PackageBoxRepositoryMongo extends MongoEntityRepository<PackageBox>
     }
 
     @Override
-    public Single<PackageBoxQuery.Result> query(PackageBoxQuery packageBoxQuery) {
+    public Single<PackageBoxQueryOld.Result> query(PackageBoxQueryOld packageBoxQuery) {
         final int first = packageBoxQuery.getFirst();
         final int pageSize = packageBoxQuery.getPageSize();
-        final PackageBoxQuery.Result.ResultBuilder builder = PackageBoxQuery.Result.builder().first(first).pageSize(pageSize);
+        final PackageBoxQueryOld.Result.ResultBuilder builder = PackageBoxQueryOld.Result.builder().first(first).pageSize(pageSize);
 
         return Single.just(packageBoxQuery)
                 .map(packageBoxLucene::build)

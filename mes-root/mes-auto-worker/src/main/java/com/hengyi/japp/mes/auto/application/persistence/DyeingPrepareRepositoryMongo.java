@@ -8,6 +8,7 @@ import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoUtil;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
 import com.hengyi.japp.mes.auto.application.query.DyeingPrepareResultQuery;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.repository.DyeingPrepareRepository;
 import com.hengyi.japp.mes.auto.search.lucene.DyeingPrepareLucene;
 import com.mongodb.client.model.Filters;
@@ -27,16 +28,21 @@ import org.apache.lucene.search.SortedNumericSortField;
 @Singleton
 public class DyeingPrepareRepositoryMongo extends MongoEntityRepository<DyeingPrepare> implements DyeingPrepareRepository {
     private final DyeingPrepareLucene dyeingPrepareLucene;
+    private final SearchService searchService;
 
     @Inject
-    private DyeingPrepareRepositoryMongo(MongoEntiyManager mongoEntiyManager, DyeingPrepareLucene dyeingPrepareLucene) {
+    private DyeingPrepareRepositoryMongo(MongoEntiyManager mongoEntiyManager, DyeingPrepareLucene dyeingPrepareLucene, SearchService searchService) {
         super(mongoEntiyManager);
         this.dyeingPrepareLucene = dyeingPrepareLucene;
+        this.searchService = searchService;
     }
 
     @Override
     public Single<DyeingPrepare> save(DyeingPrepare dyeingPrepare) {
-        return super.save(dyeingPrepare).doOnSuccess(dyeingPrepareLucene::index);
+        return super.save(dyeingPrepare).doOnSuccess(it -> {
+            dyeingPrepareLucene.index(it);
+            searchService.index(it);
+        });
     }
 
     @Override

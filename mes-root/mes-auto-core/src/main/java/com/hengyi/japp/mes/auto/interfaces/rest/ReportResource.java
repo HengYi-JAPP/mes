@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.hengyi.japp.mes.auto.application.command.ReportCommand;
 import com.hengyi.japp.mes.auto.application.query.LocalDateRange;
-import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryOld;
 import com.hengyi.japp.mes.auto.application.report.MeasurePackageBoxReport;
 import com.hengyi.japp.mes.auto.application.report.WorkshopProductPlanReport;
 import com.hengyi.japp.mes.auto.domain.Line;
@@ -71,7 +71,7 @@ public class ReportResource {
         final LocalDate startLd = J.localDate(command.getStartDate());
         final LocalDate endLd = J.localDate(command.getEndDate());
         final Set<@NotBlank String> budatClassIds = J.emptyIfNull(command.getPackageClasses()).stream().map(EntityDTO::getId).collect(toSet());
-        final PackageBoxQuery packageBoxQuery = PackageBoxQuery.builder()
+        final PackageBoxQueryOld packageBoxQuery = PackageBoxQueryOld.builder()
                 .pageSize(Integer.MAX_VALUE)
                 .workshopId(command.getWorkshop().getId())
                 .budatRange(new LocalDateRange(startLd, endLd.plusDays(1)))

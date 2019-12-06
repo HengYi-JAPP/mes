@@ -7,7 +7,6 @@ import com.hengyi.japp.mes.auto.domain.data.CarpoolSilkCarModelOrderType;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.redis.RedisOptions;
@@ -36,9 +35,9 @@ public class MesAutoConfig {
     @Getter
     private final JsonObject mongoOptions;
     @Getter
-    private final RedisOptions redisOptions;
+    private final JsonObject rabbitOptions;
     @Getter
-    private final RabbitMQOptions rabbitMQOptions;
+    private final RedisOptions redisOptions;
     @Getter
     private final JWTAuthOptions jwtAuthOptions;
     @Getter
@@ -56,8 +55,8 @@ public class MesAutoConfig {
         openConfig = rootConfig.getJsonObject("open");
         corsConfig = new CorsConfig(rootConfig.getJsonObject("cors"));
         mongoOptions = rootConfig.getJsonObject("mongo");
+        rabbitOptions = rootConfig.getJsonObject("rabbit");
         redisOptions = new RedisOptions(rootConfig.getJsonObject("redis"));
-        rabbitMQOptions = new RabbitMQOptions(rootConfig.getJsonObject("rabbit"));
 
         final PubSecKeyOptions pubSecKey = new PubSecKeyOptions(rootConfig.getJsonObject("jwt"));
         jwtAuthOptions = new JWTAuthOptions().addPubSecKey(pubSecKey);
@@ -91,10 +90,6 @@ public class MesAutoConfig {
     public Path luceneTaxoPath(Class<?> clazz) {
         final Path path = Paths.get("db", "lucene", clazz.getSimpleName() + "_Taxonomy");
         return rootPath.resolve(path);
-    }
-
-    public JDBCClient jikonDS(Vertx vertx) {
-        return JDBCClient.createShared(vertx, jikonDsOptions, "jikonDS");
     }
 
     public JDBCClient jikonDSNew(Vertx vertx) {

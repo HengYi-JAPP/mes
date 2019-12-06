@@ -3,8 +3,8 @@ package com.hengyi.japp.mes.auto.search.lucene;
 import com.github.ixtf.japp.core.J;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryOld;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.domain.*;
 import lombok.extern.slf4j.Slf4j;
@@ -108,7 +108,7 @@ public class PackageBoxLucene extends BaseLucene<PackageBox> {
         return doc;
     }
 
-    public Query build(PackageBoxQuery packageBoxQuery) {
+    public Query build(PackageBoxQueryOld packageBoxQuery) {
         final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
         addQuery(bqBuilder, "inWarehouse", true);
 

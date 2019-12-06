@@ -5,7 +5,6 @@ import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 
@@ -13,15 +12,13 @@ import java.util.Set;
  * @author jzb 2018-07-01
  */
 @Builder
-public class PackageBoxQuery {
+public class PackageBoxQueryOld {
     @Getter
     @Builder.Default
     private final int first = 0;
     @Getter
     @Builder.Default
     private final int pageSize = 50;
-    @Getter
-    private final boolean inWarehouse;
     @Getter
     private final String packageBoxCode;
     @Getter
@@ -37,9 +34,7 @@ public class PackageBoxQuery {
     @Getter
     private final String gradeId;
     @Getter
-    private final LocalDate startBudat;
-    @Getter
-    private final LocalDate endBudat;
+    private final LocalDateRange budatRange;
     @Getter
     private final PackageBoxType type;
     @Getter

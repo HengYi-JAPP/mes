@@ -11,6 +11,7 @@ import com.hengyi.japp.mes.auto.application.query.SilkBarcodeQuery;
 import com.hengyi.japp.mes.auto.domain.Batch;
 import com.hengyi.japp.mes.auto.domain.LineMachine;
 import com.hengyi.japp.mes.auto.domain.SilkBarcode;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import com.hengyi.japp.mes.auto.repository.SilkBarcodeRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkBarcodeLucene;
@@ -43,13 +44,15 @@ import static com.mongodb.client.model.Filters.eq;
 public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcode> implements SilkBarcodeRepository {
     private final SilkBarcodeLucene silkBarcodeLucene;
     private final RedisClient redisClient;
+    private final SearchService searchService;
     private final ExecutorService es = Executors.newSingleThreadExecutor();
 
     @Inject
-    private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene, RedisClient redisClient) {
+    private SilkBarcodeRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkBarcodeLucene silkBarcodeLucene, RedisClient redisClient, SearchService searchService) {
         super(mongoEntiyManager);
         this.silkBarcodeLucene = silkBarcodeLucene;
         this.redisClient = redisClient;
+        this.searchService = searchService;
     }
 
     @SneakyThrows
@@ -58,7 +61,10 @@ public class SilkBarcodeRepositoryMongo extends MongoEntityRepository<SilkBarcod
         if (J.isBlank(silkBarcode.getCode())) {
             silkBarcode.setCode(silkBarcode.generateCode());
         }
-        return super.save(silkBarcode).doOnSuccess(silkBarcodeLucene::index);
+        return super.save(silkBarcode).doOnSuccess(it -> {
+            silkBarcodeLucene.index(it);
+            searchService.index(it);
+        });
     }
 
     @Override

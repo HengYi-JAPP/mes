@@ -13,7 +13,6 @@ import com.hengyi.japp.mes.auto.interfaces.riamb.dto.RiambFetchSilkCarRecordResu
 import com.hengyi.japp.mes.auto.repository.ExceptionRecordRepository;
 import com.hengyi.japp.mes.auto.repository.OperatorRepository;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.rabbitmq.RabbitMQClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,14 +29,12 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Singleton
 public class ApplicationEventsRabbit implements ApplicationEvents {
     private final Vertx vertx;
-    private final RabbitMQClient rabbitMQClient;
     private final OperatorRepository operatorRepository;
     private final ExceptionRecordRepository exceptionRecordRepository;
 
     @Inject
-    private ApplicationEventsRabbit(Vertx vertx, RabbitMQClient rabbitMQClient, OperatorRepository operatorRepository, ExceptionRecordRepository exceptionRecordRepository) {
+    private ApplicationEventsRabbit(Vertx vertx, OperatorRepository operatorRepository, ExceptionRecordRepository exceptionRecordRepository) {
         this.vertx = vertx;
-        this.rabbitMQClient = rabbitMQClient;
         this.operatorRepository = operatorRepository;
         this.exceptionRecordRepository = exceptionRecordRepository;
     }

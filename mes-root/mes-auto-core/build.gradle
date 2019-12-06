@@ -1,7 +1,8 @@
 dependencies {
     compile "com.github.ixtf.japp:vertx",
             "io.vertx:vertx-jdbc-client",
-            "io.vertx:vertx-rabbitmq-client",
+            "io.projectreactor:reactor-core:3.3.0.RELEASE",
+            "io.projectreactor.rabbitmq:reactor-rabbitmq:1.3.0.RELEASE",
             "io.vertx:vertx-hazelcast",
             "io.vertx:vertx-auth-jwt",
             "io.vertx:vertx-mongo-client",

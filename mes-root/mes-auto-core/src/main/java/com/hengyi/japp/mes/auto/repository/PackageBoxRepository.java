@@ -1,7 +1,7 @@
 package com.hengyi.japp.mes.auto.repository;
 
-import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryForMeasure;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQueryOld;
 import com.hengyi.japp.mes.auto.domain.PackageBox;
 import io.reactivex.Single;
 
@@ -17,7 +17,7 @@ public interface PackageBoxRepository {
 
     Single<PackageBox> findByCode(String code);
 
-    Single<PackageBoxQuery.Result> query(PackageBoxQuery packageBoxQuery);
+    Single<PackageBoxQueryOld.Result> query(PackageBoxQueryOld packageBoxQuery);
 
     Single<PackageBoxQueryForMeasure.Result> query(PackageBoxQueryForMeasure packageBoxQuery);
 

@@ -6,7 +6,9 @@ import com.github.ixtf.japp.vertx.Jvertx;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.PackageBoxService;
 import com.hengyi.japp.mes.auto.application.SilkCarRuntimeService;
+import com.hengyi.japp.mes.auto.application.command.PackageBoxMeasureInfoUpdateCommand;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxEvent;
 import com.hengyi.japp.mes.auto.application.event.PackageBoxFlipEvent;
 import com.hengyi.japp.mes.auto.domain.*;
@@ -18,6 +20,7 @@ import com.hengyi.japp.mes.auto.exception.MultiBatchException;
 import com.hengyi.japp.mes.auto.exception.MultiGradeException;
 import com.hengyi.japp.mes.auto.exception.SilkCarRuntimePackagedException;
 import com.hengyi.japp.mes.auto.exception.SilkCarStatusException;
+import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseMeasureInfoUpdateCommand;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.WarehouseService;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent;
 import com.hengyi.japp.mes.auto.repository.*;
@@ -53,9 +56,10 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final SapT001lRepository sapT001lRepository;
     private final PackageClassRepository packageClassRepository;
     private final OperatorRepository operatorRepository;
+    private final PackageBoxService packageBoxService;
 
     @Inject
-    private WarehouseServiceImpl(PackageBoxRepository packageBoxRepository, PackageBoxFlipRepository packageBoxFlipRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, SapT001lRepository sapT001lRepository, PackageClassRepository packageClassRepository, OperatorRepository operatorRepository) {
+    private WarehouseServiceImpl(PackageBoxRepository packageBoxRepository, PackageBoxFlipRepository packageBoxFlipRepository, SilkCarRuntimeRepository silkCarRuntimeRepository, SilkRepository silkRepository, SapT001lRepository sapT001lRepository, PackageClassRepository packageClassRepository, OperatorRepository operatorRepository, PackageBoxService packageBoxService) {
         this.packageBoxRepository = packageBoxRepository;
         this.packageBoxFlipRepository = packageBoxFlipRepository;
         this.silkCarRuntimeRepository = silkCarRuntimeRepository;
@@ -63,6 +67,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         this.sapT001lRepository = sapT001lRepository;
         this.packageClassRepository = packageClassRepository;
         this.operatorRepository = operatorRepository;
+        this.packageBoxService = packageBoxService;
     }
 
     @Override
@@ -230,6 +235,12 @@ public class WarehouseServiceImpl implements WarehouseService {
                 });
             });
         });
+    }
+
+    @Override
+    public Single<PackageBox> handle(Principal principal, WarehouseMeasureInfoUpdateCommand command) {
+        final PackageBoxMeasureInfoUpdateCommand packageBoxMeasureInfoUpdateCommand = MAPPER.convertValue(command, PackageBoxMeasureInfoUpdateCommand.class);
+        return packageBoxService.update(principal, command.getId(), packageBoxMeasureInfoUpdateCommand);
     }
 
 }

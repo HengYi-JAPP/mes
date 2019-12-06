@@ -67,6 +67,12 @@ public class WarehouseResource {
                 .doOnComplete(() -> log.info(sb.append("\n").append("成功").toString()));
     }
 
+    @Path("measureInfo")
+    @POST
+    public Single<PackageBox> handle(WarehouseMeasureInfoUpdateCommand command) {
+        return warehouseService.handle(PRINCIPAL, command);
+    }
+
     @Path("bigSilkCarPackageBoxes")
     @POST
     public Single<PackageBox> handle(PackageBoxEvent.BigSilkCarCommand command) {

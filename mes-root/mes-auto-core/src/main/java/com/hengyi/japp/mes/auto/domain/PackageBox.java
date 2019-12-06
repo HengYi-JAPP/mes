@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.ToString;
 
+import javax.persistence.Entity;
 import java.util.Collection;
 import java.util.Date;
 
@@ -22,6 +23,7 @@ import static com.github.ixtf.japp.core.Constant.MAPPER;
 @Data
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@Entity
 public class PackageBox extends LoggableMongoEntity {
     private double tare;
     private double pipeType;

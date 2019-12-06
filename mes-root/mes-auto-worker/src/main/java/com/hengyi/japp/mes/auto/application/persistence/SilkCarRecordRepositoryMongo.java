@@ -8,6 +8,7 @@ import com.hengyi.japp.mes.auto.application.persistence.proxy.MongoEntiyManager;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
 import com.hengyi.japp.mes.auto.domain.SilkRuntime;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.repository.SilkCarRecordRepository;
 import com.hengyi.japp.mes.auto.repository.SilkRepository;
 import com.hengyi.japp.mes.auto.search.lucene.SilkCarRecordLucene;
@@ -25,16 +26,21 @@ import org.apache.commons.lang3.tuple.Pair;
 @Singleton
 public class SilkCarRecordRepositoryMongo extends MongoEntityRepository<SilkCarRecord> implements SilkCarRecordRepository {
     private final SilkCarRecordLucene lucene;
+    private final SearchService searchService;
 
     @Inject
-    private SilkCarRecordRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkCarRecordLucene lucene) {
+    private SilkCarRecordRepositoryMongo(MongoEntiyManager mongoEntiyManager, SilkCarRecordLucene lucene, SearchService searchService) {
         super(mongoEntiyManager);
         this.lucene = lucene;
+        this.searchService = searchService;
     }
 
     @Override
     public Single<SilkCarRecord> save(SilkCarRecord silkCarRecord) {
-        return super.save(silkCarRecord).doOnSuccess(lucene::index);
+        return super.save(silkCarRecord).doOnSuccess(it -> {
+            lucene.index(it);
+            searchService.index(it);
+        });
     }
 
     @Override
