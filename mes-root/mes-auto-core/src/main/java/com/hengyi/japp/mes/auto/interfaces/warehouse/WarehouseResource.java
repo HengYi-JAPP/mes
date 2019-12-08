@@ -9,7 +9,6 @@ import com.hengyi.japp.mes.auto.domain.PackageBox;
 import com.hengyi.japp.mes.auto.interfaces.warehouse.event.WarehousePackageBoxFetchEvent;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.*;
@@ -35,40 +34,43 @@ public class WarehouseResource {
         this.warehouseService = warehouseService;
     }
 
-    @SneakyThrows
     @ApmTrace(type = "WarehousePackageBoxFetchEvent")
     @Path("PackageBoxFetchEvent")
     @POST
     public Single<String> fetch(String request) {
         final StringBuilder sb = new StringBuilder("WarehousePackageBoxFetchEvent").append(request);
-        log.info(sb.toString());
-        final WarehousePackageBoxFetchEvent.Command command = MAPPER.readValue(request, WarehousePackageBoxFetchEvent.Command.class);
-        return warehouseService.handle(PRINCIPAL, command).map(MAPPER::writeValueAsString)
+        return Single.fromCallable(() -> MAPPER.readValue(request, WarehousePackageBoxFetchEvent.Command.class))
+                .flatMap(command -> warehouseService.handle(PRINCIPAL, command))
+                .map(MAPPER::writeValueAsString)
+                .doOnError(e -> log.info(sb.append("\n").append("失败").toString()))
                 .doOnSuccess(it -> log.info(sb.append("\n").append(it).toString()));
     }
 
-    @SneakyThrows
     @ApmTrace(type = "WarehousePackageBoxUnFetchEvent")
     @Path("packageBoxes/codes/{code}")
     @DELETE
     public Completable unFetch(@PathParam("code") String code) {
         final StringBuilder sb = new StringBuilder("PackageBoxUnFetchEvent[").append(code).append("]");
-        log.info(sb.toString());
         return warehouseService.unFetch(PRINCIPAL, code)
                 .doOnError(e -> log.info(sb.append("\n").append("失败").toString()))
                 .doOnComplete(() -> log.info(sb.append("\n").append("成功").toString()));
     }
 
-    @SneakyThrows
     @ApmTrace(type = "WarehousePackageBoxFlipEvent")
     @Path("PackageBoxFlipEvent")
     @POST
     public Completable packageBoxFlipEvent(String request) {
         final StringBuilder sb = new StringBuilder("WarehousePackageBoxFlipEvent").append(request);
-        log.info(sb.toString());
-        final PackageBoxFlipEvent.WarehouseCommand command = MAPPER.readValue(request, PackageBoxFlipEvent.WarehouseCommand.class);
-        return warehouseService.handle(PRINCIPAL, command).ignoreElement()
-                .doOnComplete(() -> log.info(sb.append("\n").append("OK").toString()));
+        return Single.fromCallable(() -> MAPPER.readValue(request, PackageBoxFlipEvent.WarehouseCommand.class))
+                .flatMap(command -> warehouseService.handle(PRINCIPAL, command)).ignoreElement()
+                .doOnError(e -> log.info(sb.append("\n").append("失败").toString()))
+                .doOnComplete(() -> log.info(sb.append("\n").append("成功").toString()));
+    }
+
+    @Path("measureInfo")
+    @POST
+    public Single<PackageBox> handle(WarehouseMeasureInfoUpdateCommand command) {
+        return warehouseService.handle(PRINCIPAL, command);
     }
 
     @Path("bigSilkCarPackageBoxes")

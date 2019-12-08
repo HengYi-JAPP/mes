@@ -26,4 +26,6 @@ public interface WarehouseService {
     Single<PackageBoxFlip> handle(Principal principal, PackageBoxFlipEvent.WarehouseCommand command);
 
     Single<PackageBox> handle(Principal principal, PackageBoxEvent.BigSilkCarCommand command);
+
+    Single<PackageBox> handle(Principal principal, WarehouseMeasureInfoUpdateCommand command);
 }
