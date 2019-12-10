@@ -1,11 +1,14 @@
 package com.hengyi.japp.mes.auto.interfaces.search.internal;
 
+import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQueryByEventSourceCanHappen;
+import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
+import io.vertx.core.json.JsonObject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -22,6 +25,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
@@ -45,15 +49,19 @@ public class SearchServiceImpl implements SearchService {
     private final Sender sender;
 
     @Inject
-    private SearchServiceImpl(String searchBaseUrl, Sender sender) {
-        this.searchBaseUrl = searchBaseUrl;
+    private SearchServiceImpl(MesAutoConfig mesAutoConfig, Sender sender) {
+        final JsonObject searchConfig = mesAutoConfig.getSearchOptions();
+        final String host = searchConfig.getString("host", "10.2.0.214");
+        final Integer port = searchConfig.getInteger("port", 9999);
+        searchBaseUrl = "http://" + host + ":" + port;
         this.sender = sender;
     }
 
     @Override
     public String url(String url) {
-        return StringUtils.deleteWhitespace(url).startsWith("/") ? searchBaseUrl + url : searchBaseUrl + "/" + url;
+        return searchBaseUrl + "/search/" + url;
     }
+
 
     @Override
     public Mono<Void> index(LuceneCommandOne command) {
@@ -89,6 +97,23 @@ public class SearchServiceImpl implements SearchService {
             throw new RuntimeException();
         }
         return MAPPER.readValue(response.body(), QueryResult.class).pair();
+    }
+
+    @SneakyThrows({IOException.class, InterruptedException.class})
+    @Override
+    public Collection<String> query(SilkCarRecordQueryByEventSourceCanHappen query) {
+        final byte[] bytes = MAPPER.writeValueAsBytes(query);
+        final HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(url("silkCarRecordsByEventSourceCanHappen")))
+                .POST(BodyPublishers.ofByteArray(bytes))
+                .build();
+        final HttpResponse<byte[]> response = httpClient.send(httpRequest, BodyHandlers.ofByteArray());
+        final int statusCode = response.statusCode();
+        if (statusCode < 200 || statusCode >= 300) {
+            throw new RuntimeException();
+        }
+        final CollectionLikeType collectionLikeType = MAPPER.getTypeFactory().constructCollectionLikeType(ArrayList.class, String.class);
+        return MAPPER.readValue(response.body(), collectionLikeType);
     }
 
 }

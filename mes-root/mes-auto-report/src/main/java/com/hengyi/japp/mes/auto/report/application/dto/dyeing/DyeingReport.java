@@ -2,21 +2,16 @@ package com.hengyi.japp.mes.auto.report.application.dto.dyeing;
 
 import com.github.ixtf.japp.core.J;
 import com.google.common.collect.Maps;
+import com.hengyi.japp.mes.auto.application.query.DyeingPrepareQuery;
 import com.hengyi.japp.mes.auto.domain.DyeingPrepare;
 import com.hengyi.japp.mes.auto.domain.Operator;
 import com.hengyi.japp.mes.auto.domain.data.DyeingType;
-import com.hengyi.japp.mes.auto.report.Jlucene;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.report.Report;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import com.mongodb.reactivestreams.client.MongoCollection;
-import lombok.Cleanup;
 import lombok.Data;
 import lombok.Getter;
-import lombok.SneakyThrows;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TopDocs;
 import org.bson.Document;
 import reactor.core.publisher.Flux;
 
@@ -25,7 +20,6 @@ import java.util.*;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
 import static com.mongodb.client.model.Filters.in;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-09-26
@@ -49,20 +43,14 @@ public class DyeingReport {
                 }).map(Map::values).block();
     }
 
-    @SneakyThrows
     public static DyeingReport create(String workshopId, long startDateTime, long endDateTime) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Jlucene.add(bqBuilder, "workshop", workshopId);
-        Jlucene.addRangeQuery(bqBuilder, "createDateTime", startDateTime, endDateTime);
-
-        final QueryService queryService = INJECTOR.getInstance(QueryService.class);
-        @Cleanup final IndexReader indexReader = queryService.indexReader(DyeingPrepare.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        final List<String> ids = Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
+        final SearchService searchService = INJECTOR.getInstance(SearchService.class);
+        final DyeingPrepareQuery query = DyeingPrepareQuery.builder().pageSize(Integer.MAX_VALUE)
+                .workshopId(workshopId)
+                .startDateTime(new Date(startDateTime))
+                .endDateTime(new Date(endDateTime))
+                .build();
+        final Collection<String> ids = searchService.query(query).getRight();
         return new DyeingReport(workshopId, startDateTime, endDateTime, ids);
     }
 

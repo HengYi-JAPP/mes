@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author jzb 2018-07-01
@@ -29,6 +30,10 @@ public class DyeingPrepareQuery {
     private final long startDateTimestamp;
     @Getter
     private final long endDateTimestamp;
+    @Getter
+    private final Date startDateTime;
+    @Getter
+    private final Date endDateTime;
     @Getter
     private final String lineMachineId;
     @Getter

@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author jzb 2018-10-19
@@ -27,6 +28,10 @@ public class SilkCarRecordQuery {
     private final String silkCarCode;//丝车编码
     @Getter
     private final String workshopId;
+    @Getter
+    private final Date startDateTime;
+    @Getter
+    private final Date endDateTime;
 
     @Builder
     public static class Result {

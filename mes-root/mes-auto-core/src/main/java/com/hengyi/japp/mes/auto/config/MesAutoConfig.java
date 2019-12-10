@@ -37,6 +37,8 @@ public class MesAutoConfig {
     @Getter
     private final JsonObject rabbitOptions;
     @Getter
+    private final JsonObject searchOptions;
+    @Getter
     private final RedisOptions redisOptions;
     @Getter
     private final JWTAuthOptions jwtAuthOptions;
@@ -56,6 +58,7 @@ public class MesAutoConfig {
         corsConfig = new CorsConfig(rootConfig.getJsonObject("cors"));
         mongoOptions = rootConfig.getJsonObject("mongo");
         rabbitOptions = rootConfig.getJsonObject("rabbit");
+        searchOptions = rootConfig.getJsonObject("search", new JsonObject());
         redisOptions = new RedisOptions(rootConfig.getJsonObject("redis"));
 
         final PubSecKeyOptions pubSecKey = new PubSecKeyOptions(rootConfig.getJsonObject("jwt"));

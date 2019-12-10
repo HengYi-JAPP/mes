@@ -3,11 +3,6 @@ dependencies {
             "com.github.ixtf.japp:poi",
             "org.mongodb:mongodb-driver-reactivestreams:1.11.0",
             "io.projectreactor:reactor-core:3.2.11.RELEASE",
-            "org.apache.lucene:lucene-analyzers-smartcn",
-            "org.apache.lucene:lucene-expressions",
-            "org.apache.lucene:lucene-facet",
-            "org.apache.lucene:lucene-queries",
-            "org.apache.lucene:lucene-queryparser",
             "redis.clients:jedis:3.0.1"
 
     testCompile "com.squareup.okhttp3:okhttp:3.11.0"

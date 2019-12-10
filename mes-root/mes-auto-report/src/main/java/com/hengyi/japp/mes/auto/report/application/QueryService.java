@@ -5,14 +5,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.ImplementedBy;
-import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
 import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.report.Report;
 import com.hengyi.japp.mes.auto.report.application.internal.QueryServiceImpl;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.lucene.index.IndexReader;
 import org.bson.Document;
 import reactor.core.publisher.Mono;
 
@@ -57,10 +55,6 @@ public interface QueryService {
     static Mono<Document> find(Class<?> clazz, EntityDTO dto) {
         return find(clazz, dto.getId());
     }
-
-    IndexReader indexReader(Class clazz);
-
-    Collection<String> query(SilkCarRecordQuery silkCarRecordQuery);
 
     Collection<String> querySilkCarRecordIds(String workshopId, long startL, long endL);
 

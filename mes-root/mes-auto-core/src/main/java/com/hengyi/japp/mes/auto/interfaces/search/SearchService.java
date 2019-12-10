@@ -78,6 +78,8 @@ public interface SearchService {
         return query(url("silkCarRecords"), query);
     }
 
+    Collection<String> query(SilkCarRecordQueryByEventSourceCanHappen query);
+
     default void index(DyeingPrepare dyeingPrepare) {
         final LuceneCommandOne command = new LuceneCommandOne();
         command.setClassName(DyeingPrepare.class);

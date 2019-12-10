@@ -1,33 +1,20 @@
 package com.hengyi.japp.mes.auto.report.application.internal;
 
-import com.github.ixtf.japp.core.J;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.hengyi.japp.mes.auto.application.query.PackageBoxQuery;
 import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQuery;
+import com.hengyi.japp.mes.auto.application.query.SilkCarRecordQueryByEventSourceCanHappen;
 import com.hengyi.japp.mes.auto.config.MesAutoConfig;
-import com.hengyi.japp.mes.auto.domain.PackageBox;
-import com.hengyi.japp.mes.auto.domain.SilkCarRecord;
-import com.hengyi.japp.mes.auto.report.Jlucene;
+import com.hengyi.japp.mes.auto.interfaces.search.SearchService;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
-import lombok.Cleanup;
-import lombok.SneakyThrows;
-import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.FSDirectory;
 
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
+import java.util.Map;
 
 /**
  * @author jzb 2019-05-20
@@ -35,105 +22,48 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class QueryServiceImpl implements QueryService {
     private final MesAutoConfig mesAutoConfig;
+    private final SearchService searchService;
 
     @Inject
-    private QueryServiceImpl(MesAutoConfig mesAutoConfig) {
+    private QueryServiceImpl(MesAutoConfig mesAutoConfig, SearchService searchService) {
         this.mesAutoConfig = mesAutoConfig;
+        this.searchService = searchService;
     }
 
-    @SneakyThrows
-    @Override
-    public IndexReader indexReader(Class clazz) {
-        final Path path = mesAutoConfig.luceneIndexPath(clazz);
-        return DirectoryReader.open(FSDirectory.open(path));
-    }
-
-    @SneakyThrows
-    @Override
-    public Collection<String> query(SilkCarRecordQuery silkCarRecordQuery) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Optional.ofNullable(silkCarRecordQuery.getWorkshopId()).filter(J::nonBlank)
-                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
-        final long startL = J.date(silkCarRecordQuery.getStartDate()).getTime();
-        final long endL = J.date(silkCarRecordQuery.getEndDate().plusDays(1)).getTime() - 1;
-        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
-
-        @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        return Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
-    }
-
-    @SneakyThrows
     @Override
     public Collection<String> querySilkCarRecordIds(String workshopId, long startL, long endL) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Optional.ofNullable(workshopId).filter(J::nonBlank)
-                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
-        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", startL, endL), BooleanClause.Occur.MUST);
-
-        @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        return Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
+        final Map<Object, Object> map = Maps.newHashMap();
+        final SilkCarRecordQuery query = SilkCarRecordQuery.builder()
+                .pageSize(Integer.MAX_VALUE)
+                .workshopId(workshopId)
+                .startDateTime(new Date(startL))
+                .endDateTime(new Date(endL))
+                .build();
+        return searchService.query(query).getRight();
     }
 
-    @SneakyThrows
     @Override
     public Collection<String> querySilkCarRecordIdsByEventSourceCanHappen(String workshopId, long startL, long endL) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Optional.ofNullable(workshopId).filter(J::nonBlank)
-                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
-        final long currentL = new Date().getTime();
-        bqBuilder.add(LongPoint.newRangeQuery("startDateTime", endL, currentL), BooleanClause.Occur.MUST_NOT);
-        bqBuilder.add(LongPoint.newRangeQuery("endDateTime", 0, startL), BooleanClause.Occur.MUST_NOT);
-
-        @Cleanup final IndexReader indexReader = indexReader(SilkCarRecord.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        return Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
+        final SilkCarRecordQueryByEventSourceCanHappen query = SilkCarRecordQueryByEventSourceCanHappen.builder()
+                .workshopId(workshopId)
+                .startDateTime(new Date(startL))
+                .endDateTime(new Date(endL))
+                .build();
+        return searchService.query(query);
     }
 
-    @SneakyThrows
     @Override
     public Collection<String> queryPackageBoxIds(String workshopId, LocalDate startBudat, LocalDate endBudat) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Optional.ofNullable(workshopId).filter(J::nonBlank)
-                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
-        Jlucene.addRangeQuery(bqBuilder, "budat", J.date(startBudat).getTime(), J.date(endBudat.plusDays(1)).getTime());
-
-        @Cleanup final IndexReader indexReader = indexReader(PackageBox.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        return Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
+        final PackageBoxQuery query = PackageBoxQuery.builder().pageSize(Integer.MAX_VALUE)
+                .workshopId(workshopId)
+                .startBudat(startBudat)
+                .endBudat(endBudat.plusDays(1))
+                .build();
+        return searchService.query(query).getRight();
     }
 
-    @SneakyThrows
     @Override
     public Collection<String> queryPackageBoxIds(String workshopId, long startDateTime, long endDateTime) {
-        final BooleanQuery.Builder bqBuilder = new BooleanQuery.Builder();
-        Optional.ofNullable(workshopId).filter(J::nonBlank)
-                .ifPresent(it -> Jlucene.add(bqBuilder, "workshop", it));
-        Jlucene.addRangeQuery(bqBuilder, "createDateTime", startDateTime, endDateTime);
-
-        @Cleanup final IndexReader indexReader = indexReader(PackageBox.class);
-        final IndexSearcher searcher = new IndexSearcher(indexReader);
-        final TopDocs topDocs = searcher.search(bqBuilder.build(), Integer.MAX_VALUE);
-        return Arrays.stream(topDocs.scoreDocs)
-                .map(scoreDoc -> Jlucene.toDocument(searcher, scoreDoc))
-                .map(it -> it.get("id"))
-                .collect(toList());
+        return Collections.EMPTY_LIST;
     }
 }

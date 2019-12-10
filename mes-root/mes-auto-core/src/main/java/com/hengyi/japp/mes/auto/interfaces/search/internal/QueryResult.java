@@ -15,7 +15,6 @@ public class QueryResult implements Serializable {
     private long count;
     private Collection<String> ids;
 
-
     public Pair<Long, Collection<String>> pair() {
         return Pair.of(count, J.emptyIfNull(ids));
     }
