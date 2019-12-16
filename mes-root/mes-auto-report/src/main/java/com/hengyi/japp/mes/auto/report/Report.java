@@ -4,7 +4,6 @@ import com.github.ixtf.japp.core.J;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hengyi.japp.mes.auto.GuiceModule;
-import com.hengyi.japp.mes.auto.config.MesAutoConfig;
 import com.hengyi.japp.mes.auto.report.verticle.AgentVerticle;
 import com.hengyi.japp.mes.auto.report.verticle.WorkerVerticle;
 import com.mongodb.reactivestreams.client.MongoCollection;
@@ -14,14 +13,10 @@ import io.reactivex.Single;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.VertxOptions;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.redis.RedisOptions;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class Report {
     public static Injector INJECTOR;
-    public static JedisPool JEDIS_POOL;
 
     //    static {
 //        // sshfs -o allow_other root@10.2.0.215:/data/mes/auto/db /data/mes-3000/auto/db
@@ -41,20 +35,6 @@ public class Report {
     public static void main(String[] args) {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
-
-            final JedisPoolConfig poolConfig = new JedisPoolConfig();
-            final RedisOptions redisOptions = INJECTOR.getInstance(MesAutoConfig.class).getRedisOptions();
-            poolConfig.setMaxTotal(128);
-            poolConfig.setMaxIdle(128);
-            poolConfig.setMinIdle(16);
-            poolConfig.setTestOnBorrow(true);
-            poolConfig.setTestOnReturn(true);
-            poolConfig.setTestWhileIdle(true);
-            poolConfig.setMinEvictableIdleTimeMillis(Duration.ofSeconds(60).toMillis());
-            poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
-            poolConfig.setNumTestsPerEvictionRun(3);
-            poolConfig.setBlockWhenExhausted(true);
-            JEDIS_POOL = new JedisPool(poolConfig, redisOptions.getHost(), 6379, 100000);
 
             return Completable.mergeArray(
                     deployWorker(vertx).ignoreElement(),

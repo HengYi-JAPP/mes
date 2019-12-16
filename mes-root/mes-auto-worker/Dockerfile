@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/java/jre:11u3-zulu-alpine
+FROM mcr.microsoft.com/java/jre:11u5-zulu-alpine
 
 ENV TZ Asia/Shanghai
 ENV JAVA_OPTIONS ""

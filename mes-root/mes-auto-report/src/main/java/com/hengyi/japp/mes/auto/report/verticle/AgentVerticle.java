@@ -81,7 +81,9 @@ public class AgentVerticle extends AbstractVerticle {
         router.post("/api/reports/measureFiberReport").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:measureFiberReport", Duration.ofMinutes(5)));
         router.post("/api/reports/silkExceptionReport").produces(APPLICATION_JSON)
-                .handler(rc -> commonSend(rc, "mes-auto:report:silkExceptionReport", Duration.ofMinutes(5)));
+                .handler(rc -> commonSend(rc, "mes-auto:report:silkExceptionReport", Duration.ofHours(1)));
+        router.post("/api/reports/silkExceptionByClassReport").produces(APPLICATION_JSON)
+                .handler(rc -> commonSend(rc, "mes-auto:report:silkExceptionByClassReport", Duration.ofHours(1)));
 
         final HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setDecompressionSupported(true)

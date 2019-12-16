@@ -12,8 +12,13 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import io.vertx.core.json.JsonObject;
+import io.vertx.redis.RedisOptions;
 import org.apache.commons.lang3.tuple.Pair;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -79,6 +84,29 @@ public class ReportModule extends AbstractModule {
     private MongoDatabase MongoDatabase(MesAutoConfig mesAutoConfig, MongoClient mongoClient) {
         final JsonObject mongoOptions = mesAutoConfig.getMongoOptions();
         return mongoClient.getDatabase(mongoOptions.getString("db_name", "mes-auto"));
+    }
+
+    @Provides
+    @Singleton
+    private JedisPool JedisPool(MesAutoConfig mesAutoConfig, MongoClient mongoClient) {
+        final JedisPoolConfig poolConfig = new JedisPoolConfig();
+        final RedisOptions redisOptions = mesAutoConfig.getRedisOptions();
+        poolConfig.setMaxTotal(128);
+        poolConfig.setMaxIdle(128);
+        poolConfig.setMinIdle(16);
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestOnReturn(true);
+        poolConfig.setTestWhileIdle(true);
+        poolConfig.setMinEvictableIdleTimeMillis(Duration.ofSeconds(60).toMillis());
+        poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
+        poolConfig.setNumTestsPerEvictionRun(3);
+        poolConfig.setBlockWhenExhausted(true);
+        return new JedisPool(poolConfig, redisOptions.getHost(), 6379, 100000);
+    }
+
+    @Provides
+    private Jedis Jedis(JedisPool jedisPool) {
+        return jedisPool.getResource();
     }
 
 }
