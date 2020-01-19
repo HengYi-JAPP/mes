@@ -54,4 +54,5 @@ public class Jlucene {
     public static Document toDocument(IndexSearcher searcher, ScoreDoc scoreDoc) {
         return searcher.doc(scoreDoc.doc);
     }
+
 }

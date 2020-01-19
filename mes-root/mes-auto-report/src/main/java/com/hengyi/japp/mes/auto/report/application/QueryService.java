@@ -16,6 +16,7 @@ import org.apache.lucene.index.IndexReader;
 import org.bson.Document;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -64,4 +65,8 @@ public interface QueryService {
     Collection<String> querySilkCarRecordIds(String workshopId, long startL, long endL);
 
     Collection<String> querySilkCarRecordIdsByEventSourceCanHappen(String workshopId, long startDateTime, long endDateTime);
+
+    Collection<String> queryPackageBoxIds(String workshopId, LocalDate startBudat, LocalDate endBudat);
+
+    Collection<String> queryPackageBoxIds(String workshopId, long startDateTime, long endDateTime);
 }

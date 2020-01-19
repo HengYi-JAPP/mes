@@ -73,11 +73,17 @@ public abstract class SilkCarRecordAggregate implements Serializable {
     }
 
     public static Mono<SilkCarRecordAggregate> from(String id) {
-        return QueryService.find(SilkCarRecord.class, id).map(document ->
-                document.getDate("endDateTime") != null
-                        ? new SilkCarRecordAggregate_History(document)
-                        : new SilkCarRecordAggregate_Runtime(document)
-        );
+        return QueryService.find(SilkCarRecord.class, id).flatMap(document -> {
+            if (document.getDate("endDateTime") != null) {
+                return Mono.just(new SilkCarRecordAggregate_History(document));
+            } else {
+                final SilkCarRecordAggregate_Runtime runtime = new SilkCarRecordAggregate_Runtime(document);
+                if (runtime.isStatusError()) {
+                    return Mono.empty();
+                }
+                return Mono.just(runtime);
+            }
+        });
     }
 
     private Collection<SilkRuntime.DTO> fetchInitSilkRuntimes() {
@@ -130,12 +136,13 @@ public abstract class SilkCarRecordAggregate implements Serializable {
 
     @SneakyThrows
     public static ObjectNode toJsonNode(EventSource.DTO dto) {
-        final ObjectNode objectNode = MAPPER.createObjectNode()
-                .put("eventId", dto.getEventId())
-                .put("type", dto.getType().name())
-                .put("fireDateTime", dto.getFireDateTime().getTime())
-                .put("deleted", dto.isDeleted())
-                .put("deleteDateTime", Optional.ofNullable(dto.getDeleteDateTime()).map(Date::getTime).orElse(null));
+        final ObjectNode objectNode = MAPPER.convertValue(dto, ObjectNode.class);
+//        final ObjectNode objectNode = MAPPER.createObjectNode()
+//                .put("eventId", dto.getEventId())
+//                .put("type", dto.getType().name())
+//                .put("fireDateTime", dto.getFireDateTime().getTime())
+//                .put("deleted", dto.isDeleted())
+//                .put("deleteDateTime", Optional.ofNullable(dto.getDeleteDateTime()).map(Date::getTime).orElse(null));
         final Document operator = QueryService.findFromCache(Operator.class, dto.getOperator()).get();
         objectNode.set("operator", MAPPER.readTree(operator.toJson()));
         if (dto.isDeleted()) {

@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.hengyi.japp.mes.auto.report.Report.JEDIS_POOL;
+import static com.hengyi.japp.mes.auto.report.ReportModule.getInstant;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -24,13 +24,13 @@ public interface RedisService {
     Pattern SILK_CAR_CODE_PATTERN = Pattern.compile("^SilkCarRuntime\\[(\\w+)\\]$");
 
     static <T> T call(Function<Jedis, T> function) {
-        try (Jedis jedis = JEDIS_POOL.getResource()) {
+        try (Jedis jedis = getInstant(Jedis.class)) {
             return function.apply(jedis);
         }
     }
 
     static void run(Consumer<Jedis> consumer) {
-        try (Jedis jedis = JEDIS_POOL.getResource()) {
+        try (Jedis jedis = getInstant(Jedis.class)) {
             consumer.accept(jedis);
         }
     }

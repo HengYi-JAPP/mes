@@ -54,7 +54,7 @@ public class WorkerVerticle extends AbstractVerticle {
                     final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
                     final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
                     final StrippingReport report = StrippingReport.create(workshopId, startDateTime, endDateTime);
-                    return MAPPER.writeValueAsString(report.toJsonNode());
+                    return MAPPER.writeValueAsString(report);
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
                     reply.fail(400, err.getLocalizedMessage());
@@ -90,7 +90,7 @@ public class WorkerVerticle extends AbstractVerticle {
                     final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
                     final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
                     final ToDtyReport report = ToDtyReport.create(workshopId, startDateTime, endDateTime);
-                    return MAPPER.writeValueAsString(report.toJsonNode());
+                    return MAPPER.writeValueAsString(report);
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
                     reply.fail(400, err.getLocalizedMessage());
@@ -102,7 +102,7 @@ public class WorkerVerticle extends AbstractVerticle {
                     final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
                     final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
                     final ToDtyConfirmReport report = ToDtyConfirmReport.create(workshopId, startDateTime, endDateTime);
-                    return MAPPER.writeValueAsString(report.toJsonNode());
+                    return MAPPER.writeValueAsString(report);
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
                     reply.fail(400, err.getLocalizedMessage());
