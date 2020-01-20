@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
+import static com.hengyi.japp.mes.auto.report.ReportModule.getInstant;
 
 /**
  * @author liuyuan
@@ -16,20 +16,20 @@ import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 public class RedisUtil {
 
     public static Map<String, String> getRedis(String code) {
-        try (Jedis jedis = INJECTOR.getInstance(Jedis.class)) {
+        try (Jedis jedis = getInstant(Jedis.class)) {
             return jedis.hgetAll("SilkCarRuntime[" + code + "]");
         }
     }
 
     public static Stream<String> getAllSilkCarRecords() {
-        try (Jedis jedis = INJECTOR.getInstance(Jedis.class)) {
+        try (Jedis jedis = getInstant(Jedis.class)) {
             Set<String> keys = jedis.keys("SilkCarRuntime*");
             return keys.stream().map(key -> jedis.hget(key, "silkCarRecord"));
         }
     }
 
     public static Stream<Map<String, String>> getALlSilkCarRecordsEvents() {
-        try (Jedis jedis = INJECTOR.getInstance(Jedis.class)) {
+        try (Jedis jedis = getInstant(Jedis.class)) {
             Set<String> keys = jedis.keys("SilkCarRuntime*");
             return keys.stream().map(key -> jedis.hgetAll(key));
         }

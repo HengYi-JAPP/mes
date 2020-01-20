@@ -129,14 +129,11 @@ public class SilkCarRecordResource {
         });
     }
 
-//    @Path("silkCarRecords/{id}")
-//    @DELETE
-//    public Completable delete(Principal principal, @PathParam("id") @NotBlank String id) {
-//        return silkCarRecordRepository.find(id).flatMapCompletable(silkCarRecord -> {
-//            if (silkCarRecord.getCarpoolDateTime() != null) {
-//                throw new RuntimeException("拼车,无法删除");
-//            }
-//            return silkCarRecordRepository.delete(silkCarRecord);
-//        });
-//    }
+    @Path("silkCarRecords/{id}")
+    @PUT
+    public Completable delete(Principal principal, @PathParam("id") @NotBlank String id) {
+        return silkCarRecordRepository.find(id)
+                .flatMap(silkCarRecordRepository::save)
+                .ignoreElement();
+    }
 }

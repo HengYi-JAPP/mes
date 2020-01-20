@@ -40,8 +40,7 @@ public class StrippingReport {
         this.endDateTime = endDateTime;
         groupByOperators = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds))
                 .flatMap(SilkCarRecordAggregate::from)
-                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType())
-                        || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
+                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType()) || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
                 .reduce(Maps.<String, GroupBy_Operator>newConcurrentMap(), (acc, cur) -> operatorId(cur).map(operatorId -> {
                     acc.compute(operatorId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(cur));
                     return acc;

@@ -4,10 +4,12 @@ import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.report.application.RedisService;
 import com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository;
+import lombok.Getter;
 import org.bson.Document;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.hengyi.japp.mes.auto.repository.SilkCarRuntimeRepository.EVENT_SOURCE_KEY_PREFIX;
 import static java.util.stream.Collectors.toList;
@@ -16,6 +18,8 @@ import static java.util.stream.Collectors.toList;
  * @author jzb 2019-07-11
  */
 public class SilkCarRecordAggregate_Runtime extends SilkCarRecordAggregate {
+    @Getter
+    private boolean statusError;
 
     protected SilkCarRecordAggregate_Runtime(Document document) {
         super(document);
@@ -26,6 +30,7 @@ public class SilkCarRecordAggregate_Runtime extends SilkCarRecordAggregate {
         final String code = silkCar.getString("code");
         final String redisKey = SilkCarRuntimeRepository.redisKey(code);
         final Map<String, String> redisMap = RedisService.call(jedis -> jedis.hgetAll(redisKey));
+        statusError = Objects.equals(id, redisMap.get("silkCarRecord"));
         return redisMap.keySet().parallelStream()
                 .filter(it -> it.startsWith(EVENT_SOURCE_KEY_PREFIX))
                 .map(redisMap::get)

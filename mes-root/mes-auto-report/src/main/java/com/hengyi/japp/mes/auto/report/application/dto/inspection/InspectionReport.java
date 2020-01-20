@@ -26,7 +26,7 @@ import java.util.*;
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author jzb 2019-09-04
@@ -45,7 +45,6 @@ public class InspectionReport {
         this.endDateTime = endDateTime;
         groupByOperators = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds))
                 .flatMap(SilkCarRecordAggregate::from)
-                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType()) || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
                 .reduce(Maps.<String, GroupBy_Operator>newConcurrentMap(), (acc, cur) -> operatorId(cur).map(operatorId -> {
                     acc.compute(operatorId, (k, v) -> Optional.ofNullable(v).orElse(new GroupBy_Operator(k)).collect(cur));
                     return acc;
@@ -74,21 +73,37 @@ public class InspectionReport {
         if (time >= endDateTime) {
             return Optional.empty();
         }
-        return findEventSourceDTO(silkCarRecordAggregate.getEventSourceDtos())
+        return findEventSourceDTO(silkCarRecordAggregate)
                 .map(EventSource.DTO::getOperator)
                 .map(EntityDTO::getId);
     }
 
-    private Optional<EventSource.DTO> findEventSourceDTO(Collection<EventSource.DTO> eventSourceDtos) {
-        final List<EventSource.DTO> dtos = eventSourceDtos.parallelStream().filter(it -> {
-            if (!it.isDeleted() && EventSourceType.ProductProcessSubmitEvent == it.getType()) {
-                final ProductProcessSubmitEvent.DTO dto = (ProductProcessSubmitEvent.DTO) it;
-                return PRODUCT_PROCESS_IDS.contains(dto.getProductProcess().getId());
-            }
-            return false;
-        }).collect(toList());
+    private Optional<EventSource.DTO> findEventSourceDTO(SilkCarRecordAggregate silkCarRecordAggregate) {
+        final DoffingType doffingType = silkCarRecordAggregate.getDoffingType();
+        final List<EventSource.DTO> dtos = silkCarRecordAggregate.getEventSourceDtos().parallelStream()
+                .filter(it -> !it.isDeleted())
+                .filter(it -> {
+                    if (EventSourceType.SilkCarRuntimeWeightEvent == it.getType()) {
+                        return true;
+                    }
+                    if (EventSourceType.ProductProcessSubmitEvent == it.getType()) {
+                        final ProductProcessSubmitEvent.DTO dto = (ProductProcessSubmitEvent.DTO) it;
+                        return PRODUCT_PROCESS_IDS.contains(dto.getProductProcess().getId());
+                    }
+                    return false;
+                }).collect(toList());
         if (J.isEmpty(dtos)) {
             return Optional.empty();
+        }
+        if (!Objects.equals(DoffingType.AUTO, doffingType) && !Objects.equals(DoffingType.MANUAL, doffingType)) {
+            // 拼车，必须有织袜，才算产量
+            if (silkCarRecordAggregate.getEventSourceDtos().parallelStream()
+                    .filter(it -> !it.isDeleted())
+                    .filter(it -> EventSourceType.DyeingPrepareEvent == it.getType())
+                    .findFirst()
+                    .isEmpty()) {
+                return Optional.empty();
+            }
         }
         Collections.sort(dtos);
         return Optional.of(dtos.get(0)).filter(dto -> {

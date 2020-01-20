@@ -35,7 +35,6 @@ public class Report {
     public static void main(String[] args) {
         Vertx.rxClusteredVertx(vertxOptions()).flatMapCompletable(vertx -> {
             INJECTOR = Guice.createInjector(new GuiceModule(vertx), new ReportModule());
-
             return Completable.mergeArray(
                     deployWorker(vertx).ignoreElement(),
                     deployAgent(vertx).ignoreElement()
