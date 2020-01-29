@@ -46,7 +46,6 @@ public class Util {
         return StringUtils.isBlank(s) ? false : hrIdP.matcher(s).matches();
     }
 
-
     public static void commonSend(RoutingContext rc, String address) {
         commonSend(rc, address, new DeliveryOptions());
     }

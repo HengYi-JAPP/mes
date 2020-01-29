@@ -26,7 +26,7 @@ import java.util.*;
 import static com.github.ixtf.japp.core.Constant.MAPPER;
 import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author jzb 2019-09-04

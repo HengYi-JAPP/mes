@@ -25,6 +25,9 @@ allprojects {
         imports {
             mavenBom "com.github.ixtf:bom:${bomVersion}"
         }
+//        dependencies {
+//            dependency group: 'com.hazelcast', name: 'hazelcast', version: '3.12.2'
+//        }
     }
 }
 subprojects {

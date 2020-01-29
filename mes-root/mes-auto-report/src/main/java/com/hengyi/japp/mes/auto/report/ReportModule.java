@@ -36,29 +36,6 @@ public class ReportModule extends AbstractModule {
     }
 
     @Provides
-    private Jedis Jedis(JedisPool jedisPool) {
-        return jedisPool.getResource();
-    }
-
-    @Provides
-    @Singleton
-    private JedisPool JedisPool(MesAutoConfig mesAutoConfig) {
-        final JedisPoolConfig poolConfig = new JedisPoolConfig();
-        final RedisOptions redisOptions = mesAutoConfig.getRedisOptions();
-        poolConfig.setMaxTotal(128);
-        poolConfig.setMaxIdle(128);
-        poolConfig.setMinIdle(16);
-        poolConfig.setTestOnBorrow(true);
-        poolConfig.setTestOnReturn(true);
-        poolConfig.setTestWhileIdle(true);
-        poolConfig.setMinEvictableIdleTimeMillis(Duration.ofSeconds(60).toMillis());
-        poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
-        poolConfig.setNumTestsPerEvictionRun(3);
-        poolConfig.setBlockWhenExhausted(true);
-        return new JedisPool(poolConfig, redisOptions.getHost(), 6379, 100000);
-    }
-
-    @Provides
     @Singleton
     private MongoClient MongoClient(MesAutoConfig mesAutoConfig) {
         final JsonObject mongoOptions = mesAutoConfig.getMongoOptions();
