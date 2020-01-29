@@ -6,10 +6,13 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.core.http.HttpServerRequest;
 import io.vertx.reactivex.core.http.HttpServerResponse;
+import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.Router;
@@ -21,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import static com.hengyi.japp.mes.auto.Util.commonSend;
 import static com.hengyi.japp.mes.auto.agent.Agent.INJECTOR;
@@ -50,6 +54,34 @@ public class PdaVerticle extends AbstractVerticle {
 
         final JWTAuth jwtAuth = JWTAuth.create(vertx, config.getJwtAuthOptions());
         router.route("/api/*").handler(JWTAuthHandler.create(jwtAuth));
+
+        router.route("/api/dynamic").handler(rc -> {
+            final HttpServerRequest request = rc.request();
+            final String service = request.getParam("service");
+            final String action = request.getParam("action");
+            final JsonObject principal = Optional.ofNullable(rc.user())
+                    .map(User::principal)
+                    .orElse(null);
+            final String address = String.join(":", "test", service, action);
+            final JsonObject message = new JsonObject().put("principal", principal)
+                    .put("body", rc.getBodyAsString());
+            vertx.eventBus().send(address, message, ar -> {
+                if (ar.succeeded()) {
+                    final Object body = ar.result().body();
+                    if (body == null) {
+                        rc.response().end();
+                    } else if (body instanceof String) {
+                        final String result = (String) body;
+                        rc.response().end(result);
+                    } else if (body instanceof byte[]) {
+                        final byte[] result = (byte[]) body;
+                        rc.response().end(Buffer.buffer(result));
+                    }
+                } else {
+                    rc.fail(ar.cause());
+                }
+            });
+        });
 
         router.post("/api/reports/statisticReport/generate").produces(APPLICATION_JSON)
                 .handler(rc -> commonSend(rc, "mes-auto:report:statisticReport:generate", Duration.ofMinutes(5)));

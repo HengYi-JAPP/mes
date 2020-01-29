@@ -1,8 +1,10 @@
 package com.hengyi.japp.mes.auto.interfaces.jikon;
 
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterPackageBoxEvent;
 import com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterSilkCarInfoFetchEvent;
 import com.hengyi.japp.mes.auto.interfaces.jikon.event.JikonAdapterSilkDetachEvent;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import java.security.Principal;
@@ -24,4 +26,7 @@ public interface JikonAdapter {
 
     Single<String> handle(Principal principal, JikonAdapterPackageBoxEvent.Command command);
 
+    Completable addOkCode(EntityDTO command);
+
+    Completable deleteOkCode(EntityDTO command);
 }

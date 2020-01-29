@@ -15,6 +15,7 @@ import com.hengyi.japp.mes.auto.application.event.SilkNoteFeedbackEvent;
 import com.hengyi.japp.mes.auto.domain.*;
 import com.hengyi.japp.mes.auto.domain.data.PackageBoxType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
+import com.hengyi.japp.mes.auto.dto.EntityDTO;
 import com.hengyi.japp.mes.auto.interfaces.facevisa.FacevisaService;
 import com.hengyi.japp.mes.auto.interfaces.jikon.JikonAdapter;
 import com.hengyi.japp.mes.auto.interfaces.jikon.JikonUtil;
@@ -43,6 +44,7 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 @Singleton
 public class JikonAdapterImpl implements JikonAdapter {
+    private static final Collection<String> OK_CODES = Sets.newConcurrentHashSet();
     private final ApplicationEvents applicationEvents;
     private final SilkCarRuntimeRepository silkCarRuntimeRepository;
     private final SilkRepository silkRepository;
@@ -250,6 +252,11 @@ public class JikonAdapterImpl implements JikonAdapter {
         final Single<Map<String, PackageClass>> packageClassMap$ = packageClassRepository.list().toMap(PackageClass::getRiambCode);
         final Single<Map<String, Grade>> gradeMap$ = gradeRepository.list().toMap(Grade::getName);
         @NotBlank final String boxCode = command.getBoxCode();
+
+        if (OK_CODES.contains(boxCode)) {
+            return Single.just(JikonUtil.ok());
+        }
+
         return packageClassMap$.flatMap(packageClassMap -> gradeMap$.flatMap(gradeMap -> packageBoxRepository.findOrCreateByCode(boxCode).flatMap(packageBox -> {
             packageBox.setType(PackageBoxType.AUTO);
             packageBox.command(MAPPER.convertValue(command, JsonNode.class));
@@ -289,6 +296,16 @@ public class JikonAdapterImpl implements JikonAdapter {
                 );
             });
         }))).map(packageBox -> JikonUtil.ok()).onErrorReturn(ex -> JikonUtil.error(ex));
+    }
+
+    @Override
+    public Completable addOkCode(EntityDTO command) {
+        return Completable.fromRunnable(() -> OK_CODES.add(command.getId()));
+    }
+
+    @Override
+    public Completable deleteOkCode(EntityDTO command) {
+        return Completable.fromRunnable(() -> OK_CODES.remove(command.getId()));
     }
 
 }

@@ -4,6 +4,8 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Executors;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
@@ -13,6 +15,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ReportDebug {
 
     public static void main(String[] args) {
+        Executors.newWorkStealingPool();
         final Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(new AbstractVerticle() {
             @Override
