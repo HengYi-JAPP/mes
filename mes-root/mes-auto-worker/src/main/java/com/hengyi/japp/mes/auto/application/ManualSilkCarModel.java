@@ -254,6 +254,40 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
             builder.add(shuffle(list));
             return Single.just(builder.build());
         }
+        if (lineMachineCount == 8) {
+            List<CheckSilkDTO> list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 4));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 3));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 2));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 1));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 4));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 3));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 2));
+            builder.add(shuffle(list));
+
+            list = Lists.newArrayList();
+            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 1));
+            builder.add(shuffle(list));
+            return Single.just(builder.build());
+        }
         throw new RuntimeException();
     }
 
