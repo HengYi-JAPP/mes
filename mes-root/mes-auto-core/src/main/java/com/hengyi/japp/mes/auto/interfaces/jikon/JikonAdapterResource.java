@@ -68,13 +68,13 @@ public class JikonAdapterResource {
                 .doOnError(ex -> log.error(sb.append("\n").append("失败!").toString(), ex));
     }
 
-    @Path("open/okCodes/add")
+    @Path("open/automaticintegration/okCodes/add")
     @POST
     public Completable addOkCode(EntityDTO command) throws Exception {
         return jikonAdapter.addOkCode(command);
     }
 
-    @Path("open/okCodes/delete")
+    @Path("open/automaticintegration/okCodes/delete")
     @POST
     public Completable deleteOkCode(EntityDTO command) throws Exception {
         return jikonAdapter.deleteOkCode(command);
