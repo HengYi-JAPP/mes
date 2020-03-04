@@ -15,6 +15,7 @@ import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.domain.data.SilkCarSideType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -34,8 +35,10 @@ import static java.util.stream.Collectors.toList;
  */
 @Slf4j
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class SilkCarRecordAggregate implements Serializable {
     protected final Document document;
+    @EqualsAndHashCode.Include
     protected final String id;
     protected final String doffingOperatorId;
     protected final DoffingType doffingType;

@@ -3,13 +3,18 @@ package com.hengyi.japp.mes.auto.report.application.dto.silk_car_record;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.domain.Batch;
-import com.hengyi.japp.mes.auto.domain.Grade;
+import com.google.common.collect.Maps;
+import com.hengyi.japp.mes.auto.application.event.EventSource;
 import com.hengyi.japp.mes.auto.domain.Silk;
+import com.hengyi.japp.mes.auto.domain.data.DoffingType;
+import com.hengyi.japp.mes.auto.domain.data.SilkCarRecordAggregateType;
 import com.hengyi.japp.mes.auto.report.application.QueryService;
 import lombok.Data;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bson.Document;
 import reactor.core.publisher.Flux;
 
@@ -21,8 +26,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.github.ixtf.japp.core.Constant.MAPPER;
+import static com.hengyi.japp.mes.auto.report.Report.INJECTOR;
 import static com.hengyi.japp.mes.auto.report.application.QueryService.ID_COL;
-import static java.util.stream.Collectors.*;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.partitioningBy;
 
 /**
  * @author jzb 2019-07-11
@@ -30,25 +37,34 @@ import static java.util.stream.Collectors.*;
 @Slf4j
 @Data
 public class DoffingSilkCarRecordReport implements Serializable {
+    private final String workshopId;
+    private final long startDateTime;
+    private final long endDateTime;
+    @Getter
     private final Collection<GroupBy_Batch_Grade> groupByBatchGrades;
 
-    public DoffingSilkCarRecordReport(Collection<String> silkCarRecordIds) {
-        groupByBatchGrades = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds))
-                .flatMap(SilkCarRecordAggregate::from)
-                .filter(it -> Objects.nonNull(it.getDoffingDateTime())).toStream()
-                .collect(groupingBy(it -> it.getBatch().getString(ID_COL)))
-                .entrySet().stream()
-                .flatMap(entry -> {
-                    final Document batch = QueryService.findFromCache(Batch.class, entry.getKey()).get();
-                    return entry.getValue().stream()
-                            .collect(groupingBy(it -> it.getGrade().getString(ID_COL)))
-                            .entrySet().stream()
-                            .map(entry2 -> {
-                                final Document grade = QueryService.findFromCache(Grade.class, entry2.getKey()).get();
-                                return new GroupBy_Batch_Grade(batch, grade, entry2.getValue());
-                            });
-                })
-                .collect(toList());
+    private DoffingSilkCarRecordReport(String workshopId, long startDateTime, long endDateTime, Flux<SilkCarRecordAggregate> silkCarRecordAggregate$) {
+        this.workshopId = workshopId;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        groupByBatchGrades = silkCarRecordAggregate$
+                .filter(it -> Objects.equals(DoffingType.AUTO, it.getDoffingType()) || Objects.equals(DoffingType.MANUAL, it.getDoffingType()))
+                .reduce(Maps.<Pair<String, String>, GroupBy_Batch_Grade>newConcurrentMap(), (acc, cur) -> {
+                    final Document batch = cur.getBatch();
+                    final String batchId = batch.getString(ID_COL);
+                    final Document grade = cur.getGrade();
+                    final String gradeId = grade.getString(ID_COL);
+                    final Pair<String, String> key = Pair.of(batchId, gradeId);
+                    acc.compute(key, (k, v) -> ofNullable(v).orElse(new GroupBy_Batch_Grade(batch, grade)).collect(cur));
+                    return acc;
+                }).map(Map::values).block();
+    }
+
+    public static DoffingSilkCarRecordReport create(String workshopId, long startDateTime, long endDateTime) {
+        final QueryService queryService = INJECTOR.getInstance(QueryService.class);
+        final Collection<String> silkCarRecordIds = queryService.querySilkCarRecordIds(workshopId, startDateTime, endDateTime);
+        final Flux<SilkCarRecordAggregate> silkCarRecordAggregate$ = Flux.fromIterable(J.emptyIfNull(silkCarRecordIds)).flatMap(SilkCarRecordAggregate::from);
+        return new DoffingSilkCarRecordReport(workshopId, startDateTime, endDateTime, silkCarRecordAggregate$);
     }
 
     @SneakyThrows
@@ -62,13 +78,18 @@ public class DoffingSilkCarRecordReport implements Serializable {
     public static class GroupBy_Batch_Grade {
         private final Document batch;
         private final Document grade;
-        private final Collection<Item> items;
+        private final Collection<Item> items = Lists.newArrayList();
 
-        public GroupBy_Batch_Grade(Document batch, Document grade, Collection<SilkCarRecordAggregate> silkCarRecordAggregates) {
+        public GroupBy_Batch_Grade(Document batch, Document grade) {
             this.batch = batch;
             this.grade = grade;
-            items = silkCarRecordAggregates.parallelStream().map(it -> new Item(batch, grade, it)).collect(toList());
         }
+
+//        public GroupBy_Batch_Grade(Document batch, Document grade, Collection<SilkCarRecordAggregate> silkCarRecordAggregates) {
+//            this.batch = batch;
+//            this.grade = grade;
+//            items = silkCarRecordAggregates.parallelStream().map(it -> new Item(batch, grade, it)).collect(toList());
+//        }
 
         @SneakyThrows
         public ObjectNode toJsonNode() {
@@ -80,22 +101,36 @@ public class DoffingSilkCarRecordReport implements Serializable {
             items.forEach(item -> itemsArrayNode.add(item.toJsonNode()));
             return objectNode;
         }
+
+        public GroupBy_Batch_Grade collect(SilkCarRecordAggregate silkCarRecordAggregate) {
+            final Item item = new Item(batch, grade, silkCarRecordAggregate);
+            items.add(item);
+            return this;
+        }
     }
 
     @Data
     public static class Item {
+        private final String id;
         private final Document batch;
         private final Document grade;
-        private final SilkCarRecordAggregate silkCarRecordAggregate;
+        private final Document silkCar;
+        private final Document creator;
+        private final Collection<EventSource.DTO> eventSources;
+        private final SilkCarRecordAggregateType type;
         private final int silkCount;
         private final BigDecimal netWeight;
         // 是否已经称重
         private final boolean hasNetWeight;
 
         public Item(Document batch, Document grade, SilkCarRecordAggregate silkCarRecordAggregate) {
+            this.id = silkCarRecordAggregate.getId();
+            this.silkCar = silkCarRecordAggregate.getSilkCar();
+            this.creator = silkCarRecordAggregate.getCreator();
+            this.eventSources = silkCarRecordAggregate.getEventSourceDtos();
             this.batch = batch;
             this.grade = grade;
-            this.silkCarRecordAggregate = silkCarRecordAggregate;
+            this.type = silkCarRecordAggregate.getType();
             silkCount = silkCarRecordAggregate.getInitSilkRuntimeDtos().size();
             if (grade.getInteger("sortBy") >= 100) {
                 hasNetWeight = true;
@@ -124,16 +159,16 @@ public class DoffingSilkCarRecordReport implements Serializable {
         @SneakyThrows
         public ObjectNode toJsonNode() {
             final ObjectNode objectNode = MAPPER.createObjectNode()
-                    .put("type", silkCarRecordAggregate.getType().name())
-                    .put("id", silkCarRecordAggregate.getId())
+                    .put("type", type.name())
+                    .put("id", id)
                     .put("hasNetWeight", hasNetWeight)
                     .put("silkCount", silkCount)
                     .put("netWeight", netWeight);
-            objectNode.set("silkCar", MAPPER.readTree(silkCarRecordAggregate.getSilkCar().toJson()));
-            objectNode.set("creator", MAPPER.readTree(silkCarRecordAggregate.getCreator().toJson()));
+            objectNode.set("silkCar", MAPPER.readTree(silkCar.toJson()));
+            objectNode.set("creator", MAPPER.readTree(creator.toJson()));
             final ArrayNode eventSourcesArrayNode = MAPPER.createArrayNode();
             objectNode.set("eventSources", eventSourcesArrayNode);
-            J.emptyIfNull(silkCarRecordAggregate.getEventSourceDtos()).stream()
+            J.emptyIfNull(eventSources).stream()
                     .map(SilkCarRecordAggregate::toJsonNode)
                     .forEach(eventSourcesArrayNode::add);
             return objectNode;

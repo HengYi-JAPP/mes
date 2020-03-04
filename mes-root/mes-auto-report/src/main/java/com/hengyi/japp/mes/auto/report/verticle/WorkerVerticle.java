@@ -1,15 +1,14 @@
 package com.hengyi.japp.mes.auto.report.verticle;
 
 import com.github.ixtf.japp.core.J;
-import com.hengyi.japp.mes.auto.report.application.QueryService;
-import com.hengyi.japp.mes.auto.report.application.RedisService;
-import com.hengyi.japp.mes.auto.report.application.StatisticReportService;
+import com.hengyi.japp.mes.auto.report.application.*;
+import com.hengyi.japp.mes.auto.report.application.command.ExceptionRecordByClassReportCommand;
+import com.hengyi.japp.mes.auto.report.application.command.ExceptionRecordReportCommand;
 import com.hengyi.japp.mes.auto.report.application.dto.PackageBoxReport_ByOperator;
 import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyConfirmReport;
 import com.hengyi.japp.mes.auto.report.application.dto.dty.ToDtyReport;
 import com.hengyi.japp.mes.auto.report.application.dto.dyeing.DyeingReport;
 import com.hengyi.japp.mes.auto.report.application.dto.inspection.InspectionReport;
-import com.hengyi.japp.mes.auto.report.application.dto.silkException.ExceptionRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.silk_car_record.DoffingSilkCarRecordReport;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportCombine;
 import com.hengyi.japp.mes.auto.report.application.dto.statistic.StatisticReportDay;
@@ -27,7 +26,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.net.URLEncoder;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -122,12 +120,20 @@ public class WorkerVerticle extends AbstractVerticle {
                 })).rxCompletionHandler(),
                 vertx.eventBus().<JsonObject>consumer("mes-auto:report:silkExceptionReport", reply -> Single.fromCallable(() -> {
                     final JsonObject msg = reply.body();
-                    final JsonObject postBody = new JsonObject(msg.getString("body"));
-                    final String workshopId = postBody.getString("workshopId");
-                    final long startDateTime = NumberUtils.toLong(postBody.getString("startDateTime"));
-                    final long endDateTime = NumberUtils.toLong(postBody.getString("endDateTime"));
-                    final ExceptionRecordReport report = ExceptionRecordReport.create(workshopId, startDateTime, endDateTime);
-                    return MAPPER.writeValueAsString(report.toJsonNode());
+                    final var command = MAPPER.readValue(msg.getString("body"), ExceptionRecordReportCommand.class);
+                    final var service = INJECTOR.getInstance(SilkExceptionReportService.class);
+                    final var report = service.report(command).block();
+                    return MAPPER.writeValueAsString(report);
+                }).subscribe(reply::reply, err -> {
+                    log.error("", err);
+                    reply.fail(400, err.getLocalizedMessage());
+                })).rxCompletionHandler(),
+                vertx.eventBus().<JsonObject>consumer("mes-auto:report:silkExceptionByClassReport", reply -> Single.fromCallable(() -> {
+                    final JsonObject msg = reply.body();
+                    final var command = MAPPER.readValue(msg.getString("body"), ExceptionRecordByClassReportCommand.class);
+                    final var service = INJECTOR.getInstance(SilkExceptionByClassReportService.class);
+                    final var report = service.report(command).block();
+                    return MAPPER.writeValueAsString(report);
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
                     reply.fail(400, err.getLocalizedMessage());
@@ -146,8 +152,7 @@ public class WorkerVerticle extends AbstractVerticle {
                             .map(it -> it.getJsonArray("endDateTime"))
                             .map(it -> it.getString(0))
                             .map(NumberUtils::toLong).get();
-                    final Collection<String> silkCarRecordIds = queryService.querySilkCarRecordIds(workshopId, startDateTime, endDateTime);
-                    final DoffingSilkCarRecordReport report = new DoffingSilkCarRecordReport(silkCarRecordIds);
+                    final DoffingSilkCarRecordReport report = DoffingSilkCarRecordReport.create(workshopId, startDateTime, endDateTime);
                     return MAPPER.writeValueAsString(report.toJsonNode());
                 }).subscribe(reply::reply, err -> {
                     log.error("", err);
