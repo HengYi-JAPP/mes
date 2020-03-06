@@ -46,8 +46,12 @@ public class SilkCar extends LoggableMongoEntity {
     }
 
     public List<CheckSilkDTO> checkSilks(SilkCarSideType silkCarSideType, int row) {
+        return checkSilks(silkCarSideType, row, IntStream.rangeClosed(1, getCol()));
+    }
+
+    public List<CheckSilkDTO> checkSilks(SilkCarSideType silkCarSideType, int row, IntStream colStream) {
         final ImmutableList.Builder<CheckSilkDTO> builder = ImmutableList.builder();
-        IntStream.rangeClosed(1, getCol()).filter(c -> !isMiddle(c)).mapToObj(c -> {
+        colStream.filter(c -> !isMiddle(c)).mapToObj(c -> {
             final CheckSilkDTO checkSilk = new CheckSilkDTO();
             checkSilk.setSideType(silkCarSideType);
             checkSilk.setRow(row);

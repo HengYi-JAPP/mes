@@ -15,9 +15,12 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.hengyi.japp.mes.auto.application.SilkCarModel.shuffle;
+import static com.hengyi.japp.mes.auto.domain.data.SilkCarSideType.A;
+import static com.hengyi.japp.mes.auto.domain.data.SilkCarSideType.B;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -89,6 +92,9 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
                 final int row = silkCar.getRow();
                 final int col = silkCar.getCol();
                 if (row == 3 && col == 4) {
+                    if (lineMachineCount == 4) {
+                        return generateSilkRuntimesBySilkBarcodesC_4(builder, silkBarcodes);
+                    }
                     return generateSilkRuntimesBySilkBarcodesC(builder, silkBarcodes);
                 }
             }
@@ -109,6 +115,47 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         return addAll(builder.build());
     }
 
+    private Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC_4(ImmutableList.Builder<Single<SilkRuntime>> builder, List<SilkBarcode> silkBarcodes) {
+        final int row = silkCar.getRow();
+        final int col = silkCar.getCol();
+        if (row != 3 || col != 4) {
+            throw new RuntimeException("丝车不符!");
+        }
+
+        final Collection<Single<SilkRuntime>> build = builder.build();
+        if (J.isEmpty(build)) {
+            final int size = silkBarcodes.size();
+            if (size == 4) {
+                return Single.merge(List.of(
+                        silkCarRuntime(A, 2, 4, silkBarcodes.get(0), 1),
+                        silkCarRuntime(A, 3, 4, silkBarcodes.get(0), 2),
+                        silkCarRuntime(A, 3, 3, silkBarcodes.get(0), 3),
+                        silkCarRuntime(A, 3, 2, silkBarcodes.get(0), 4),
+                        silkCarRuntime(A, 3, 1, silkBarcodes.get(0), 5),
+
+                        silkCarRuntime(A, 1, 3, silkBarcodes.get(1), 1),
+                        silkCarRuntime(A, 1, 2, silkBarcodes.get(1), 2),
+                        silkCarRuntime(A, 2, 1, silkBarcodes.get(1), 3),
+                        silkCarRuntime(A, 2, 2, silkBarcodes.get(1), 4),
+                        silkCarRuntime(A, 2, 3, silkBarcodes.get(1), 5),
+
+                        silkCarRuntime(B, 2, 4, silkBarcodes.get(2), 1),
+                        silkCarRuntime(B, 3, 4, silkBarcodes.get(2), 2),
+                        silkCarRuntime(B, 3, 3, silkBarcodes.get(2), 3),
+                        silkCarRuntime(B, 3, 2, silkBarcodes.get(2), 4),
+                        silkCarRuntime(B, 3, 1, silkBarcodes.get(2), 5),
+
+                        silkCarRuntime(B, 1, 3, silkBarcodes.get(3), 1),
+                        silkCarRuntime(B, 1, 2, silkBarcodes.get(3), 2),
+                        silkCarRuntime(B, 2, 1, silkBarcodes.get(3), 3),
+                        silkCarRuntime(B, 2, 2, silkBarcodes.get(3), 4),
+                        silkCarRuntime(B, 2, 3, silkBarcodes.get(3), 5)
+                )).toList();
+            }
+        }
+        throw new RuntimeException("验证数不符!");
+    }
+
     private Single<List<SilkRuntime>> generateSilkRuntimesBySilkBarcodesC(ImmutableList.Builder<Single<SilkRuntime>> builder, List<SilkBarcode> silkBarcodes) {
         final int row = silkCar.getRow();
         final int col = silkCar.getCol();
@@ -120,20 +167,20 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         if (J.isEmpty(build)) {
             final int size = silkBarcodes.size();
             if (size == 1) {
-                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)).collect(toList());
+                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(A, silkBarcodes.get(0)).collect(toList());
                 return Single.merge(collect).toList();
             }
             if (size == 2) {
                 final List<Single<SilkRuntime>> collect = Stream.concat(
-                        generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.A, silkBarcodes.get(0)),
-                        generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(1))
+                        generateSilkRuntimesBySilkBarcodesC(A, silkBarcodes.get(0)),
+                        generateSilkRuntimesBySilkBarcodesC(B, silkBarcodes.get(1))
                 ).collect(toList());
                 return Single.merge(collect).toList();
             }
         } else {
             final int size = silkBarcodes.size();
             if (build.size() == 10 && size == 1) {
-                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(SilkCarSideType.B, silkBarcodes.get(0)).collect(toList());
+                final List<Single<SilkRuntime>> collect = generateSilkRuntimesBySilkBarcodesC(B, silkBarcodes.get(0)).collect(toList());
                 builder.addAll(collect);
                 return Single.merge(builder.build()).toList();
             }
@@ -183,112 +230,135 @@ public class ManualSilkCarModel extends AbstractSilkCarModel {
         final ImmutableList.Builder<CheckSilkDTO> builder = ImmutableList.builder();
         if (lineMachineCount == 1) {
             List<CheckSilkDTO> list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B));
+            list.addAll(silkCar.checkSilks(A));
+            list.addAll(silkCar.checkSilks(B));
             builder.add(shuffle(list));
             return Single.just(builder.build());
         }
         if (lineMachineCount == 2) {
-            builder.add(shuffle(silkCar.checkSilks(SilkCarSideType.A)));
-            builder.add(shuffle(silkCar.checkSilks(SilkCarSideType.B)));
+            builder.add(shuffle(silkCar.checkSilks(A)));
+            builder.add(shuffle(silkCar.checkSilks(B)));
             return Single.just(builder.build());
         }
         if (lineMachineCount == 3) {
             List<CheckSilkDTO> list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 3));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 2));
+            list.addAll(silkCar.checkSilks(A, 3));
+            list.addAll(silkCar.checkSilks(A, 2));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 1));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 3));
+            list.addAll(silkCar.checkSilks(A, 1));
+            list.addAll(silkCar.checkSilks(B, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 2));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 1));
+            list.addAll(silkCar.checkSilks(B, 2));
+            list.addAll(silkCar.checkSilks(B, 1));
             builder.add(shuffle(list));
             return Single.just(builder.build());
         }
         if (lineMachineCount == 4) {
+            if (silkCar.getRow() == 3 && silkCar.getCol() == 4) {
+                List<CheckSilkDTO> list = Lists.newArrayList();
+                list.addAll(silkCar.checkSilks(A, 3));
+                list.addAll(silkCar.checkSilks(A, 2, IntStream.of(4)));
+                builder.add(shuffle(list));
+
+                list = Lists.newArrayList();
+                list.addAll(silkCar.checkSilks(A, 1, IntStream.of(2, 3)));
+                list.addAll(silkCar.checkSilks(A, 2, IntStream.of(1, 2, 3)));
+                builder.add(shuffle(list));
+
+                list = Lists.newArrayList();
+                list.addAll(silkCar.checkSilks(B, 3));
+                list.addAll(silkCar.checkSilks(B, 2, IntStream.of(4)));
+                builder.add(shuffle(list));
+
+                list = Lists.newArrayList();
+                list.addAll(silkCar.checkSilks(B, 1, IntStream.of(2, 3)));
+                list.addAll(silkCar.checkSilks(B, 2, IntStream.of(1, 2, 3)));
+                builder.add(shuffle(list));
+                return Single.just(builder.build());
+            }
+
             List<CheckSilkDTO> list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 4));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 3));
+            list.addAll(silkCar.checkSilks(A, 4));
+            list.addAll(silkCar.checkSilks(A, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 2));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 1));
+            list.addAll(silkCar.checkSilks(A, 2));
+            list.addAll(silkCar.checkSilks(A, 1));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 4));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 3));
+            list.addAll(silkCar.checkSilks(B, 4));
+            list.addAll(silkCar.checkSilks(B, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 2));
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 1));
+            list.addAll(silkCar.checkSilks(B, 2));
+            list.addAll(silkCar.checkSilks(B, 1));
             builder.add(shuffle(list));
             return Single.just(builder.build());
         }
         if (lineMachineCount == 6) {
             List<CheckSilkDTO> list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 3));
+            list.addAll(silkCar.checkSilks(A, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 2));
+            list.addAll(silkCar.checkSilks(A, 2));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 1));
+            list.addAll(silkCar.checkSilks(A, 1));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 3));
+            list.addAll(silkCar.checkSilks(B, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 2));
+            list.addAll(silkCar.checkSilks(B, 2));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 1));
+            list.addAll(silkCar.checkSilks(B, 1));
             builder.add(shuffle(list));
             return Single.just(builder.build());
         }
         if (lineMachineCount == 8) {
             List<CheckSilkDTO> list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 4));
+            list.addAll(silkCar.checkSilks(A, 4));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 3));
+            list.addAll(silkCar.checkSilks(A, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 2));
+            list.addAll(silkCar.checkSilks(A, 2));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.A, 1));
+            list.addAll(silkCar.checkSilks(A, 1));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 4));
+            list.addAll(silkCar.checkSilks(B, 4));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 3));
+            list.addAll(silkCar.checkSilks(B, 3));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 2));
+            list.addAll(silkCar.checkSilks(B, 2));
             builder.add(shuffle(list));
 
             list = Lists.newArrayList();
-            list.addAll(silkCar.checkSilks(SilkCarSideType.B, 1));
+            list.addAll(silkCar.checkSilks(B, 1));
             builder.add(shuffle(list));
             return Single.just(builder.build());
         }
