@@ -169,14 +169,14 @@ public class PoiUtil {
                     .peek(it -> it.setCellStyle(cellStyle))
                     .filter(it -> FORMULA == it.getCellType())
                     .forEach(it -> {
-                        double d = it.getNumericCellValue();
+               /*         double d = it.getNumericCellValue();
                         if (d > 0) {
 //                            final DataFormat dataFormat = sheet.getWorkbook().createDataFormat();
 //                            cellStyle.setDataFormat(dataFormat.getFormat("0.000"));
                         } else {
                             it.setCellValue("");
 //                            it.setBlank();
-                        }
+                        }*/
                     });
         });
         Stream.of('C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'N', 'O', 'P', 'Q').mapToInt(it -> it - 'A').forEach(sheet::autoSizeColumn);
