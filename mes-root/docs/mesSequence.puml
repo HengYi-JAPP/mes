@@ -1,0 +1,17 @@
+@startuml
+start
+
+partition 生成丝车丝锭资料{
+
+
+
+
+}
+
+
+
+
+stop
+
+@enduml
+
